@@ -125,7 +125,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     msg.style.color = "green";
 
     setTimeout(() => {
-      window.location.href = "home.html";
+      window.location.href = "index.html";
     }, 800);
 
   } catch (error) {
