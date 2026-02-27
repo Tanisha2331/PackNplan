@@ -165,7 +165,7 @@ sendBtn.addEventListener('click', async () => {
   chatMessages.scrollTop=chatMessages.scrollHeight;
 
   try {
-    const response = await fetch('http://localhost:5000/api/chat', {
+    const response = await fetch('https://your-new-backend-url.vercel.app/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: userText })
