@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Trip Plan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f0f2f5; margin: 0; color: #333; }
+        
+        .header { background: #0b74e7; color: white; padding: 40px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 2.5rem; }
+        .header p { opacity: 0.9; margin-top: 10px; }
+
+        .container { max-width: 900px; margin: -30px auto 50px; padding: 20px; }
+        .back-btn { display: inline-block; background: white; color: #333; padding: 8px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        /* Timeline Styles */
+        .day-section { margin-bottom: 40px; position: relative; padding-left: 20px; }
+        .day-header { font-size: 1.5rem; color: #0b74e7; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #ddd; padding-bottom: 5px; }
+        
+        .activity-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            border-left: 5px solid #00b894; /* Green accent */
+        }
+        .activity-img { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; background: #eee; }
+        .activity-info h4 { margin: 0 0 5px; font-size: 1.1rem; }
+        .activity-info p { margin: 0; color: #666; font-size: 0.9rem; }
+
+        .loading { text-align: center; padding: 50px; font-size: 1.2rem; color: #666; }
+        .error { color: red; text-align: center; padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1 id="tripTitle">Planning your Trip...</h1>
+        <p id="tripSubtitle">Just a moment</p>
+    </div>
+
+    <div class="container">
+        <a href="home.html" class="back-btn">← Back Home</a>
+        <div id="itinerary-content">
+            <div class="loading">Generating your smart itinerary... 🤖</div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // 🛑 PASTE YOUR API KEY HERE
+        // ============================================
+        const API_KEY = "PASTE_YOUR_API_KEY_HERE"; 
+        // ============================================
+
+        const params = new URLSearchParams(window.location.search);
+        const city = params.get("dest");
+        const days = parseInt(params.get("days")) || 3; // Default to 3 days
+
+        if(city) {
+            document.getElementById("tripTitle").innerText = `Trip to ${city}`;
+            document.getElementById("tripSubtitle").innerText = `${days} Day Itinerary`;
+            generateItinerary(city, days);
+        }
+
+        async function generateItinerary(cityName, numDays) {
+            try {
+                // 1. Get Coords
+                const geoUrl = `https://api.geoapify.com/v1/geocode/search?text=${cityName}&apiKey=${API_KEY}`;
+                const geoRes = await fetch(geoUrl);
+                const geoData = await geoRes.json();
+                
+                if(!geoData.features || geoData.features.length === 0) {
+                     document.getElementById("itinerary-content").innerHTML = "<div class='error'>City not found.</div>";
+                     return;
+                }
+                const { lat, lon } = geoData.features[0].properties;
+
+                // 2. Get Attractions (Fetch enough for all days)
+                const limit = numDays * 3; // 3 activities per day
+                const url = `https://api.geoapify.com/v2/places?categories=tourism.attraction&filter=circle:${lon},${lat},10000&limit=${limit}&apiKey=${API_KEY}`;
+                
+                const res = await fetch(url);
+                const data = await res.json();
+                const places = data.features;
+
+                renderItinerary(places, numDays);
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById("itinerary-content").innerHTML = "<div class='error'>Failed to generate plan.</div>";
+            }
+        }
+
+        function renderItinerary(places, numDays) {
+            const container = document.getElementById("itinerary-content");
+            container.innerHTML = ""; // Clear loading
+
+            if(places.length === 0) {
+                container.innerHTML = "<p>No popular attractions found nearby.</p>";
+                return;
+            }
+
+            let placeIndex = 0;
+
+            // Loop through each Day
+            for (let day = 1; day <= numDays; day++) {
+                let dayHTML = `<div class="day-section"><div class="day-header">Day ${day}</div>`;
+                
+                // Add 3 activities per day (if available)
+                for (let i = 0; i < 3; i++) {
+                    if (placeIndex < places.length) {
+                        const place = places[placeIndex].properties;
+                        const name = place.name || "Unknown Spot";
+                        const address = place.address_line2 || "Location unavailable";
+                        const randomImg = `https://loremflickr.com/100/100/landmark?lock=${placeIndex}`;
+
+                        dayHTML += `
+                            <div class="activity-card">
+                                <img src="${randomImg}" class="activity-img" alt="Place">
+                                <div class="activity-info">
+                                    <h4>${name}</h4>
+                                    <p>📍 ${address}</p>
+                                    <p style="font-size:0.8rem; color:#0b74e7; margin-top:5px;">Suggestion: Spend 2 hours here</p>
+                                </div>
+                            </div>`;
+                        
+                        placeIndex++;
+                    }
+                }
+                dayHTML += `</div>`;
+                container.innerHTML += dayHTML;
+
+                if (placeIndex >= places.length) break; // Stop if we run out of places
+            }
+        }
+    </script>
+</body>
+</html>

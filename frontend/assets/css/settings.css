@@ -1,0 +1,77 @@
+body {
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #5ec9f3, #7de2b9);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.settings-container {
+    background: rgba(255, 255, 255, 0.85);
+    padding: 30px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 700px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    backdrop-filter: blur(4px);
+}
+
+.title {
+    font-size: 34px;
+    font-weight: bold;
+    color: #0b3c5d;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.title-icon {
+    width: 40px;
+    height: 40px;
+}
+
+.settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.setting-option {
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.setting-option:hover {
+    transform: translateY(-4px);
+    background: #f1faf6;
+}
+
+.setting-option h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #0b3c5d;
+}
+
+.setting-option p {
+    margin: 5px 0 0;
+    color: #444;
+    font-size: 14px;
+}
+
+@media (max-width: 600px) {
+    .title {
+        font-size: 28px;
+    }
+
+    .setting-option h3 {
+        font-size: 18px;
+    }
+}

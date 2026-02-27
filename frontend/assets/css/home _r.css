@@ -1,0 +1,724 @@
+:root{
+  --accent:#0b74e7;
+  --dark-overlay: rgba(0,0,0,0.45);
+  --drawer-width: 220px;
+  --max-width:1100px;
+  --clr:linear-gradient(135deg, #00b894, #0984e3);
+}
+*{box-sizing:border-box}
+body,html{
+  margin:0;
+  font-family:Inter,system-ui,Arial,Helvetica,sans-serif;
+  color:#111}
+
+.topbar{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  position: fixed;   
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  z-index: 999;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.177);
+  background: rgba(255,255,255,255); /* transparent */
+  backdrop-filter: blur(6px);
+}
+.topbar .left{
+  display:flex;
+  align-items:center;
+  gap:12px
+}
+.hamburger{
+  font-size:20px;
+  background:transparent;
+  border:0;
+  cursor:pointer
+}
+.logo{
+  height:40px
+}
+.account-btn{
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  background:linear-gradient(135deg, #00b894, #0984e3);
+  cursor:pointer;
+  color: white;
+  font-weight: 500;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+.account-btn:hover{
+   transform: scale(1.05);
+  background: linear-gradient(135deg, #00cec9, #74b9ff);
+  font-weight: bold;
+  color: black;
+}
+/* Drawer */
+.drawer{
+  position:fixed;
+  left:0; top:0; bottom:0;
+  width:var(--drawer-width);
+  transform:translateX(-110%);
+  background:#fff;
+  z-index:80;
+  padding:28px 16px;
+  box-shadow:4px 0 30px rgba(0,0,0,0.15);
+  transition:transform .28s cubic-bezier(.2,.9,.3,1);
+}
+.drawer.open{transform:translateX(0)}
+.page-wrapper {
+  transition: transform 0.3s ease;
+  transform-origin: left center;
+}
+
+.page-wrapper.shifted {
+  transform: translateX(var(--drawer-width)) scale(0.8);
+}
+.drawer{ padding-top: 50px;}
+.drawer-header {
+  padding: 20px 20px 15px 20px;
+  text-align: left;
+} 
+.drawer-header .avatar {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #00b894, #0984e3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 20px;
+}
+.drawer-header h2{
+  color:rgba(6, 83, 237, 0.962);
+  margin:3px; 
+  font-size: 22px;
+  font-family: 'Times New Roman', Times, serif;
+  font-weight: bold;
+}
+.drawer-divider {
+  width: 80%;
+  height: 2px;
+  background: rgba(0,0,0,0.15);
+  margin: 10px auto 20px auto; /* center + spacing */
+}
+.drawer ul{
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+/*.drawer-item{
+  padding:12px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  margin-bottom:6px;
+}
+.drawer-item:hover{background:#f4f6f8}*/
+/* =========================================
+   PROFESSIONAL SIDE DRAWER ITEMS
+   ========================================= */
+
+/* 1. The List Item Styling */
+.drawer-item {
+  display: flex;           /* Aligns icon and text */
+  align-items: center;     /* Centers them vertically */
+  gap: 15px;               /* Space between icon and text */
+  
+  padding: 14px 20px;      /* Comfortable clicking size */
+  margin-bottom: 8px;      /* Space between items */
+  border-radius: 12px;     /* Smooth rounded corners */
+  
+  font-size: 15px;
+  font-weight: 500;
+  color: #4a5568;          /* Professional dark grey */
+  cursor: pointer;
+  
+  transition: all 0.2s ease; /* Smooth hover animation */
+}
+
+/* 2. Hover Effect (Matches your Dropdown) */
+.drawer-item:hover {
+  background-color: #f0f9ff; /* Light blue background */
+  color: #0b74e7;            /* Your Accent Blue text */
+  transform: translateX(5px); /* Subtle slide to the right */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Tiny shadow pop */
+}
+
+/* 3. Automatic Icons (No HTML changes needed!) */
+
+/* 1st Item: Hotels & Transport */
+.drawer-item:nth-child(1)::before { 
+  content: "🏨"; 
+  font-size: 1.2em; 
+}
+
+/* 2nd Item: Saved Trips */
+.drawer-item:nth-child(2)::before { 
+  content: "❤️"; 
+  font-size: 1.2em; 
+}
+
+/* 3rd Item: Visited Trips */
+.drawer-item:nth-child(3)::before { 
+  content: "🕒"; 
+  font-size: 1.2em; 
+}
+
+/* 4th Item: Maps */
+.drawer-item:nth-child(4)::before { 
+  content: "🗺️"; 
+  font-size: 1.2em; 
+}
+
+/* 5th Item: Chatbot */
+.drawer-item:nth-child(5)::before { 
+  content: "🤖"; 
+  font-size: 1.2em; 
+}
+
+/* 6th Item: Itinerary */
+.drawer-item:nth-child(6)::before { 
+  content: "📅"; 
+  font-size: 1.2em; 
+}
+/* overlay */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.35);
+  opacity:0; visibility:hidden;
+  transition:opacity .25s;
+  z-index:50;
+}
+.overlay.show{opacity:1;visibility:visible}
+/* account menu */
+/*.account-menu{
+  position:absolute;
+  right:16px; top:56px;
+  background:#fff;
+  border:1px solid #eee;
+  padding:8px;
+  border-radius:8px;
+  box-shadow:0 6px 30px rgba(0,0,0,0.12);
+  z-index:70;
+  /*animation
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  max-height: 0;
+  overflow: hidden;
+  transition: 
+  opacity 0.25s ease,
+  transform 0.25s ease,
+  max-height 0.3s ease;
+}
+.account-menu.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  max-height: 200px;
+}
+.acct-option{
+  display:block;
+  background:transparent;
+  border:0;
+  padding:10px 12px;
+  cursor:pointer;
+  width:100%;
+  text-align:center;
+}
+.acct-option:last-child { margin-bottom:0; }
+#loginBtn{
+  background: linear-gradient(135deg, #00b894, #0984e3);
+  color: white;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 5px;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+#loginBtn:hover{
+   transform: scale(1.05);
+  background: linear-gradient(135deg, #00cec9, #74b9ff);
+  font-weight: 600;
+  color: #000;
+}
+#signupBtn{
+  background: linear-gradient(135deg, #00b894, #0984e3);
+  border: none;
+  color: white;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+#signupBtn:hover{
+   transform: scale(1.05);
+  background: linear-gradient(135deg, #00cec9, #74b9ff);
+  font-weight: 600;
+  color: #000;}
+.bg-video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}*/
+.video-container {
+    position: relative;
+    width: 98%;
+    height: 350px; 
+    overflow: hidden;
+   margin: 80px auto 20px;
+   border-radius: 25px;
+   top: 50;
+}
+.video-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+     border-radius: inherit;
+}
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4); 
+    border-radius: inherit;
+}
+.tagline {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  width: 100%;
+}
+.tagline h1 {
+  font-size: 48px;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  margin: 0;
+}
+/* search/tabs */
+.search-area {
+  text-align: center;
+  padding-top: 0;
+}
+.tabs{
+  display:flex;
+  gap:10px;
+  margin-bottom:16px;
+  justify-content: center;   /* ✅ centers tabs horizontally */
+  align-items: center;
+ 
+  
+}
+.tab{
+  background:#111;
+  color:#fff;
+  padding:8px 12px;
+  border-radius:20px;
+  border:0;
+  cursor:pointer;
+  opacity:.85;  
+}
+.tab.active {
+  background: black;
+  color: white;
+}
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+.search-form .field-row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.field{
+  padding:10px;
+  border-radius:8px;
+  border:0;
+}
+.field.short{width:12rem}
+.field.mid{width:18rem}
+.search-btn{
+  padding:10px 16px;
+  border-radius:8px;
+  border:0;
+  background:var(--accent);
+  color:#fff;
+  cursor:pointer;
+}
+
+/* gallery */
+.content-gallery{
+  max-width:var(--max-width);
+  margin:28px auto;
+  padding:0 12px;
+}
+.gallery-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:16px;
+}
+
+/* modal */
+.modal{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,0.4);
+  z-index:120;
+}
+.modal.hidden{display:none}
+.modal-inner{
+  background:#fff;
+  padding:18px;
+  border-radius:10px;
+  min-width:260px;
+}
+.modal-actions{
+  display:flex;
+  gap:8px;
+  justify-content:flex-end;
+  margin-top:12px;
+}
+/* GENERAL */
+.carousel-section{width:100%;padding:36px 0;text-align:center}
+.carousel-title{font-size:26px;margin-bottom:16px}
+
+/* wrapper */
+.carousel-wrapper{width:92%;max-width:1200px;margin:0 auto;position:relative}
+.carousel-container{overflow:hidden;width:100%}
+
+/* Track & slide basic 
+.carousel-track{
+  display:flex;
+  align-items:stretch;
+  transition:transform 0.6s cubic-bezier(.2,.9,.3,1)
+  }*/
+  .carousel-track {
+  display: flex;
+  transition: transform 0.4s ease-in-out;
+}
+.carousel-slide{
+    flex:0 0 auto;
+    position: relative;
+    border-radius:14px;
+    background:var(--card-bg);
+    overflow:hidden;
+    box-shadow:0 6px 18px rgba(0,0,0,0.12);
+    cursor:pointer;
+    opacity:.95;
+    display:flex;
+    flex-direction:column;
+    transition: transform 0.35s ease, box-shadow 0.3s ease,opacity 0.35s ease;
+}
+.carousel-slide img{width:100%;height:180px;object-fit:cover;display:block;transition: transform 0.4s ease;border-radius: 10px;}
+.carousel-slide p{margin:10px;padding:0 12px 18px;font-weight:600;transition: transform 0.35s ease, opacity 0.35s ease;}
+.slide-inner {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+.carousel-slide:hover .slide-inner {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+}
+.carousel-slide:hover img {
+    transform: scale(1.05);
+}
+.carousel-slide::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0);
+    transition: 0.3s;
+}
+.carousel-slide:hover::after {
+    background: rgba(0,0,0,0.15);  /* slight shade */
+}
+.carousel-slide:hover p {
+    opacity: 1;
+    transform: translateY(4px);   /* tiny motion */
+}
+.carousel-track:hover .carousel-slide:not(:hover) {
+    opacity: 0.55;
+    transform: scale(0.98);
+}
+/* Buttons */
+.carousel-btn{position:absolute;top:50%;transform:translateY(-50%);background:#000;color:#fff;border:0;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.85;z-index:5}
+.prev{left:-10px}
+.next{right:-10px}
+
+/* Dots */
+.carousel-dots{display:flex;justify-content:center;gap:8px;margin-top:16px}
+.carousel-dots span{width:12px;height:12px;border-radius:50%;background:#bbb;display:inline-block;cursor:pointer;transition:background .25s}
+.carousel-dots span.active{background:#111}
+
+/* Responsive: desktop=3, tablet=2, mobile=1 */
+@media (min-width: 901px) {
+  /* JS will set widths for 3-per-view */
+}
+@media (min-width: 601px) and (max-width: 900px) {
+  /* JS will set widths for 2-per-view */
+}
+@media (max-width:600px) {
+  /* JS will set widths for 1-per-view */
+}
+/* small niceties */
+.carousel-slide:active{transform:translateY(-2px)}
+/* responsive */
+@media (max-width:900px){
+  .hero-content h1{font-size:24px}
+  .field.short{width:8rem}
+  .field.mid{width:12rem}
+  .topbar{padding:10px}
+}
+@media (max-width:560px){
+  .hero-media{height:46vh}
+  .tabs{flex-wrap:wrap}
+  .field-row{
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .field.short,.field.mid{width:100%}
+  .search-btn{width:100%}
+}
+/* --- CRITICAL FIXES FOR AUTH LOGIC --- */
+
+/* 1. Global Utility to hide elements (Required for the Dropdown buttons) */
+.hidden {
+  display: none !important;
+}
+
+/* 2. Fix Modal Z-Index so it covers the Topbar (999) */
+.modal {
+  z-index: 2000; /* Increased from 120 to 2000 */
+}
+
+/* 3. Ensure the Avatar in the drawer looks good */
+.avatar {
+  /* You already have this, just ensuring it matches the top-right button */
+  object-fit: cover;
+}
+/* =========================================
+   PROFESSIONAL DROPDOWN STYLING
+   ========================================= */
+
+/* 1. The Floating Card Container */
+.account-menu {
+  position: absolute;
+  top: 70px; /* Moved down to make room for the arrow */
+  right: 20px; /* Aligned with the right edge */
+  width: 200px; /* Fixed width for a clean rectangular look */
+  
+  background: #ffffff;
+  border-radius: 12px; /* Smooth rounded corners */
+  
+  /* Glassmorphism-style soft deep shadow */
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1), 
+              0 2px 10px rgba(0,0,0,0.05);
+              
+  border: 1px solid rgba(0,0,0,0.05); /* Very subtle border definition */
+  padding: 8px 0; /* Vertical padding inside the box */
+  z-index: 1000;
+  
+  /* Animation settings */
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  pointer-events: none;
+  visibility: hidden;
+  transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+  overflow: hidden !important; /* Cuts off anything sticking out */
+  box-sizing: border-box !important;
+}
+
+/* 2. The "Show" State (Triggered by JS) */
+.account-menu.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* 3. The "Speech Bubble" Arrow (Pointing Up) */
+.account-menu::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: 20px; /* Adjust this to center perfectly under your Avatar */
+  width: 12px;
+  height: 12px;
+  background: white;
+  transform: rotate(45deg); /* Diamond shape rotated becomes a triangle */
+  border-top: 1px solid rgba(0,0,0,0.05);
+  border-left: 1px solid rgba(0,0,0,0.05);
+}
+
+/* 4. The Menu Options (Buttons) */
+.acct-option {
+  width: 100%;
+  text-align: left; /* Aligns text to the left */
+  background: transparent;
+  border: none;
+  padding: 12px 20px; /* Comfortable clicking area */
+  font-size: 15px;
+  font-family: inherit;
+  color: #4a5568; /* Professional dark grey (not pure black) */
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Space between icon and text */
+  transition: all 0.2s ease;
+}
+
+/* 5. Hover Effects */
+.acct-option:hover {
+  background-color: #f0f9ff ;
+    color: #0b74e7 ;
+    transform: translateX(5px) ; /* Slide animation */
+}
+
+/* 6. Logout Specific Styling (Optional: Make it red on hover) */
+#logoutBtn:hover {
+  background-color: #fff5f5;
+  color: #e53e3e;
+}
+
+/* 7. AUTOMATIC ICONS (CSS Magic) 
+   This adds emojis before the text without changing HTML */
+#profileBtn::before  { content: "👤"; font-size: 16px; }
+#settingsBtn::before { content: "⚙️"; font-size: 16px; }
+#logoutBtn::before   { content: "🚪"; font-size: 16px; }
+#loginBtn::before    { content: "🔑"; font-size: 16px; }
+#signupBtn::before   { content: "📝"; font-size: 16px; }
+/* === FORCE FIX FOR LOGIN/SIGNUP BUTTONS === */
+/* Chatbot Widget Container */
+.chat-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 350px;
+  height: 450px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 2000; /* Higher than your overlay */
+  transition: transform 0.3s ease;
+}
+
+/* Header */
+.chat-header {
+  background-color: #2c3e50; /* Adjust to match your theme color */
+  color: white;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-mini-logo { width: 25px; height: 25px; margin-right: 10px; }
+
+/* Messages Area */
+.chat-messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #f9f9f9;
+}
+
+.message {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  position: relative;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  word-wrap: break-word;
+}
+
+.message.bot { background: #ffffff; align-self: flex-start; border-bottom-left-radius: 4px;color:#333;border:1px solid #e0e0e0; }
+.message.user { background:linear-gradient(135deg,#0b74e7,#007bff) ; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+
+/* Input Area */
+.chat-input-area {
+  padding: 15px;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 8px;
+}
+
+.chat-input-area input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  outline: none;
+}
+/* Styling the list items inside the chat bubbles */
+.message.bot ul {
+  padding-left: 20px;
+  margin: 8px 0 0 0 ;
+}
+
+.message.bot li {
+  margin-bottom: 4px;
+}
+
+.message.bot p {
+  margin: 5px 0;
+}
+/* =========================================
+   TYPING ANIMATION (BOUNCING DOTS)
+   ========================================= */
+.typing-dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.typing-dots span {
+  width: 8px;
+  height: 8px;
+  background-color: #999;
+  border-radius: 50%;
+  display: inline-block;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+/* Delay dots so they wave */
+.typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+.typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1.0); }
+}
+
+.close-chat { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+.hidden { display: none !important; }

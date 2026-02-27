@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destination Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- BEAUTIFUL UI STYLES --- */
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            margin: 0; 
+            background: #f4f7f6; 
+            color: #333;
+        }
+
+        /* Hero Header */
+        .hero { 
+            height: 350px; 
+            background: #222; 
+            position: relative; 
+            overflow: hidden;
+        }
+        .hero img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            opacity: 0.6; 
+        }
+        .hero-content {
+            position: absolute; 
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            text-align: center;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+            width: 90%;
+        }
+        .hero h1 { margin: 0; font-size: 3.5rem; letter-spacing: 1px; }
+        .hero p { font-size: 1.2rem; margin-top: 5px; opacity: 0.9; }
+
+        /* Container */
+        .container { 
+            max-width: 1100px; 
+            margin: -50px auto 40px; /* Pull up over hero */
+            padding: 20px; 
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Back Button */
+        .back-btn { 
+            display: inline-block;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+        .back-btn:hover { transform: translateY(-2px); }
+
+        /* Section Titles */
+        .section-title { 
+            font-size: 1.5rem; 
+            color: #0b74e7; 
+            margin: 40px 0 20px; 
+            border-left: 5px solid #0b74e7;
+            padding-left: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Grid Layout */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 25px; 
+        }
+
+        /* Card Style */
+        .card { 
+            background: white; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+
+        /* Card Image Placeholder */
+        .card-img {
+            height: 160px;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+            font-size: 3rem;
+            overflow: hidden;
+        }
+        .card-img img { width: 100%; height: 100%; object-fit: cover; }
+
+        .card-body { padding: 20px; flex-grow: 1; }
+        .card h4 { margin: 0 0 8px; color: #222; font-size: 1.1rem; }
+        .card p { margin: 0; font-size: 0.9rem; color: #666; line-height: 1.5; }
+        .card-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            background: #e3f2fd;
+            color: #0b74e7;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Loading State */
+        .loading { text-align: center; padding: 40px; color: #777; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        <img id="cityImg" src="https://source.unsplash.com/1600x900/?travel" alt="City">
+        <div class="hero-content">
+            <h1 id="cityName">Loading...</h1>
+            <p>Explore the best stays and sights</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <a href="home.html" class="back-btn">← Back to Home</a>
+        
+        <h2 class="section-title">🏨 Top Hotels Nearby</h2>
+        <div id="hotel-list" class="grid">
+            <div class="loading">Loading hotels...</div>
+        </div>
+
+        <h2 class="section-title">🎡 Tourist Attractions</h2>
+        <div id="attraction-list" class="grid">
+            <div class="loading">Loading attractions...</div>
+        </div>
+    </div>
+        <script>
+        // =========================================================
+        // 🛑 PASTE YOUR API KEY BELOW
+        // =========================================================
+        const API_KEY = "1158d45a31c54d4fa492f618703b1f7f"; 
+        // =========================================================
+
+        const params = new URLSearchParams(window.location.search);
+        const city = params.get("city");
+        const heroImage = params.get("hero");
+
+        if(city) {
+            document.getElementById("cityName").innerText = city;
+            
+            // 1. SET HERO IMAGE
+            if (heroImage && heroImage !== "undefined") {
+                document.getElementById("cityImg").src = decodeURIComponent(heroImage);
+            } else {
+                document.getElementById("cityImg").src = `https://loremflickr.com/1600/900/${city},travel/all`;
+            }
+            
+            fetchData(city);
+        } else {
+             document.getElementById("cityName").innerText = "No City Selected";
+        }
+
+        async function fetchData(cityName) {
+            try {
+                // 1. Get Coordinates
+                const geoUrl = `https://api.geoapify.com/v1/geocode/search?text=${cityName}&apiKey=${API_KEY}`;
+                const geoRes = await fetch(geoUrl);
+                const geoData = await geoRes.json();
+                
+                if(!geoData.features || geoData.features.length === 0) {
+                     alert("Location not found");
+                     return;
+                }
+
+                const { lat, lon } = geoData.features[0].properties;
+
+                // 2. Get Hotels & Attractions
+                // UPDATED: "accommodation" covers resorts/homestays (common in Coorg)
+                // UPDATED: Radius increased to 15,000 meters (15km)
+                getPlaces(lat, lon, "accommodation", "hotel-list", "Stay");
+                getPlaces(lat, lon, "tourism.attraction", "attraction-list", "Attraction");
+
+            } catch (e) { 
+                console.error(e); 
+            }
+        }
+
+        async function getPlaces(lat, lon, category, containerId, typeLabel) {
+            // FIX: Changed radius from 5000 -> 20000 (20km) to catch resorts in spread-out areas
+            const url = `https://api.geoapify.com/v2/places?categories=${category}&filter=circle:${lon},${lat},50000&limit=15&apiKey=${API_KEY}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            
+            const container = document.getElementById(containerId);
+            container.innerHTML = ""; 
+
+            if(!data.features || data.features.length === 0) {
+                 container.innerHTML = "<p>No results found nearby. Try a more specific location name.</p>";
+                 return;
+            }
+
+            data.features.forEach(place => {
+                const props = place.properties;
+                const name = props.name;
+                
+                if(name) {
+                    // Smart Image Keywords
+                    let searchKeyword = typeLabel === 'Stay' ? 'resort,hotel,bedroom' : 'landmark,nature,tourism';
+                    const randomImg = `https://loremflickr.com/300/200/${searchKeyword}?lock=${Math.random()}`;
+
+                    const address = props.address_line2 || props.formatted || "Address unavailable";
+
+                    container.innerHTML += `
+                        <div class="card">
+                            <div class="card-img">
+                                <img src="${randomImg}" alt="${name}" loading="lazy">
+                            </div>
+                            <div class="card-body">
+                                <span class="card-badge">${typeLabel}</span>
+                                <h4>${name}</h4>
+                                <p>📍 ${address}</p>
+                            </div>
+                        </div>`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

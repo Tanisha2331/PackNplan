@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pack & Plan — Home</title>
+  <link rel="stylesheet" href="assets/css/home.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="left">
+      <button id="hamburger" class="hamburger" aria-label="Open menu">☰</button>
+      <img src="assets/pnp logo.png" alt="Pack and Plan" class="logo">
+    </div>
+    <div class="right">
+      <button id="accountBtn" class="account-btn">Account</button>
+    </div>
+    <!-- account dropdown -->
+    <div id="accountMenu" class="account-menu">
+     <!-- Guest options -->
+      <button class="acct-option guest-only" id="loginBtn">Login</button>
+  <button class="acct-option guest-only" id="signupBtn">Sign up</button>
+      <!-- User options -->
+      <button class="acct-option user-only hidden" id="profileBtn">Profile</button>
+      <button class="acct-option user-only hidden" id="settingsBtn">Settings</button>
+      <button class="acct-option user-only hidden" id="logoutBtn">Logout</button>
+    </div>
+  </header>
+  <!-- Side menu / Drawer -->
+  <!-- Drawer UI: Guest mode by default. Changes after login -->
+  <div id="menu" class="side-menu">
+    <nav id="drawer" class="drawer" aria-hidden="true">
+      <div class="drawer-header">
+        <div class="avatar" id="userAvatar">G</div>
+        <h2 id="drawerWelcome">Welcome, Guest</h2>
+      </div>
+      <div class="drawer-divider"></div>
+      <ul>
+        <li class="drawer-item">Hotels &amp; Transport</li>
+        <li class="drawer-item" data-requires-auth="true" id="savedTrips">Saved Trips</li>
+        <li class="drawer-item" data-requires-auth="true" id="visitedTrips">Visited Trips</li>
+        <li class="drawer-item" id="mapsTrigger">Maps</li>
+        <li class="drawer-item" id="chatbotTrigger">TripMyPlan — Chatbot</li>
+        <li class="drawer-item">Itinerary</li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- overlay -->
+  <div id="overlay" class="overlay" tabindex="-1"></div>
+  <!-- Everything wrapped inside #content -->
+  <main id="content" class="page-content">
+     <section id="mapSection" class="page-section hidden" style="padding: 30px 20px; background: white; margin: 0; min-height: 100vh;">
+      <div class="section-header" style="display: flex; flex-direction: column; align-items: flex-start; gap: 15px; margin-bottom: 20px;">
+        <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-size: 2rem; width: 100%; white-space: nowrap;">
+        Explore the World
+        </h2>
+        <button id="closeMap" style="background: #0b74e7; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; z-index: 1001; transition: transform 0.2s;">
+        ← Back to Search
+        </button>
+      </div>
+      <div id="map" style="height: 600px; width: 100%; border-radius: 15px; border: 2px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.05);"></div>
+    </section>
+<div class="page-wrapper">
+    <!-- VIDEO SECTION -->
+    <div class="video-container">
+      <video id="bgVideo" src="assets/videos/nature.mp4" autoplay muted loop playsinline></video>
+      <div class="video-overlay"></div>
+      <div class="tagline">
+        <h1>"JUST PACK , WE PLAN"</h1>
+      </div>
+    </div>
+
+    <!-- SEARCH SECTION -->
+    <div class="search-area">
+      <div class="tabs">
+        <button class="tab active" data-for="hotels">Hotels & Home</button>
+        <button class="tab" data-for="transport">Transport</button>
+        <button class="tab" data-for="destination">Destination</button>
+        <button class="tab" data-for="itinerary">Itinerary</button>
+      </div>
+      <!--<form id="searchForm" class="search-form">-->
+      <div class="tab-content">
+         <!-- HOTELS -->
+        <form class="tab-panel active" id="hotels">
+          <div class="field-row">
+            <input type="text" placeholder="City" class="field mid">
+            <div class="date-group">
+            <input type="text" placeholder="Check-in" onfocus="(this.type='date')" class="field short">
+            <input type="text" placeholder="Check-out" onfocus="(this.type='date')" class="field short">
+        </div>
+        <select class="field short">
+            <option>2 Guests, 1 Room</option>
+            <option>1 Guest, 1 Room</option>
+            <option>Family (2 Adults, 2 Kids)</option>
+        </select>
+        <button class="search-btn">Search Hotels</button>
+      </div>
+    </form>
+        <!-- TRANSPORT -->
+        <form class="tab-panel" id="transport">
+          <div class="field-row">
+        <input type="text" placeholder="From City" class="field short">
+        <input type="text" placeholder="To City" class="field short">
+        <input type="text" placeholder="Travel Date" onfocus="(this.type='date')" class="field short">
+        <select class="field short">
+            <option value="flight">✈️ Flight</option>
+            <option value="train">🚆 Train</option>
+            <option value="bus">🚌 Bus</option>
+            <option value="cab">🚖 Cab</option>
+        </select>
+        <button class="search-btn">Search Transport</button>
+      </div>
+    </form>
+          <!-- DESTINATION -->
+        <form class="tab-panel" id="destination">
+          <div class="field-row">
+            <input type="text" placeholder="Search places (e.g. 'Coorg')" class="field mid">
+        <select class="field mid">
+            <option value="">What's your vibe?</option>
+            <option value="beach">🏖️ Beaches & Relax</option>
+            <option value="mountain">🏔️ Mountains & Trek</option>
+            <option value="temple">🛕 Heritage & Culture</option>
+        </select>
+        <button class="search-btn">Explore</button>
+        </div>
+      </form>
+        <!-- ITINERARY -->
+        <form class="tab-panel" id="itinerary">
+          <div class="field-row">
+          <input type="text" placeholder="Destination" class="field short">
+          <input type="number" placeholder="Days" class="field tiny" style="width: 80px;">
+          <select class="field mid">
+              <option>Relaxed (Leisure)</option>
+              <option>Packed (Sightseeing)</option>
+              <option>Adventure (Active)</option>
+          </select>
+         <button type="button" class="search-btn">Create Plan</button>
+          </div>
+      </form>
+      </div>
+    </div>
+   <!-- Carousel Section -->
+<section class="carousel-section">
+  <h2 class="carousel-title">Top Tourist Attractions</h2>
+
+  <div class="carousel-wrapper">
+    <button class="carousel-btn prev" aria-label="Previous">&#10094;</button>
+    <div class="carousel-container">
+       <div class="carousel-track" id="carouselTrack"></div>
+    </div>
+    <button class="carousel-btn next" aria-label="Next">&#10095;</button>
+  </div>
+  <div class="carousel-dots" aria-hidden="false"></div>
+</section>
+</div>
+  </main>
+
+  <!-- Please login modal -->
+  <div id="msgModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-inner">
+      <p id="modalText">Please login to access this feature.</p>
+      <div class="modal-actions">
+        <button id="modalClose">Close</button>
+        <button id="modalLogin">Login</button>
+      </div>
+    </div>
+  </div>
+  <div id="chatWidget" class="chat-widget hidden">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <img src="assets/pnp logo.png" alt="Logo" class="chat-mini-logo">
+        <span>TripMyPlan AI</span>
+      </div>
+      <button id="closeChat" class="close-chat">&times;</button>
+    </div>
+    <div id="chatMessages" class="chat-messages">
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="chatInput" placeholder="Ask me anything...">
+      <button id="sendChat">➤</button>
+    </div>
+  </div>
+  <div id="savedTripsModal" class="modal hidden">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h3>❤️ My Saved Trips</h3>
+              <button id="closeSavedModal" class="close-modal">&times;</button>
+          </div>
+          <div id="savedTripsList" class="modal-body">
+              </div>
+      </div>
+  </div>
+  <div id="visitedTripsModal" class="modal hidden">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h3>🕒 My Visited Trips</h3>
+              <button id="closeVisitedModal" class="close-modal">&times;</button>
+          </div>
+          <div id="visitedTripsList" class="modal-body">
+              </div>
+      </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script type="module" src="assets/js/home.js"></script>
+</body>
+</html>

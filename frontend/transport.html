@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transport Results</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f4f7f6; margin: 0; }
+        .header { background: #222; color: white; padding: 20px; text-align: center; }
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; }
+        
+        .result-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .airline { font-weight: bold; font-size: 1.1rem; color: #0b74e7; }
+        .route { color: #555; margin-top: 5px; }
+        .price { font-size: 1.5rem; font-weight: bold; color: #2ecc71; }
+        .book-btn { background: #0b74e7; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2 id="routeTitle">Transport Results</h2>
+    </div>
+
+    <div class="container">
+        <a href="home.html" style="text-decoration:none; color:black; font-weight:bold;">← Back</a>
+        <br><br>
+        <div id="results">
+            <div class="result-card">
+                <div>
+                    <div class="airline">✈️ IndiGo (6E-442)</div>
+                    <div class="route" id="route1">10:00 AM ➔ 12:30 PM</div>
+                </div>
+                <div style="text-align:right;">
+                    <div class="price">₹4,500</div>
+                    <button class="book-btn" onclick="alert('Booking feature coming soon!')">Book</button>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <div>
+                    <div class="airline">🚆 Shatabdi Express</div>
+                    <div class="route" id="route2">06:00 AM ➔ 01:00 PM</div>
+                </div>
+                <div style="text-align:right;">
+                    <div class="price">₹1,200</div>
+                    <button class="book-btn" onclick="alert('Booking feature coming soon!')">Book</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const from = params.get("from") || "Origin";
+        const to = params.get("to") || "Destination";
+        
+        document.getElementById("routeTitle").innerText = `${from} to ${to}`;
+        document.getElementById("route1").innerText = `10:00 AM (${from}) ➔ 12:30 PM (${to})`;
+        document.getElementById("route2").innerText = `06:00 AM (${from}) ➔ 01:00 PM (${to})`;
+    </script>
+</body>
+</html>

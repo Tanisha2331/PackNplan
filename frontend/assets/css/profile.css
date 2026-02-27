@@ -1,0 +1,238 @@
+/* Background Gradient */
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #00b4d8, #009688);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* Header Section */
+.header-hero {
+  text-align: center;
+  padding: 40px 20px;
+  color: white;
+}
+
+.header-hero h1 {
+  font-size: 32px;
+  font-weight: 700;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-hero p {
+  margin-top: -5px;
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+/* Profile Card */
+.profile-card {
+  width: 90%;
+  max-width: 420px;
+
+  /* Dim glass effect */
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+
+  padding: 25px;
+  border-radius: 20px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  margin-bottom: 40px;
+}
+
+/* Profile Image */
+.profile-image {
+  display: flex;
+  justify-content: center;
+}
+
+.profile-image img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 3px solid white;
+}
+
+/* Change Picture Button */
+.change-pic-btn {
+  margin-top: 12px;
+  padding: 8px 15px;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.change-pic-btn:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+/* Name & Details */
+h2 {
+  margin: 15px 0 5px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.email, .phone {
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+/* Options */
+.options {
+  margin-top: 25px;
+  text-align: left;
+}
+
+.option {
+  display: block;
+  padding: 12px;
+  margin: 8px 0;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: white;
+  text-decoration: none;
+  font-size: 15px;
+  transition: 0.3s;
+}
+
+.option i {
+  margin-right: 10px;
+}
+
+.option:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateX(5px);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .header-hero h1 {
+    font-size: 28px;
+  }
+  .profile-card {
+    padding: 20px;
+  }
+}
+/* ===============================
+   EDIT PROFILE MODAL STYLES
+   =============================== */
+.hidden {
+    display: none !important;
+}
+
+/* The dark background overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; 
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6); /* Darker dim */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(5px); /* Blurs the background content */
+}
+
+/* The white box */
+.modal-box {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    text-align: left;
+    color: #333; /* Dark text for readability */
+    animation: popupFadeIn 0.3s ease-out;
+}
+
+@keyframes popupFadeIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-box h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 22px;
+    color: #333;
+    font-weight: 600;
+}
+
+.modal-box label {
+    display: block;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.modal-box input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box; /* Important: keeps padding inside */
+    font-family: "Poppins", sans-serif;
+}
+
+.modal-box input:focus {
+    border-color: #00b4d8;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.1);
+}
+
+.modal-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* Cancel Button */
+#btnCancel {
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+}
+#btnCancel:hover {
+    background: #e2e8f0;
+    color: #333;
+}
+
+/* Save Button */
+#btnSave {
+    background: linear-gradient(135deg, #00b4d8, #009688);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+    transition: 0.2s;
+}
+#btnSave:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 180, 216, 0.4);
+}

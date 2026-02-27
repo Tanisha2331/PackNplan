@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile – Pack & Plan</title>
+
+  <link rel="stylesheet" href="assets/css/profile.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+</head>
+
+<body>
+
+  <!-- Travel Header -->
+  <div class="header-hero">
+      <h1><i class="fas fa-user-circle"></i> My Profile</h1>
+      <p>Your personal travel identity</p>
+  </div>
+
+  <!-- Profile Card -->
+  <div class="profile-card">
+
+    <div class="profile-image">
+      <img id="profilePic" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="User Profile">
+    </div>
+
+    <button class="change-pic-btn" id="changePicButton">Change Profile Picture</button>
+
+   <h2 id="profileName">Loading...</h2>
+    <p class="email" id="profileEmail">...</p>
+    <p class="phone" id="profilePhone">...</p>
+
+    <div class="options">
+      <a href="#" class="option" id="openEditBtn"><i class="fas fa-edit"></i> Edit Profile</a>
+      <a href="#" class="option"><i class="fas fa-lock"></i> Change Password</a>
+      <a href="#" class="option"><i class="fas fa-history"></i> Trip History</a>
+      <a href="login.html" class="option"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+  </div>
+  <div id="editModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>Edit Profile</h3>
+      
+      <label>Full Name</label>
+      <input type="text" id="inputName" placeholder="Enter your name">
+      
+      <label>Phone Number</label>
+      <input type="text" id="inputPhone" placeholder="+91 0000000000">
+
+      <div class="modal-actions">
+        <button id="btnCancel">Cancel</button>
+        <button id="btnSave">Save Changes</button>
+      </div>
+    </div>
+  </div>
+<script type="module" src="assets/js/profile.js"></script>
+</body>
+</html>
