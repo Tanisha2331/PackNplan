@@ -3,9 +3,17 @@ const express = require("express");
 const cors = require("cors");
 const { GoogleGenerativeAI } = require("@google/generative-ai"); // Use the standard library
 require('dotenv').config(); // Optional: if you use .env files
+// Add this to your backend/index.js
+const corsOptions = {
+    origin: "https://pack-nplan.vercel.app", // Your ACTUAL frontend URL from the error
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true,
+    optionsSuccessStatus: 204
+};
+
 
 const app = express();
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // ⚠️ PASTE YOUR API KEY HERE
