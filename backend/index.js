@@ -5,7 +5,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai"); // Use the stan
 require('dotenv').config(); // Optional: if you use .env files
 // Add this to your backend/index.js
 const corsOptions = {
-    origin: "https://pack-nplan.vercel.app", // Your ACTUAL frontend URL from the error
+    origin: "https://packnplan.vercel.app", // Your ACTUAL frontend URL from the error
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
     optionsSuccessStatus: 204
