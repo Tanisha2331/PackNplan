@@ -17,7 +17,11 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // ⚠️ PASTE YOUR API KEY HERE
-const genAI = new GoogleGenerativeAI("AIzaSyCbXHiiATYz6565bVsTF25mTTR1086f-Xs");
+// CHANGE THIS:
+// const genAI = new GoogleGenerativeAI("xyz");
+
+// TO THIS:
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post('/api/chat', async (req, res) => {
     try {
@@ -36,5 +40,6 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
-const PORT = 5000;
-app.listen(PORT, () => console.log(`🚀 Server speeding on http://localhost:${PORT}`));
+//const PORT = 5000;
+//app.listen(PORT, () => console.log(`🚀 Server speeding on http://localhost:${PORT}`));
+module.exports = app;
