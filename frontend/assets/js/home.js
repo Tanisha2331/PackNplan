@@ -629,7 +629,7 @@ if (planBtn) {
 
     if (dest && days) {
       // Redirect to the new Itinerary page
-      window.location.href = `itinerary.html?dest=${encodeURIComponent(dest)}&days=${days}`;
+      window.location.href = `itinerary.html?city=${encodeURIComponent(dest)}&days=${days}`;
     } else {
       alert("Please enter both a destination and the number of days.");
     }
