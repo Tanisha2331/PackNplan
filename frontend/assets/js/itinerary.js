@@ -102,7 +102,7 @@ document.getElementById("saveTripBtn")?.addEventListener("click", async () => {
     return;
   }
   try {
-    await addDoc(collection(db, "user_trips"), {
+    await addDoc(collection(db, "savedTrips"), {
       userId: user.uid,
       city,
       days,
