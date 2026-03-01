@@ -184,54 +184,58 @@ sendBtn.addEventListener('click', async () => {
   }
 });
 // =========================================
-// SAVED TRIPS LOGIC (DYNAMIC FETCH)
+// SAVED TRIPS LOGIC (DYNAMIC FETCH) - FIXED
 // =========================================
 const savedTripsTrigger = document.getElementById("savedTrips");
 const savedModal = document.getElementById("savedTripsModal");
 const savedList = document.getElementById("savedTripsList");
+// 🛑 ADD THESE TWO LINES TO PREVENT THE CRASH
+const closeSavedBtn = document.getElementById("closeSavedModal");
+const closeVisitedBtn = document.getElementById("closeVisitedModal");
 
 if (savedTripsTrigger) {
     savedTripsTrigger.addEventListener("click", async (e) => {
         const user = auth.currentUser;
 
         if (!user) {
-            showLoginModal(); // Show your login prompt if guest
+            if (typeof showLoginModal === "function") showLoginModal();
             return; 
         }
 
         if (typeof closeDrawer === "function") closeDrawer();
         savedModal.classList.remove("hidden");
 
-        // Show a loading spinner or text while we fetch
-        savedList.innerHTML = `<p class="loading">Loading your adventures... 🎒</p>`;
+        // Loading State
+        savedList.innerHTML = `<p style="text-align:center; padding:20px; color:#666;">Loading your adventures... 🎒</p>`;
 
         try {
-            // 🔍 QUERY: Get only the trips belonging to THIS user
+            // 🔍 Fetch trips from Firestore for the logged-in user
             const q = query(collection(db, "savedTrips"), where("userId", "==", user.uid));
             const querySnapshot = await getDocs(q);
 
             if (querySnapshot.empty) {
                 savedList.innerHTML = `
-                    <span class="empty-state-img">🎒</span>
-                    <h3>No saved trips yet</h3>
-                    <p>Your itinerary is looking a bit empty. Let's fix that!</p>
+                    <div style="text-align:center; padding:20px;">
+                        <span style="font-size:3rem;">🎒</span>
+                        <h3 style="margin:10px 0 5px;">No saved trips yet</h3>
+                        <p style="color:#666; font-size:0.9rem;">Your itinerary is looking a bit empty. Let's fix that!</p>
+                    </div>
                 `;
                 return;
             }
 
-            // ✅ RENDER: Clear the list and add each trip
+            // ✅ Clear list and render cards
             savedList.innerHTML = ""; 
             querySnapshot.forEach((doc) => {
                 const trip = doc.data();
                 const tripCard = document.createElement("div");
-                tripCard.className = "saved-trip-card";
                 tripCard.innerHTML = `
-                    <div style="padding: 15px; background: #f8f9fa; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #0b74e7;">
-                        <h4 style="margin: 0;">📍 ${trip.city}</h4>
-                        <p style="margin: 5px 0 0; font-size: 0.9rem; color: #666;">Duration: ${trip.days} Days</p>
-                        <button onclick="window.location.href='itinerary.html?city=${trip.city}&days=${trip.days}'" 
-                                style="margin-top: 10px; background: #0b74e7; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">
-                            View Plan
+                    <div style="padding: 15px; background: white; border-radius: 10px; margin-bottom: 12px; border-left: 5px solid #0b74e7; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                        <h4 style="margin: 0; color:#333;">📍 ${trip.city}</h4>
+                        <p style="margin: 5px 0 10px; font-size: 0.85rem; color: #666;">Plan for ${trip.days} Days</p>
+                        <button onclick="window.location.href='itinerary.html?city=${encodeURIComponent(trip.city)}&days=${trip.days}'" 
+                                style="background: #0b74e7; color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; font-weight: 600;">
+                            View Details
                         </button>
                     </div>
                 `;
@@ -240,16 +244,41 @@ if (savedTripsTrigger) {
 
         } catch (error) {
             console.error("Error fetching trips:", error);
-            savedList.innerHTML = "<p>Error loading trips. Please try again.</p>";
+            savedList.innerHTML = "<p style='color:red; text-align:center;'>Error loading trips.</p>";
         }
     });
 }
+
+// =========================================
+// MODAL CLOSE LOGIC (FIXED)
+// =========================================
+
+// Close Saved Modal
+if (closeSavedBtn) {
+    closeSavedBtn.addEventListener("click", () => {
+        savedModal.classList.add("hidden");
+    });
+}
+
+// Close Visited Modal
+if (closeVisitedBtn) {
+    closeVisitedBtn.addEventListener("click", () => {
+        const visitedModal = document.getElementById("visitedTripsModal");
+        if (visitedModal) visitedModal.classList.add("hidden");
+    });
+}
+
+// Close if clicking outside the modal box
+window.addEventListener("click", (e) => {
+    if (e.target === savedModal) {
+        savedModal.classList.add("hidden");
+    }
+});
 // =========================================
 // VISITED TRIPS LOGIC
 // =========================================
 const visitedTripsTrigger = document.getElementById("visitedTrips");
 const visitedModal = document.getElementById("visitedTripsModal");
-const closeVisitedBtn = document.getElementById("closeVisitedModal");
 const visitedList = document.getElementById("visitedTripsList");
 
 if (visitedTripsTrigger) {
@@ -277,20 +306,6 @@ if (visitedTripsTrigger) {
         `;
     });
 }
-
-// Close Modal Logic (Clicking the "X")
-if (closeVisitedBtn) {
-    closeVisitedBtn.addEventListener("click", () => {
-        visitedModal.classList.add("hidden");
-    });
-}
-
-// Close if clicking outside the white box
-window.addEventListener("click", (e) => {
-    if (e.target === visitedModal) {
-        visitedModal.classList.add("hidden");
-    }
-});
 // ===============================
 // MAP LOGIC 
 // ===============================
