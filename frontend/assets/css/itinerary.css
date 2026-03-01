@@ -1,0 +1,129 @@
+/* ===============================
+   ITINERARY PAGE STYLES
+   =============================== */
+
+body { 
+    font-family: 'Poppins', sans-serif; 
+    background: #f0f2f5; 
+    margin: 0; 
+    color: #333; 
+}
+
+.header { 
+    background: #0b74e7; 
+    color: white; 
+    padding: 40px 20px; 
+    text-align: center; 
+}
+
+.header h1 { 
+    margin: 0; 
+    font-size: 2.5rem; 
+}
+
+.header p { 
+    opacity: 0.9; 
+    margin-top: 10px; 
+}
+
+.container { 
+    max-width: 900px; 
+    margin: -30px auto 50px; 
+    padding: 20px; 
+}
+
+/* Action Buttons (Save/PDF/Back) */
+.back-btn, .action-btn { 
+    display: inline-block; 
+    background: white; 
+    color: #333; 
+    padding: 8px 20px; 
+    border-radius: 20px; 
+    text-decoration: none; 
+    font-weight: bold; 
+    margin-bottom: 20px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.back-btn:hover, .action-btn:hover {
+    transform: translateY(-2px);
+}
+
+.itinerary-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Timeline Styles */
+.day-section { 
+    margin-bottom: 40px; 
+    position: relative; 
+    padding-left: 20px; 
+}
+
+.day-header { 
+    font-size: 1.5rem; 
+    color: #0b74e7; 
+    font-weight: bold; 
+    margin-bottom: 15px; 
+    border-bottom: 2px solid #ddd; 
+    padding-bottom: 5px; 
+}
+
+.activity-card {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    border-left: 5px solid #00b894; /* Green accent */
+}
+
+.activity-img { 
+    width: 80px; 
+    height: 80px; 
+    border-radius: 8px; 
+    object-fit: cover; 
+    background: #eee; 
+}
+
+.activity-info h4 { 
+    margin: 0 0 5px; 
+    font-size: 1.1rem; 
+}
+
+.activity-info p { 
+    margin: 0; 
+    color: #666; 
+    font-size: 0.9rem; 
+}
+
+.loading { 
+    text-align: center; 
+    padding: 50px; 
+    font-size: 1.2rem; 
+    color: #666; 
+}
+
+.error { 
+    color: red; 
+    text-align: center; 
+    padding: 20px; 
+}
+@media (max-width: 600px) {
+    .itinerary-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .back-btn, .action-btn {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+}
