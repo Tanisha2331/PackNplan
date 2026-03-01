@@ -2,7 +2,7 @@
 // FIREBASE INIT
 // ===============================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
 let myMap;
@@ -184,38 +184,64 @@ sendBtn.addEventListener('click', async () => {
   }
 });
 // =========================================
-// SAVED TRIPS LOGIC (UPDATED WITH AUTH CHECK)
+// SAVED TRIPS LOGIC (DYNAMIC FETCH)
 // =========================================
 const savedTripsTrigger = document.getElementById("savedTrips");
 const savedModal = document.getElementById("savedTripsModal");
-const closeSavedBtn = document.getElementById("closeSavedModal");
 const savedList = document.getElementById("savedTripsList");
 
 if (savedTripsTrigger) {
-    savedTripsTrigger.addEventListener("click", (e) => {
-        
-        // 🛑 THE GATEKEEPER: Check if user is logged out
-        // Based on your HTML, if the "Login" button doesn't have the 'hidden' class, they are a guest.
-        const loginBtn = document.getElementById("loginBtn");
-        const isGuest = loginBtn && !loginBtn.classList.contains("hidden");
+    savedTripsTrigger.addEventListener("click", async (e) => {
+        const user = auth.currentUser;
 
-        if (isGuest) {
-            // STOP! The user is not logged in. 
-            // We exit this function so ONLY your "Please login" modal shows up.
+        if (!user) {
+            showLoginModal(); // Show your login prompt if guest
             return; 
         }
 
-        // ✅ IF LOGGED IN: Proceed to show the Saved Trips modal
         if (typeof closeDrawer === "function") closeDrawer();
-
         savedModal.classList.remove("hidden");
 
-        savedList.innerHTML = `
-            <span class="empty-state-img">🎒</span>
-            <h3 style="color: #333; margin-bottom: 5px;">No saved trips yet</h3>
-            <p class="empty-text">Your itinerary is looking a bit empty. Let's fix that!</p>
-            <button onclick="document.getElementById('savedTripsModal').classList.add('hidden')" class="plan-btn">Plan a Trip Now</button>
-        `;
+        // Show a loading spinner or text while we fetch
+        savedList.innerHTML = `<p class="loading">Loading your adventures... 🎒</p>`;
+
+        try {
+            // 🔍 QUERY: Get only the trips belonging to THIS user
+            const q = query(collection(db, "savedTrips"), where("userId", "==", user.uid));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                savedList.innerHTML = `
+                    <span class="empty-state-img">🎒</span>
+                    <h3>No saved trips yet</h3>
+                    <p>Your itinerary is looking a bit empty. Let's fix that!</p>
+                `;
+                return;
+            }
+
+            // ✅ RENDER: Clear the list and add each trip
+            savedList.innerHTML = ""; 
+            querySnapshot.forEach((doc) => {
+                const trip = doc.data();
+                const tripCard = document.createElement("div");
+                tripCard.className = "saved-trip-card";
+                tripCard.innerHTML = `
+                    <div style="padding: 15px; background: #f8f9fa; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #0b74e7;">
+                        <h4 style="margin: 0;">📍 ${trip.city}</h4>
+                        <p style="margin: 5px 0 0; font-size: 0.9rem; color: #666;">Duration: ${trip.days} Days</p>
+                        <button onclick="window.location.href='itinerary.html?city=${trip.city}&days=${trip.days}'" 
+                                style="margin-top: 10px; background: #0b74e7; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">
+                            View Plan
+                        </button>
+                    </div>
+                `;
+                savedList.appendChild(tripCard);
+            });
+
+        } catch (error) {
+            console.error("Error fetching trips:", error);
+            savedList.innerHTML = "<p>Error loading trips. Please try again.</p>";
+        }
     });
 }
 // =========================================
@@ -475,39 +501,6 @@ function calcVisibleCount() {
   return 1;
 }
 
-// load slides from Firestore (creates .carousel-slide elements)
-/*async function loadDestinations() {
-  track.innerHTML = "";
-  
-  const snap = await getDocs(collection(db, "destinations"));
-
-  snap.forEach(doc => {
-    const d = doc.data();
-    const slide = document.createElement("div");
-    slide.className = "carousel-slide";
-    // ensure data-link if you use links
-    if (d.link) slide.dataset.link = d.link;
-
-    // build image + title nodes (avoid innerHTML for safer load control)
-    const img = document.createElement("img");
-    img.src = d.image;
-    img.alt = d.name || "";
-
-    const p = document.createElement("p");
-    p.textContent = d.name || "";
-
-    slide.appendChild(img);
-    slide.appendChild(p);
-    track.appendChild(slide);
-  });
-
-  // wait for all images to load (so widths are accurate)
-  const imgs = [...track.querySelectorAll("img")];
-  await Promise.all(imgs.map(img => (img.complete ? Promise.resolve() : new Promise(r => { img.onload = r; img.onerror = r; }))));
-
-  // refresh slides list
-  slides = Array.from(track.querySelectorAll(".carousel-slide"));
-}*/
 // ===============================
 // LOAD DESTINATIONS (With Click Logic)
 // ===============================
