@@ -364,6 +364,7 @@ function moveToIndex() {
 
 async function boot() {
   await loadDestinations();
+  await loadOffers(); // <--- ADD THIS LINE
   startAutoplay();
 }
 
@@ -400,8 +401,4 @@ async function loadOffers() {
         container.innerHTML = "<p>Check back later for exclusive deals!</p>";
     }
 }
-async function boot() {
-  await loadDestinations();
-  await loadOffers(); // <--- ADD THIS LINE
-  startAutoplay();
-}
+boot();
