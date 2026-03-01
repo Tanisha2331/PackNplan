@@ -952,3 +952,73 @@ body,html{
   background: #085cb1;
   transform: scale(1.02); /* Slight pop effect on hover */
 }
+/* Offers Grid Layout */
+.offers-grid {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding: 10px 5px;
+    scrollbar-width: none; /* Hide scrollbar for Chrome/Safari */
+}
+
+.offers-grid::-webkit-scrollbar {
+    display: none;
+}
+
+/* Coupon Card Design */
+.offer-card {
+    background: white;
+    min-width: 260px;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border: 1px solid #eee;
+    position: relative;
+}
+
+/* The Ticket "Punch" Effect */
+.offer-card::before, .offer-card::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #f0f2f5; /* Matches your body background */
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.offer-card::before { left: -11px; }
+.offer-card::after { right: -11px; }
+
+.offer-img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+}
+
+.offer-info h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.offer-info p {
+    margin: 5px 0 10px;
+    font-size: 0.9rem;
+    color: #0b74e7;
+    font-weight: bold;
+}
+
+.claim-btn {
+    background: #0b74e7;
+    color: white;
+    border: none;
+    padding: 6px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+}

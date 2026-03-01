@@ -371,5 +371,37 @@ function startAutoplay() { autoplayId = setInterval(() => {
   index = (index + 1) > (slides.length - visibleCount) ? 0 : index + 1;
   moveToIndex();
 }, 3000); }
+//offers section//
+async function loadOffers() {
+    const container = document.getElementById("offersContainer");
+    if (!container) return;
 
-boot();
+    try {
+        const snap = await getDocs(collection(db, "offers"));
+        container.innerHTML = ""; // Clear loading message
+
+        snap.forEach(docSnap => {
+            const offer = docSnap.data();
+            const card = document.createElement("div");
+            card.className = "offer-card";
+            
+            card.innerHTML = `
+                <img src="${offer.image}" alt="Icon" class="offer-img">
+                <div class="offer-info">
+                    <p>${offer.discount} off</p>
+                    <h3>${offer.title}</h3>
+                    <button class="claim-btn">${offer.buttonText || 'Claim All'}</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    } catch (error) {
+        console.error("Error loading offers:", error);
+        container.innerHTML = "<p>Check back later for exclusive deals!</p>";
+    }
+}
+async function boot() {
+  await loadDestinations();
+  await loadOffers(); // <--- ADD THIS LINE
+  startAutoplay();
+}
