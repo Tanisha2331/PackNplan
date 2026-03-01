@@ -379,18 +379,22 @@ async function loadOffers() {
 
     try {
         const snap = await getDocs(collection(db, "offers"));
-        container.innerHTML = ""; // Clear loading message
+        container.innerHTML = ""; 
 
         snap.forEach(docSnap => {
             const offer = docSnap.data();
+            
+            // ✅ FIX: Check if offer.image exists, otherwise use a fallback icon
+            const imageUrl = offer.image || "https://cdn-icons-png.flaticon.com/512/1162/1162250.png";
+
             const card = document.createElement("div");
             card.className = "offer-card";
             
             card.innerHTML = `
-                <img src="${offer.image}" alt="Icon" class="offer-img">
+                <img src="${imageUrl}" alt="Offer Icon" class="offer-img">
                 <div class="offer-info">
-                    <p>${offer.discount} off</p>
-                    <h3>${offer.title}</h3>
+                    <p>${offer.discount || "Special"} off</p>
+                    <h3>${offer.title || "Limited Deal"}</h3>
                     <button class="claim-btn">${offer.buttonText || 'Claim All'}</button>
                 </div>
             `;
