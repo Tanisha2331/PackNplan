@@ -46,7 +46,7 @@ const modalLogin = document.getElementById("modalLogin");
 const avatar = document.getElementById("userAvatar");
 const welcomeText = document.getElementById("drawerWelcome");
 
-// --- 2. CAROUSEL LOGIC (Kept exactly as you had it) ---
+// --- 2. CAROUSEL LOGIC ---
 const track = document.getElementById("carouselTrack");
 const container = document.querySelector(".carousel-container");
 const prevBtn = document.querySelector(".prev");
@@ -58,39 +58,8 @@ const chatbotTrigger = document.getElementById('chatbotTrigger');
 const chatWidget = document.getElementById('chatWidget');
 const chatInput = document.getElementById('chatInput');
 const sendBtn = document.getElementById('sendChat');
-// ===================================
-// ALLOW "ENTER" KEY TO SEND MESSAGES
-// ===================================
-chatInput.addEventListener("keypress", function(event) {
-  // Check if the key pressed is "Enter"
-  if (event.key === "Enter") {
-    // Prevent the default action (like adding a new line)
-    event.preventDefault();
-    // Click the send button programmatically
-    sendBtn.click();
-  }
-});
 const chatMessages = document.getElementById('chatMessages');
 const closeChat = document.getElementById('closeChat');
-
-if (chatbotTrigger) {
-  chatbotTrigger.addEventListener('click', () => {
-    console.log("Chatbot opened");
-    chatWidget.classList.remove('hidden');
-    closeDrawer();
-    if (chatMessages.innerHTML.trim() === ""){
-      setTimeout(() => {
-        if(typeof addMessage === "function"){
-        addMessage("Hello! I'm your Pack & Plan assistant, ready to turn your 'someday' into a 'Saturday.' Where should we escape to first?")
-      }
-      },400)
-    }
-  });
-}
-  closeChat.addEventListener('click', () => {
-  chatWidget.classList.add('hidden');
-});
-
 
 // ===============================
 // AUTH UI HANDLER
@@ -100,52 +69,54 @@ function updateUI(user) {
   const userEls = document.querySelectorAll(".user-only");
 
   if (user) {
-    // LOGGED IN
-    const name =
-      user.displayName ||
-      localStorage.getItem("userName") ||
-      user.email.split("@")[0];
-
+    const name = user.displayName || localStorage.getItem("userName") || user.email.split("@")[0];
     accountBtn.innerHTML = `<span class="profile-circle">${name[0].toUpperCase()}</span>`;
     avatar.textContent = name[0].toUpperCase();
     welcomeText.textContent = `Welcome ${name}!`;
-
     guestEls.forEach(el => el.classList.add("hidden"));
     userEls.forEach(el => el.classList.remove("hidden"));
-
   } else {
-    // GUEST
     accountBtn.textContent = "Account";
     avatar.textContent = "G";
     welcomeText.textContent = "Welcome, Guest";
-
     guestEls.forEach(el => el.classList.remove("hidden"));
     userEls.forEach(el => el.classList.add("hidden"));
   }
 }
-
-// Firebase auth listener
 onAuthStateChanged(auth, updateUI);
+
 // ===============================
-// 5. CHATBOT AI LOGIC (UPDATED)
+// CHATBOT LOGIC
 // ===============================
+chatInput?.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    sendBtn.click();
+  }
+});
+
 function addMessage(text, sender) {
   const msgDiv = document.createElement('div');
   msgDiv.classList.add('message', sender);
-  
-  if (sender === 'bot') {
-    // Use marked to parse the AI response and remove asterisks
-    // Ensure you added the marked.js script to your home.html
-    msgDiv.innerHTML = typeof marked !== 'undefined' ? marked.parse(text) : text;
-  } else {
-    msgDiv.textContent = text;
-  }
-  
+  msgDiv.innerHTML = (sender === 'bot' && typeof marked !== 'undefined') ? marked.parse(text) : text;
   chatMessages.appendChild(msgDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-sendBtn.addEventListener('click', async () => {
+if (chatbotTrigger) {
+  chatbotTrigger.addEventListener('click', () => {
+    chatWidget.classList.remove('hidden');
+    closeDrawer();
+    if (chatMessages.innerHTML.trim() === "") {
+      setTimeout(() => {
+        addMessage("Hello! I'm your Pack & Plan assistant! Where should we escape to first?", "bot");
+      }, 400);
+    }
+  });
+}
+closeChat?.addEventListener('click', () => chatWidget.classList.add('hidden'));
+
+sendBtn?.addEventListener('click', async () => {
   const userText = chatInput.value.trim();
   if (!userText) return;
 
@@ -155,14 +126,9 @@ sendBtn.addEventListener('click', async () => {
   const typingId = "typing-" + Date.now();
   const typingDiv = document.createElement('div');
   typingDiv.classList.add('message', 'bot');
-  typingDiv.id=typingId
-  typingDiv.innerHTML=`
-  <div class="typing-dots">
-  <span></span><span></span><span></span>
-  </div>
-  `;
+  typingDiv.id = typingId;
+  typingDiv.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div>`;
   chatMessages.appendChild(typingDiv);
-  chatMessages.scrollTop=chatMessages.scrollHeight;
 
   try {
     const response = await fetch('https://packn-plan.vercel.app/api/chat', {
@@ -171,222 +137,117 @@ sendBtn.addEventListener('click', async () => {
       body: JSON.stringify({ prompt: userText })
     });
     const data = await response.json();
-    
-    // Remove the typing indicator
-    const indicator = document.getElementById(typingId);
-    if (indicator) indicator.remove();
-    
-    // Add the real parsed message
+    document.getElementById(typingId)?.remove();
     addMessage(data.reply, 'bot');
   } catch (error) {
     const indicator = document.getElementById(typingId);
     if (indicator) indicator.textContent = "Error: Could not connect to AI server.";
   }
 });
+
 // =========================================
-// SAVED TRIPS LOGIC (DYNAMIC FETCH) - FIXED
+// SAVED TRIPS LOGIC
 // =========================================
-const savedTripsTrigger = document.getElementById("savedTrips");
 const savedModal = document.getElementById("savedTripsModal");
 const savedList = document.getElementById("savedTripsList");
-// 🛑 ADD THESE TWO LINES TO PREVENT THE CRASH
 const closeSavedBtn = document.getElementById("closeSavedModal");
-const closeVisitedBtn = document.getElementById("closeVisitedModal");
 
-if (savedTripsTrigger) {
-    savedTripsTrigger.addEventListener("click", async (e) => {
-        const user = auth.currentUser;
-
-        if (!user) {
-            if (typeof showLoginModal === "function") showLoginModal();
-            return; 
-        }
-
-        if (typeof closeDrawer === "function") closeDrawer();
-        savedModal.classList.remove("hidden");
-
-        // Loading State
-        savedList.innerHTML = `<p style="text-align:center; padding:20px; color:#666;">Loading your adventures... 🎒</p>`;
-
-        try {
-            // 🔍 Fetch trips from Firestore for the logged-in user
-            const q = query(collection(db, "savedTrips"), where("userId", "==", user.uid));
-            const querySnapshot = await getDocs(q);
-
-            if (querySnapshot.empty) {
-                savedList.innerHTML = `
-                    <div style="text-align:center; padding:20px;">
-                        <span style="font-size:3rem;">🎒</span>
-                        <h3 style="margin:10px 0 5px;">No saved trips yet</h3>
-                        <p style="color:#666; font-size:0.9rem;">Your itinerary is looking a bit empty. Let's fix that!</p>
-                    </div>
-                `;
-                return;
-            }
-
-            // ✅ Clear list and render cards
-            savedList.innerHTML = ""; 
-            querySnapshot.forEach((doc) => {
-                const trip = doc.data();
-                const tripCard = document.createElement("div");
-                tripCard.innerHTML = `
-                    <div style="padding: 15px; background: white; border-radius: 10px; margin-bottom: 12px; border-left: 5px solid #0b74e7; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                        <h4 style="margin: 0; color:#333;">📍 ${trip.city}</h4>
-                        <p style="margin: 5px 0 10px; font-size: 0.85rem; color: #666;">Plan for ${trip.days} Days</p>
-                        <button onclick="window.location.href='itinerary.html?city=${encodeURIComponent(trip.city)}&days=${trip.days}'" 
-                                style="background: #0b74e7; color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; font-weight: 600;">
-                            View Details
-                        </button>
-                    </div>
-                `;
-                savedList.appendChild(tripCard);
-            });
-
-        } catch (error) {
-            console.error("Error fetching trips:", error);
-            savedList.innerHTML = "<p style='color:red; text-align:center;'>Error loading trips.</p>";
-        }
-    });
-}
-
-// =========================================
-// MODAL CLOSE LOGIC (FIXED)
-// =========================================
-
-// Close Saved Modal
-if (closeSavedBtn) {
-    closeSavedBtn.addEventListener("click", () => {
-        savedModal.classList.add("hidden");
-    });
-}
-
-// Close Visited Modal
-if (closeVisitedBtn) {
-    closeVisitedBtn.addEventListener("click", () => {
-        const visitedModal = document.getElementById("visitedTripsModal");
-        if (visitedModal) visitedModal.classList.add("hidden");
-    });
-}
-
-// Close if clicking outside the modal box
-window.addEventListener("click", (e) => {
-    if (e.target === savedModal) {
-        savedModal.classList.add("hidden");
+if (savedTrips) {
+  savedTrips.addEventListener("click", async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      showLoginModal();
+      return;
     }
-});
+    closeDrawer();
+    savedModal.classList.remove("hidden");
+    savedList.innerHTML = `<p style="text-align:center; padding:20px;">Loading adventures... 🎒</p>`;
+
+    try {
+      const q = query(collection(db, "savedTrips"), where("userId", "==", user.uid));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        savedList.innerHTML = `<div style="text-align:center; padding:20px;"><h3>No saved trips yet</h3></div>`;
+        return;
+      }
+      savedList.innerHTML = "";
+      snap.forEach(doc => {
+        const trip = doc.data();
+        const card = document.createElement("div");
+        card.innerHTML = `
+          <div style="padding:15px; background:#f8f9fa; border-radius:10px; margin-bottom:10px; border-left:5px solid #0b74e7;">
+            <h4>📍 ${trip.city}</h4>
+            <p>${trip.days} Days</p>
+            <button onclick="window.location.href='itinerary.html?city=${encodeURIComponent(trip.city)}&days=${trip.days}'" style="background:#0b74e7; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">View Plan</button>
+          </div>`;
+        savedList.appendChild(card);
+      });
+    } catch (e) { console.error(e); }
+  });
+}
+
 // =========================================
 // VISITED TRIPS LOGIC
 // =========================================
-const visitedTripsTrigger = document.getElementById("visitedTrips");
 const visitedModal = document.getElementById("visitedTripsModal");
 const visitedList = document.getElementById("visitedTripsList");
+const closeVisitedBtn = document.getElementById("closeVisitedModal");
 
-if (visitedTripsTrigger) {
-    visitedTripsTrigger.addEventListener("click", (e) => {
-        
-        // 🛑 THE GATEKEEPER: Check if user is logged out
-        const loginBtn = document.getElementById("loginBtn");
-        const isGuest = loginBtn && !loginBtn.classList.contains("hidden");
-
-        if (isGuest) {
-            return; // Exit and let the "Please Login" modal show up
-        }
-
-        // ✅ IF LOGGED IN: Show the Visited Trips modal
-        if (typeof closeDrawer === "function") closeDrawer();
-
-        visitedModal.classList.remove("hidden");
-
-        // Show the "Empty State" message
-        visitedList.innerHTML = `
-            <span class="empty-state-img">✈️</span>
-            <h3 style="color: #333; margin-bottom: 5px;">No visited trips yet</h3>
-            <p class="empty-text">You haven't marked any trips as completed. Time to start exploring!</p>
-            <button onclick="document.getElementById('visitedTripsModal').classList.add('hidden')" class="plan-btn">Find a Destination</button>
-        `;
-    });
+if (visitedTrips) {
+  visitedTrips.addEventListener("click", () => {
+    if (!auth.currentUser) { showLoginModal(); return; }
+    closeDrawer();
+    visitedModal.classList.remove("hidden");
+    visitedList.innerHTML = `<div style="text-align:center; padding:20px;"><h3>No visited trips yet</h3></div>`;
+  });
 }
+
+// Close Modals
+closeSavedBtn?.addEventListener("click", () => savedModal.classList.add("hidden"));
+closeVisitedBtn?.addEventListener("click", () => visitedModal.classList.add("hidden"));
+window.addEventListener("click", (e) => {
+  if (e.target === savedModal) savedModal.classList.add("hidden");
+  if (e.target === visitedModal) visitedModal.classList.add("hidden");
+});
+
 // ===============================
-// MAP LOGIC 
+// MAP LOGIC
 // ===============================
 const mapsTrigger = document.getElementById('mapsTrigger');
 const mapSection = document.getElementById('mapSection');
 const pageWrapper = document.querySelector('.page-wrapper');
 const closeMapBtn = document.getElementById('closeMap');
 
-if (mapsTrigger) {
-  mapsTrigger.addEventListener('click', () => {
-  pageWrapper.style.display = 'none'; 
+mapsTrigger?.addEventListener('click', () => {
+  pageWrapper.style.display = 'none';
   mapSection.classList.remove('hidden');
-  mapSection.style.display = 'block'; 
-  closeDrawer(); 
-
+  mapSection.style.display = 'block';
+  closeDrawer();
   if (!myMap) {
-    // 1. Create the map with a "Fly" animation feel
-    myMap = L.map('map', {
-      zoomControl: false, // We'll move this to a better spot
-      scrollWheelZoom: true
-    }).setView([20.5937, 78.9629], 5); // Default to a central location (e.g., India)
-
-    // 2. Add high-quality Voyager tiles immediately
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '©OpenStreetMap'
-    }).addTo(myMap);
-
-    // 3. Move zoom buttons to bottom-right (looks cleaner)
+    myMap = L.map('map', { zoomControl: false }).setView([20.5937, 78.9629], 5);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(myMap);
     L.control.zoom({ position: 'bottomright' }).addTo(myMap);
-
-  } else {
-    // If it exists, reset it to a "clean" starting zoom
-    myMap.setView([20.5937, 78.9629], 5);
   }
-  
-  // 4. Force refresh with almost zero delay
   setTimeout(() => { myMap.invalidateSize(); }, 50);
 });
-}
 
-// Logic for the "Back to Search" button
-if (closeMapBtn) {
-  closeMapBtn.addEventListener('click', () => {
-    // Hide map
-    mapSection.style.display = 'none';
-    mapSection.classList.add('hidden');
-    
-    // Bring back the main site
-    pageWrapper.style.display = 'block';
-  });
-}
-// Close Modal Logic (When clicking the "X")
-if (closeSavedBtn) {
-    closeSavedBtn.addEventListener("click", () => {
-        savedModal.classList.add("hidden");
-    });
-}
-
-// Close if clicking outside the white box
-window.addEventListener("click", (e) => {
-    if (e.target === savedModal) {
-        savedModal.classList.add("hidden");
-    }
+closeMapBtn?.addEventListener('click', () => {
+  mapSection.style.display = 'none';
+  pageWrapper.style.display = 'block';
 });
+
 // ===============================
-// ACCOUNT MENU
+// UI HELPERS (DRAWER, TABS, ETC)
 // ===============================
 accountBtn.addEventListener("click", (e) => {
   e.stopPropagation();
   accountMenu.classList.toggle("show");
 });
-// Close account menu on outside click
+
 document.addEventListener("click", (e) => {
-  if (!accountMenu.contains(e.target) && e.target !== accountBtn) {
-    accountMenu.classList.remove("show");
-  }
+  if (!accountMenu.contains(e.target) && e.target !== accountBtn) accountMenu.classList.remove("show");
 });
 
-// ===============================
-// DRAWER
-// ===============================
 hamburger.addEventListener("click", (e) => {
   e.stopPropagation();
   drawer.classList.toggle("open");
@@ -397,280 +258,95 @@ function closeDrawer() {
   drawer.classList.remove("open");
   overlay.classList.remove("show");
 }
+overlay.addEventListener("click", closeDrawer);
 
-overlay.addEventListener("click", () => {
-  closeDrawer();
-});
-// ===============================
-// black tabs logic
-// ===============================
-const tabs = document.querySelectorAll(".tab");
-const panels = document.querySelectorAll(".tab-panel");
-
-tabs.forEach(tab => {
+// Tab Logic
+document.querySelectorAll(".tab").forEach(tab => {
   tab.addEventListener("click", () => {
-    // 1. Remove 'active' class from all tabs
-    tabs.forEach(t => t.classList.remove("active"));
-    
-    // 2. Hide all panels
-    panels.forEach(p => {
-      p.classList.remove("active");
-      p.style.display = "none"; // Force hide
-    });
-
-    // 3. Activate the clicked tab
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
     tab.classList.add("active");
-
-    // 4. Find the matching panel using your 'data-for' attribute
-    const targetName = tab.getAttribute("data-for");
-    const targetPanel = document.getElementById(targetName);
-    
-    // 5. Show the matching panel
-    if (targetPanel) {
-      targetPanel.classList.add("active");
-      targetPanel.style.display = "block"; // Force show
-      
-      // Optional: Add a smooth fade-in animation
-      targetPanel.style.animation = "fadeIn 0.5s ease";
-    }
+    const target = document.getElementById(tab.getAttribute("data-for"));
+    if (target) target.style.display = "block";
   });
 });
-// Add this animation style via JS just to be safe
-const style = document.createElement('style');
-style.innerHTML = `
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-`;
-document.head.appendChild(style);
-// ===============================
-// MODAL
-// ===============================
-function showLoginModal() {
-  modal.classList.remove("hidden");
-}
 
-function hideLoginModal() {
-  modal.classList.add("hidden");
-}
-
-// IMPORTANT: modal should NOT affect drawer
-modal.querySelector(".modal-inner").addEventListener("click", e => e.stopPropagation());
-
+// Login Modal
+function showLoginModal() { modal.classList.remove("hidden"); }
+function hideLoginModal() { modal.classList.add("hidden"); }
 modalClose.addEventListener("click", hideLoginModal);
 modalLogin.addEventListener("click", () => window.location.href = "login.html");
 
-// ===============================
-// PROTECTED FEATURES
-// ===============================
-function requireAuth(action) {
-  if (!auth.currentUser) {
-    showLoginModal();
-    return;
-  }
-  action();
-}
-
-savedTrips.addEventListener("click", () => {
-  requireAuth(() => {
-    console.log("Open Saved Trips");
-  });
-});
-
-visitedTrips.addEventListener("click", () => {
-  requireAuth(() => {
-    console.log("Open Visited Trips");
-  });
-});
-
-// ===============================
-// NAV BUTTONS
-// ===============================
+// Nav Buttons
 loginBtn.onclick = () => window.location.href = "login.html";
 signupBtn.onclick = () => window.location.href = "signup.html";
-profileBtn.onclick = () => {
-  window.location.href = "profile.html";
-};
-settingsBtn.onclick = () => {
-  window.location.href = "settings.html";
-};
+profileBtn.onclick = () => window.location.href = "profile.html";
+settingsBtn.onclick = () => window.location.href = "settings.html";
 logoutBtn.onclick = async () => {
   await signOut(auth);
   localStorage.clear();
   window.location.reload();
 };
-// state
-let slides = [];
-let index = 0;
-let visibleCount = 3;
-const GAP = 20; // must match CSS margin-right
-let slideWidth = 0;
-let autoplayId = null;
 
-// determine visibleCount by width
-function calcVisibleCount() {
-  const w = window.innerWidth;
-  if (w > 900) return 3;
-  if (w > 600) return 2;
-  return 1;
-}
-
-// ===============================
-// LOAD DESTINATIONS (With Click Logic)
-// ===============================
-async function loadDestinations() {
-  track.innerHTML = "";
-  try {
-    const snap = await getDocs(collection(db, "destinations"));
-
-    snap.forEach(docSnap => {
-      const d = docSnap.data();
-      const slide = document.createElement("div");
-      slide.className = "carousel-slide";
-      
-      // --- NEW: CLICK EVENT ---
-      slide.addEventListener("click", () => {
-         console.log("Clicked:", d.name);
-        // We encode the image URL so it doesn't break the browser link
-         const targetUrl = `destination-details.html?city=${encodeURIComponent(d.name)}&hero=${encodeURIComponent(d.image)}`;
-         window.location.href = targetUrl;
-      });
-
-      const img = document.createElement("img");
-      img.src = d.image; 
-      img.alt = d.name || "Destination";
-
-      const p = document.createElement("p");
-      p.textContent = d.name || "Unknown";
-
-      slide.appendChild(img);
-      slide.appendChild(p);
-      track.appendChild(slide);
-    });
-
-    // Wait for images to load so layout doesn't break
-    const imgs = [...track.querySelectorAll("img")];
-    await Promise.all(imgs.map(img => (img.complete ? Promise.resolve() : new Promise(r => { img.onload = r; img.onerror = r; }))));
-
-    // Refresh slides array
-    slides = Array.from(track.querySelectorAll(".carousel-slide"));
-    
-    // Recalculate dots and layout
-    applySlideSizing();
-    buildDots();
-
-  } catch (error) {
-    console.error("Error loading destinations:", error);
-  }
-}
 // ===============================
 // SEARCH BAR LOGIC
 // ===============================
+document.querySelector("#itinerary .search-btn")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  const dest = document.querySelector("#itinerary input[placeholder='Destination']").value.trim();
+  const days = document.querySelector("#itinerary input[placeholder='Days']").value.trim();
+  if (dest && days) window.location.href = `itinerary.html?city=${encodeURIComponent(dest)}&days=${days}`;
+});
 
-// 1. HOTELS SEARCH
-const hotelBtn = document.querySelector("#hotels .search-btn");
-const hotelInput = document.querySelector("#hotels input[placeholder='City']"); // More specific selector
-
-if (hotelBtn) {
-  hotelBtn.addEventListener("click", (e) => {
-    e.preventDefault(); // Stop page reload
-    const city = hotelInput.value.trim();
-    
-    if (city) {
-      console.log("Searching for hotel in:", city);
-      // Redirect to your details page
-      window.location.href = `destination-details.html?city=${encodeURIComponent(city)}`;
-    } else {
-      alert("Please enter a city name first!");
-    }
-  });
-}
-
-// 2. DESTINATION SEARCH (The "Explore" Tab)
-const destBtn = document.querySelector("#destination .search-btn");
-const destInput = document.querySelector("#destination input[placeholder*='Search places']"); // Matches placeholder "Search places..."
-
-if (destBtn) {
-  destBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    const place = destInput.value.trim();
-    
-    if (place) {
-      window.location.href = `destination-details.html?city=${encodeURIComponent(place)}`;
-    } else {
-      alert("Please tell us where you want to go!");
-    }
-  });
-}
-
-// 3. TRANSPORT SEARCH (Optional - Sends you to the "To" city)
-const transBtn = document.querySelector("#transport .search-btn");
-const transInputs = document.querySelectorAll("#transport input"); 
-// 0=From, 1=To, 2=Date
-
-if (transBtn) {
-  transBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    const fromCity = transInputs[0].value;
-    const toCity = transInputs[1].value;
-    
-    if (toCity) {
-      window.location.href = `transport.html?from=${encodeURIComponent(fromCity)}&to=${encodeURIComponent(toCity)}`;
-    } else {
-      alert("Please enter From and To locations.");
-    }
-  });
-}
 // ===============================
-// 4. ITINERARY SEARCH LOGIC
+// CAROUSEL LOGIC
 // ===============================
-const planBtn = document.querySelector("#itinerary .search-btn");
-const planDestInput = document.querySelector("#itinerary input[placeholder='Destination']");
-const planDaysInput = document.querySelector("#itinerary input[placeholder='Days']");
+let slides = [];
+let index = 0;
+let visibleCount = 3;
+const GAP = 20;
+let slideWidth = 0;
+let autoplayId = null;
 
-if (planBtn) {
-  planBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    const dest = planDestInput.value.trim();
-    const days = planDaysInput.value.trim();
-
-    if (dest && days) {
-      // Redirect to the new Itinerary page
-      window.location.href = `itinerary.html?city=${encodeURIComponent(dest)}&days=${days}`;
-    } else {
-      alert("Please enter both a destination and the number of days.");
-    }
-  });
+function calcVisibleCount() {
+  const w = window.innerWidth;
+  return w > 900 ? 3 : w > 600 ? 2 : 1;
 }
-// apply widths to slides according to visibleCount
+
+async function loadDestinations() {
+  track.innerHTML = "";
+  const snap = await getDocs(collection(db, "destinations"));
+  snap.forEach(docSnap => {
+    const d = docSnap.data();
+    const slide = document.createElement("div");
+    slide.className = "carousel-slide";
+    slide.addEventListener("click", () => {
+      window.location.href = `destination-details.html?city=${encodeURIComponent(d.name)}&hero=${encodeURIComponent(d.image)}`;
+    });
+    slide.innerHTML = `<img src="${d.image}" alt="${d.name}"><p>${d.name}</p>`;
+    track.appendChild(slide);
+  });
+  slides = Array.from(track.querySelectorAll(".carousel-slide"));
+  applySlideSizing();
+  buildDots();
+}
+
 function applySlideSizing() {
   visibleCount = calcVisibleCount();
-  const containerWidth = container.clientWidth;
-  const totalGaps = (visibleCount - 1) * GAP;
-  slideWidth = Math.floor((containerWidth - totalGaps) / visibleCount);
-
+  slideWidth = Math.floor((container.clientWidth - (visibleCount - 1) * GAP) / visibleCount);
   slides.forEach((s, i) => {
     s.style.width = `${slideWidth}px`;
     s.style.marginRight = (i === slides.length - 1) ? "0px" : `${GAP}px`;
   });
 }
 
-// build dots (one dot per valid start index)
 function buildDots() {
   dotsContainer.innerHTML = "";
-  if (!slides.length) return;
   const maxStart = Math.max(0, slides.length - visibleCount);
   for (let i = 0; i <= maxStart; i++) {
     const dot = document.createElement("span");
     dot.className = "dot";
-    dot.dataset.index = i;
-    dot.addEventListener("click", () => {
-      stopAutoplay();
-      index = i;
-      moveToIndex();
-      startAutoplay();
-    });
+    dot.addEventListener("click", () => { index = i; moveToIndex(); });
     dotsContainer.appendChild(dot);
   }
   updateDots();
@@ -678,93 +354,22 @@ function buildDots() {
 
 function updateDots() {
   const dots = dotsContainer.querySelectorAll(".dot");
-  if (!dots || dots.length === 0) return;
-  const maxStart = Math.max(0, slides.length - visibleCount);
-  let showIndex = Math.max(0, Math.min(maxStart, Math.round(index)));
-  dots.forEach(d => d.classList.remove("active"));
-  const chosen = dots[showIndex];
-  if (chosen) chosen.classList.add("active");
+  dots.forEach((d, i) => d.classList.toggle("active", i === index));
 }
 
-// move the track to current index
-function moveToIndex(animate = true) {
-  const offset = index * (slideWidth + GAP);
-  if (!animate) {
-    track.style.transition = "none";
-  } else {
-    track.style.transition = "transform 0.5s cubic-bezier(.2,.9,.3,1)";
-  }
-  track.style.transform = `translateX(-${offset}px)`;
-  if (!animate) {
-    // force reflow then restore
-    track.offsetHeight;
-    track.style.transition = "transform 0.5s cubic-bezier(.2,.9,.3,1)";
-  }
+function moveToIndex() {
+  track.style.transform = `translateX(-${index * (slideWidth + GAP)}px)`;
   updateDots();
 }
 
-// next / prev
-function next() {
-  const maxStart = Math.max(0, slides.length - visibleCount);
-  index = index + 1;
-  if (index > maxStart) index = 0; // wrap
-  moveToIndex();
-}
-function prev() {
-  const maxStart = Math.max(0, slides.length - visibleCount);
-  index = index - 1;
-  if (index < 0) index = maxStart;
-  moveToIndex();
-}
-
-// autoplay
-function startAutoplay() {
-  stopAutoplay();
-  autoplayId = setInterval(next, 3000);
-}
-function stopAutoplay() {
-  if (autoplayId) {
-    clearInterval(autoplayId);
-    autoplayId = null;
-  }
-}
-
-// click on slide -> open link if present
-track.addEventListener("click", (e) => {
-  const slide = e.target.closest(".carousel-slide");
-  if (!slide) return;
-  const link = slide.dataset.link;
-  if (link) window.location.href = link;
-});
-
-// wire buttons
-if (nextBtn) nextBtn.addEventListener("click", () => { stopAutoplay(); next(); startAutoplay(); });
-if (prevBtn) prevBtn.addEventListener("click", () => { stopAutoplay(); prev(); startAutoplay(); });
-
-// handle resize
-let resizeTO;
-window.addEventListener("resize", () => {
-  stopAutoplay();
-  clearTimeout(resizeTO);
-  resizeTO = setTimeout(() => {
-    applySlideSizing();
-    // clamp index
-    const maxStart = Math.max(0, slides.length - visibleCount);
-    if (index > maxStart) index = maxStart;
-    moveToIndex(false);
-    startAutoplay();
-  }, 150);
-});
-
-// main init
 async function boot() {
-  await loadDestinations();   // loads DOM slides + waits for images
-  if (!slides.length) slides = Array.from(track.querySelectorAll(".carousel-slide"));
-  applySlideSizing();
-  buildDots();
-  index = 0;
-  moveToIndex(false);
+  await loadDestinations();
   startAutoplay();
 }
+
+function startAutoplay() { autoplayId = setInterval(() => {
+  index = (index + 1) > (slides.length - visibleCount) ? 0 : index + 1;
+  moveToIndex();
+}, 3000); }
 
 boot();
