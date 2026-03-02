@@ -20,33 +20,38 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// =========================================
+// 🚀 NEW: DYNAMIC BOOKING HANDLER
+// =========================================
+window.initiateBooking = (url) => {
+    const user = auth.currentUser;
+    if (!user) {
+        showLoginModal(); //
+        return;
+    }
+    window.open(url, '_blank'); //
+};
+
 // ===============================
 // DOM ELEMENTS
 // ===============================
 const accountBtn = document.getElementById("accountBtn");
 const accountMenu = document.getElementById("accountMenu");
-
 const loginBtn = document.getElementById("loginBtn");
 const signupBtn = document.getElementById("signupBtn");
 const profileBtn = document.getElementById("profileBtn");
 const settingsBtn = document.getElementById("settingsBtn");
 const logoutBtn = document.getElementById("logoutBtn");
-
 const drawer = document.getElementById("drawer");
 const hamburger = document.getElementById("hamburger");
 const overlay = document.getElementById("overlay");
-
 const savedTrips = document.getElementById("savedTrips");
 const visitedTrips = document.getElementById("visitedTrips");
-
 const modal = document.getElementById("msgModal");
 const modalClose = document.getElementById("modalClose");
 const modalLogin = document.getElementById("modalLogin");
-
 const avatar = document.getElementById("userAvatar");
 const welcomeText = document.getElementById("drawerWelcome");
-
-// --- 2. CAROUSEL LOGIC ---
 const track = document.getElementById("carouselTrack");
 const container = document.querySelector(".carousel-container");
 const prevBtn = document.querySelector(".prev");
@@ -202,14 +207,6 @@ if (visitedTrips) {
   });
 }
 
-// Close Modals
-closeSavedBtn?.addEventListener("click", () => savedModal.classList.add("hidden"));
-closeVisitedBtn?.addEventListener("click", () => visitedModal.classList.add("hidden"));
-window.addEventListener("click", (e) => {
-  if (e.target === savedModal) savedModal.classList.add("hidden");
-  if (e.target === visitedModal) visitedModal.classList.add("hidden");
-});
-
 // ===============================
 // MAP LOGIC
 // ===============================
@@ -237,7 +234,7 @@ closeMapBtn?.addEventListener('click', () => {
 });
 
 // ===============================
-// UI HELPERS (DRAWER, TABS, ETC)
+// UI HELPERS
 // ===============================
 accountBtn.addEventListener("click", (e) => {
   e.stopPropagation();
@@ -271,13 +268,11 @@ document.querySelectorAll(".tab").forEach(tab => {
   });
 });
 
-// Login Modal
 function showLoginModal() { modal.classList.remove("hidden"); }
 function hideLoginModal() { modal.classList.add("hidden"); }
 modalClose.addEventListener("click", hideLoginModal);
 modalLogin.addEventListener("click", () => window.location.href = "login.html");
 
-// Nav Buttons
 loginBtn.onclick = () => window.location.href = "login.html";
 signupBtn.onclick = () => window.location.href = "signup.html";
 profileBtn.onclick = () => window.location.href = "profile.html";
@@ -288,9 +283,7 @@ logoutBtn.onclick = async () => {
   window.location.reload();
 };
 
-// ===============================
-// SEARCH BAR LOGIC
-// ===============================
+// Search Redirection
 document.querySelector("#itinerary .search-btn")?.addEventListener("click", (e) => {
   e.preventDefault();
   const dest = document.querySelector("#itinerary input[placeholder='Destination']").value.trim();
@@ -299,19 +292,13 @@ document.querySelector("#itinerary .search-btn")?.addEventListener("click", (e) 
 });
 
 // ===============================
-// CAROUSEL LOGIC
+// CAROUSEL & OFFERS
 // ===============================
 let slides = [];
 let index = 0;
 let visibleCount = 3;
 const GAP = 20;
 let slideWidth = 0;
-let autoplayId = null;
-
-function calcVisibleCount() {
-  const w = window.innerWidth;
-  return w > 900 ? 3 : w > 600 ? 2 : 1;
-}
 
 async function loadDestinations() {
   track.innerHTML = "";
@@ -320,9 +307,16 @@ async function loadDestinations() {
     const d = docSnap.data();
     const slide = document.createElement("div");
     slide.className = "carousel-slide";
+    
+    // ✅ DYNAMIC BOOKING LOGIC FOR ATTRACTIONS
     slide.addEventListener("click", () => {
-      window.location.href = `destination-details.html?city=${encodeURIComponent(d.name)}&hero=${encodeURIComponent(d.image)}`;
+      if (d.bookingUrl) {
+          window.initiateBooking(d.bookingUrl);
+      } else {
+          window.location.href = `destination-details.html?city=${encodeURIComponent(d.name)}&hero=${encodeURIComponent(d.image)}`;
+      }
     });
+
     slide.innerHTML = `<img src="${d.image}" alt="${d.name}"><p>${d.name}</p>`;
     track.appendChild(slide);
   });
@@ -331,8 +325,40 @@ async function loadDestinations() {
   buildDots();
 }
 
+async function loadOffers() {
+    const offersCont = document.getElementById("offersContainer");
+    const criteriaModal = document.getElementById("criteriaModal");
+    const criteriaText = document.getElementById("criteriaText");
+    const criteriaTitle = document.getElementById("criteriaTitle");
+    const closeBtn = document.getElementById("closeCriteria");
+    if (!offersCont) return;
+
+    try {
+        const snap = await getDocs(collection(db, "offers"));
+        offersCont.innerHTML = ""; 
+        snap.forEach(docSnap => {
+            const offer = docSnap.data();
+            const card = document.createElement("div");
+            card.className = "offer-card";
+            card.innerHTML = `
+                <img src="${offer.image}" alt="Icon" class="offer-img">
+                <div class="offer-info">
+                    <p>${offer.discount}</p>
+                    <h3>${offer.title}</h3>
+                </div>`;
+            card.addEventListener("click", () => {
+                criteriaTitle.innerText = `${offer.title} Rules`;
+                criteriaText.innerText = offer.criteria || "Standard terms apply.";
+                criteriaModal.classList.remove("hidden");
+            });
+            offersCont.appendChild(card);
+        });
+        closeBtn.onclick = () => criteriaModal.classList.add("hidden");
+    } catch (error) { console.error("Offers error:", error); }
+}
+
 function applySlideSizing() {
-  visibleCount = calcVisibleCount();
+  visibleCount = window.innerWidth > 900 ? 3 : window.innerWidth > 600 ? 2 : 1;
   slideWidth = Math.floor((container.clientWidth - (visibleCount - 1) * GAP) / visibleCount);
   slides.forEach((s, i) => {
     s.style.width = `${slideWidth}px`;
@@ -342,80 +368,27 @@ function applySlideSizing() {
 
 function buildDots() {
   dotsContainer.innerHTML = "";
-  const maxStart = Math.max(0, slides.length - visibleCount);
-  for (let i = 0; i <= maxStart; i++) {
+  for (let i = 0; i <= Math.max(0, slides.length - visibleCount); i++) {
     const dot = document.createElement("span");
     dot.className = "dot";
-    dot.addEventListener("click", () => { index = i; moveToIndex(); });
+    dot.onclick = () => { index = i; updateSlider(); };
     dotsContainer.appendChild(dot);
   }
-  updateDots();
 }
 
-function updateDots() {
+function updateSlider() {
+  track.style.transform = `translateX(-${index * (slideWidth + GAP)}px)`;
   const dots = dotsContainer.querySelectorAll(".dot");
   dots.forEach((d, i) => d.classList.toggle("active", i === index));
 }
 
-function moveToIndex() {
-  track.style.transform = `translateX(-${index * (slideWidth + GAP)}px)`;
-  updateDots();
-}
-
 async function boot() {
   await loadDestinations();
-  await loadOffers(); 
-  startAutoplay();
+  await loadOffers();
+  setInterval(() => {
+    index = (index + 1) > (slides.length - visibleCount) ? 0 : index + 1;
+    updateSlider();
+  }, 3000);
 }
 
-function startAutoplay() { autoplayId = setInterval(() => {
-  index = (index + 1) > (slides.length - visibleCount) ? 0 : index + 1;
-  moveToIndex();
-}, 3000); }
-//offers section//
-async function loadOffers() {
-    const container = document.getElementById("offersContainer");
-    const criteriaModal = document.getElementById("criteriaModal");
-    const criteriaText = document.getElementById("criteriaText");
-    const criteriaTitle = document.getElementById("criteriaTitle");
-    const closeBtn = document.getElementById("closeCriteria");
-
-    if (!container) return;
-
-    try {
-        const snap = await getDocs(collection(db, "offers"));
-        container.innerHTML = ""; 
-
-        snap.forEach(docSnap => {
-            const offer = docSnap.data();
-            const card = document.createElement("div");
-            card.className = "offer-card";
-            
-            // Render the card UI
-            card.innerHTML = `
-                <img src="${offer.image}" alt="Icon" class="offer-img">
-                <div class="offer-info">
-                    <p>${offer.discount}</p>
-                    <h3>${offer.title}</h3>
-                </div>
-            `;
-
-            // ✅ CLICK EVENT: Show unique criteria for this specific card
-            card.addEventListener("click", () => {
-                criteriaTitle.innerText = `${offer.title} Rules`;
-                criteriaText.innerText = offer.criteria || "Standard terms apply. Check booking page for details.";
-                criteriaModal.classList.remove("hidden");
-            });
-
-            container.appendChild(card);
-        });
-
-        // Close modal logic
-        closeBtn.onclick = () => criteriaModal.classList.add("hidden");
-        
-    } catch (error) {
-        console.error("Error loading offers:", error);
-        container.innerHTML = "<p>Check back later for exclusive deals!</p>";
-    }
-}
 boot();

@@ -1,9 +1,11 @@
 // ===============================
-// 1. FIREBASE INIT
+// FIREBASE INIT
 // ===============================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+let myMap;
 
 const firebaseConfig = {
   apiKey: "AIzaSyDfP1XaMtkGuBeSrl4fRw-Zi3l7_5sPm_w",
@@ -19,13 +21,37 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // ===============================
-// 2. DOM ELEMENTS
+// DOM ELEMENTS
 // ===============================
 const accountBtn = document.getElementById("accountBtn");
 const accountMenu = document.getElementById("accountMenu");
+
+const loginBtn = document.getElementById("loginBtn");
+const signupBtn = document.getElementById("signupBtn");
+const profileBtn = document.getElementById("profileBtn");
+const settingsBtn = document.getElementById("settingsBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const drawer = document.getElementById("drawer");
 const hamburger = document.getElementById("hamburger");
-const drawerElement = document.querySelector(".drawer"); 
 const overlay = document.getElementById("overlay");
+
+const savedTrips = document.getElementById("savedTrips");
+const visitedTrips = document.getElementById("visitedTrips");
+
+const modal = document.getElementById("msgModal");
+const modalClose = document.getElementById("modalClose");
+const modalLogin = document.getElementById("modalLogin");
+
+const avatar = document.getElementById("userAvatar");
+const welcomeText = document.getElementById("drawerWelcome");
+
+// --- 2. CAROUSEL LOGIC ---
+const track = document.getElementById("carouselTrack");
+const container = document.querySelector(".carousel-container");
+const prevBtn = document.querySelector(".prev");
+const nextBtn = document.querySelector(".next");
+const dotsContainer = document.querySelector(".carousel-dots");
 
 // Chatbot Elements
 const chatbotTrigger = document.getElementById('chatbotTrigger');
@@ -35,56 +61,10 @@ const sendBtn = document.getElementById('sendChat');
 const chatMessages = document.getElementById('chatMessages');
 const closeChat = document.getElementById('closeChat');
 
-// Carousel Elements
-const track = document.getElementById("carouselTrack");
-const container = document.querySelector(".carousel-container");
-const prevBtn = document.querySelector(".prev");
-const nextBtn = document.querySelector(".next");
-const dotsContainer = document.querySelector(".carousel-dots");
-
 // ===============================
-// 3. SIDEBAR & NAVIGATION
-// ===============================
-hamburger.addEventListener("click", (e) => {
-  e.stopPropagation();
-  drawerElement.classList.add("open"); 
-  overlay.classList.add("show");       
-});
-
-function closeDrawer() {
-  drawerElement.classList.remove("open");
-  overlay.classList.remove("show");
-}
-
-overlay.addEventListener("click", closeDrawer);
-
-if (chatbotTrigger) {
-  chatbotTrigger.addEventListener('click', () => {
-    console.log("Chatbot opened");
-    chatWidget.classList.remove('hidden');
-    closeDrawer();
-    if (chatMessages.innerHTML.trim() === ""){
-      setTimeout(() => {
-        if(typeof addMessage === "function"){
-        addMessage("Hello! I'm your Pack & Plan assistant, ready to turn your 'someday' into a 'Saturday.' Where should we escape to first?")
-      }
-      },400)
-    }
-  });
-}
-  
-
-
-closeChat.addEventListener('click', () => {
-  chatWidget.classList.add('hidden');
-});
-
-// ===============================
-// 4. AUTH UI HANDLER
+// AUTH UI HANDLER
 // ===============================
 function updateUI(user) {
-  const avatar = document.getElementById("userAvatar");
-  const welcomeText = document.getElementById("drawerWelcome");
   const guestEls = document.querySelectorAll(".guest-only");
   const userEls = document.querySelectorAll(".user-only");
 
@@ -106,25 +86,37 @@ function updateUI(user) {
 onAuthStateChanged(auth, updateUI);
 
 // ===============================
-// 5. CHATBOT AI LOGIC (UPDATED)
+// CHATBOT LOGIC
 // ===============================
+chatInput?.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    sendBtn.click();
+  }
+});
+
 function addMessage(text, sender) {
   const msgDiv = document.createElement('div');
   msgDiv.classList.add('message', sender);
-  
-  if (sender === 'bot') {
-    // Use marked to parse the AI response and remove asterisks
-    // Ensure you added the marked.js script to your home.html
-    msgDiv.innerHTML = typeof marked !== 'undefined' ? marked.parse(text) : text;
-  } else {
-    msgDiv.textContent = text;
-  }
-  
+  msgDiv.innerHTML = (sender === 'bot' && typeof marked !== 'undefined') ? marked.parse(text) : text;
   chatMessages.appendChild(msgDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-sendBtn.addEventListener('click', async () => {
+if (chatbotTrigger) {
+  chatbotTrigger.addEventListener('click', () => {
+    chatWidget.classList.remove('hidden');
+    closeDrawer();
+    if (chatMessages.innerHTML.trim() === "") {
+      setTimeout(() => {
+        addMessage("Hello! I'm your Pack & Plan assistant! Where should we escape to first?", "bot");
+      }, 400);
+    }
+  });
+}
+closeChat?.addEventListener('click', () => chatWidget.classList.add('hidden'));
+
+sendBtn?.addEventListener('click', async () => {
   const userText = chatInput.value.trim();
   if (!userText) return;
 
@@ -134,28 +126,18 @@ sendBtn.addEventListener('click', async () => {
   const typingId = "typing-" + Date.now();
   const typingDiv = document.createElement('div');
   typingDiv.classList.add('message', 'bot');
-  typingDiv.id=typingId
-  typingDiv.innerHTML=`
-  <div class="typing-dots">
-  <span></span><span></span><span></span>
-  </div>
-  `;
+  typingDiv.id = typingId;
+  typingDiv.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div>`;
   chatMessages.appendChild(typingDiv);
-  chatMessages.scrollTop=chatMessages.scrollHeight;
 
   try {
-    const response = await fetch('http://localhost:5000/api/chat', {
+    const response = await fetch('https://packn-plan.vercel.app/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: userText })
     });
     const data = await response.json();
-    
-    // Remove the typing indicator
-    const indicator = document.getElementById(typingId);
-    if (indicator) indicator.remove();
-    
-    // Add the real parsed message
+    document.getElementById(typingId)?.remove();
     addMessage(data.reply, 'bot');
   } catch (error) {
     const indicator = document.getElementById(typingId);
@@ -163,41 +145,203 @@ sendBtn.addEventListener('click', async () => {
   }
 });
 
+// =========================================
+// SAVED TRIPS LOGIC
+// =========================================
+const savedModal = document.getElementById("savedTripsModal");
+const savedList = document.getElementById("savedTripsList");
+const closeSavedBtn = document.getElementById("closeSavedModal");
+
+if (savedTrips) {
+  savedTrips.addEventListener("click", async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      showLoginModal();
+      return;
+    }
+    closeDrawer();
+    savedModal.classList.remove("hidden");
+    savedList.innerHTML = `<p style="text-align:center; padding:20px;">Loading adventures... 🎒</p>`;
+
+    try {
+      const q = query(collection(db, "savedTrips"), where("userId", "==", user.uid));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        savedList.innerHTML = `<div style="text-align:center; padding:20px;"><h3>No saved trips yet</h3></div>`;
+        return;
+      }
+      savedList.innerHTML = "";
+      snap.forEach(doc => {
+        const trip = doc.data();
+        const card = document.createElement("div");
+        card.innerHTML = `
+          <div style="padding:15px; background:#f8f9fa; border-radius:10px; margin-bottom:10px; border-left:5px solid #0b74e7;">
+            <h4>📍 ${trip.city}</h4>
+            <p>${trip.days} Days</p>
+            <button onclick="window.location.href='itinerary.html?city=${encodeURIComponent(trip.city)}&days=${trip.days}'" style="background:#0b74e7; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">View Plan</button>
+          </div>`;
+        savedList.appendChild(card);
+      });
+    } catch (e) { console.error(e); }
+  });
+}
+
+// =========================================
+// VISITED TRIPS LOGIC
+// =========================================
+const visitedModal = document.getElementById("visitedTripsModal");
+const visitedList = document.getElementById("visitedTripsList");
+const closeVisitedBtn = document.getElementById("closeVisitedModal");
+
+if (visitedTrips) {
+  visitedTrips.addEventListener("click", () => {
+    if (!auth.currentUser) { showLoginModal(); return; }
+    closeDrawer();
+    visitedModal.classList.remove("hidden");
+    visitedList.innerHTML = `<div style="text-align:center; padding:20px;"><h3>No visited trips yet</h3></div>`;
+  });
+}
+
+// Close Modals
+closeSavedBtn?.addEventListener("click", () => savedModal.classList.add("hidden"));
+closeVisitedBtn?.addEventListener("click", () => visitedModal.classList.add("hidden"));
+window.addEventListener("click", (e) => {
+  if (e.target === savedModal) savedModal.classList.add("hidden");
+  if (e.target === visitedModal) visitedModal.classList.add("hidden");
+});
+
 // ===============================
-// 6. CAROUSEL LOGIC
+// MAP LOGIC
+// ===============================
+const mapsTrigger = document.getElementById('mapsTrigger');
+const mapSection = document.getElementById('mapSection');
+const pageWrapper = document.querySelector('.page-wrapper');
+const closeMapBtn = document.getElementById('closeMap');
+
+mapsTrigger?.addEventListener('click', () => {
+  pageWrapper.style.display = 'none';
+  mapSection.classList.remove('hidden');
+  mapSection.style.display = 'block';
+  closeDrawer();
+  if (!myMap) {
+    myMap = L.map('map', { zoomControl: false }).setView([20.5937, 78.9629], 5);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(myMap);
+    L.control.zoom({ position: 'bottomright' }).addTo(myMap);
+  }
+  setTimeout(() => { myMap.invalidateSize(); }, 50);
+});
+
+closeMapBtn?.addEventListener('click', () => {
+  mapSection.style.display = 'none';
+  pageWrapper.style.display = 'block';
+});
+
+// ===============================
+// UI HELPERS (DRAWER, TABS, ETC)
+// ===============================
+accountBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  accountMenu.classList.toggle("show");
+});
+
+document.addEventListener("click", (e) => {
+  if (!accountMenu.contains(e.target) && e.target !== accountBtn) accountMenu.classList.remove("show");
+});
+
+hamburger.addEventListener("click", (e) => {
+  e.stopPropagation();
+  drawer.classList.toggle("open");
+  overlay.classList.toggle("show");
+});
+
+function closeDrawer() {
+  drawer.classList.remove("open");
+  overlay.classList.remove("show");
+}
+overlay.addEventListener("click", closeDrawer);
+
+// Tab Logic
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+    tab.classList.add("active");
+    const target = document.getElementById(tab.getAttribute("data-for"));
+    if (target) target.style.display = "block";
+  });
+});
+
+// Login Modal
+function showLoginModal() { modal.classList.remove("hidden"); }
+function hideLoginModal() { modal.classList.add("hidden"); }
+modalClose.addEventListener("click", hideLoginModal);
+modalLogin.addEventListener("click", () => window.location.href = "login.html");
+
+// Nav Buttons
+loginBtn.onclick = () => window.location.href = "login.html";
+signupBtn.onclick = () => window.location.href = "signup.html";
+profileBtn.onclick = () => window.location.href = "profile.html";
+settingsBtn.onclick = () => window.location.href = "settings.html";
+logoutBtn.onclick = async () => {
+  await signOut(auth);
+  localStorage.clear();
+  window.location.reload();
+};
+
+// ===============================
+// SEARCH BAR LOGIC
+// ===============================
+document.querySelector("#itinerary .search-btn")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  const dest = document.querySelector("#itinerary input[placeholder='Destination']").value.trim();
+  const days = document.querySelector("#itinerary input[placeholder='Days']").value.trim();
+  if (dest && days) window.location.href = `itinerary.html?city=${encodeURIComponent(dest)}&days=${days}`;
+});
+
+// ===============================
+// CAROUSEL LOGIC
 // ===============================
 let slides = [];
 let index = 0;
 let visibleCount = 3;
 const GAP = 20;
 let slideWidth = 0;
+let autoplayId = null;
+
+function calcVisibleCount() {
+  const w = window.innerWidth;
+  return w > 900 ? 3 : w > 600 ? 2 : 1;
+}
 
 async function loadDestinations() {
   track.innerHTML = "";
   const snap = await getDocs(collection(db, "destinations"));
-  snap.forEach(doc => {
-    const d = doc.data();
+  snap.forEach(docSnap => {
+    const d = docSnap.data();
     const slide = document.createElement("div");
     slide.className = "carousel-slide";
-    slide.innerHTML = `<img src="${d.image}"><p>${d.name}</p>`;
+    slide.addEventListener("click", () => {
+      window.location.href = `destination-details.html?city=${encodeURIComponent(d.name)}&hero=${encodeURIComponent(d.image)}`;
+    });
+    slide.innerHTML = `<img src="${d.image}" alt="${d.name}"><p>${d.name}</p>`;
     track.appendChild(slide);
   });
   slides = Array.from(track.querySelectorAll(".carousel-slide"));
+  applySlideSizing();
+  buildDots();
 }
 
-function applySizing() {
-  const w = window.innerWidth;
-  visibleCount = w > 900 ? 3 : (w > 600 ? 2 : 1);
+function applySlideSizing() {
+  visibleCount = calcVisibleCount();
   slideWidth = Math.floor((container.clientWidth - (visibleCount - 1) * GAP) / visibleCount);
   slides.forEach((s, i) => {
     s.style.width = `${slideWidth}px`;
-    s.style.marginRight = i === slides.length - 1 ? "0px" : `${GAP}px`;
+    s.style.marginRight = (i === slides.length - 1) ? "0px" : `${GAP}px`;
   });
 }
 
-async function init() {
-  await loadDestinations();
-  applySizing();
+function buildDots() {
+  dotsContainer.innerHTML = "";
   const maxStart = Math.max(0, slides.length - visibleCount);
   for (let i = 0; i <= maxStart; i++) {
     const dot = document.createElement("span");
@@ -205,17 +349,73 @@ async function init() {
     dot.addEventListener("click", () => { index = i; moveToIndex(); });
     dotsContainer.appendChild(dot);
   }
+  updateDots();
+}
+
+function updateDots() {
+  const dots = dotsContainer.querySelectorAll(".dot");
+  dots.forEach((d, i) => d.classList.toggle("active", i === index));
 }
 
 function moveToIndex() {
   track.style.transform = `translateX(-${index * (slideWidth + GAP)}px)`;
+  updateDots();
 }
 
-init();
+async function boot() {
+  await loadDestinations();
+  await loadOffers(); 
+  startAutoplay();
+}
 
-// ===============================
-// 7. ACCOUNT MENU & BUTTONS
-// ===============================
-accountBtn.onclick = (e) => { e.stopPropagation(); accountMenu.classList.toggle("show"); };
-document.onclick = (e) => { if (!accountMenu.contains(e.target)) accountMenu.classList.remove("show"); };
-document.getElementById("logoutBtn").onclick = async () => { await signOut(auth); window.location.reload(); };
+function startAutoplay() { autoplayId = setInterval(() => {
+  index = (index + 1) > (slides.length - visibleCount) ? 0 : index + 1;
+  moveToIndex();
+}, 3000); }
+//offers section//
+async function loadOffers() {
+    const container = document.getElementById("offersContainer");
+    const criteriaModal = document.getElementById("criteriaModal");
+    const criteriaText = document.getElementById("criteriaText");
+    const criteriaTitle = document.getElementById("criteriaTitle");
+    const closeBtn = document.getElementById("closeCriteria");
+
+    if (!container) return;
+
+    try {
+        const snap = await getDocs(collection(db, "offers"));
+        container.innerHTML = ""; 
+
+        snap.forEach(docSnap => {
+            const offer = docSnap.data();
+            const card = document.createElement("div");
+            card.className = "offer-card";
+            
+            // Render the card UI
+            card.innerHTML = `
+                <img src="${offer.image}" alt="Icon" class="offer-img">
+                <div class="offer-info">
+                    <p>${offer.discount}</p>
+                    <h3>${offer.title}</h3>
+                </div>
+            `;
+
+            // ✅ CLICK EVENT: Show unique criteria for this specific card
+            card.addEventListener("click", () => {
+                criteriaTitle.innerText = `${offer.title} Rules`;
+                criteriaText.innerText = offer.criteria || "Standard terms apply. Check booking page for details.";
+                criteriaModal.classList.remove("hidden");
+            });
+
+            container.appendChild(card);
+        });
+
+        // Close modal logic
+        closeBtn.onclick = () => criteriaModal.classList.add("hidden");
+        
+    } catch (error) {
+        console.error("Error loading offers:", error);
+        container.innerHTML = "<p>Check back later for exclusive deals!</p>";
+    }
+}
+boot();
