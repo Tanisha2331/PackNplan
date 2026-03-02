@@ -24,6 +24,7 @@
   <button class="acct-option guest-only" id="signupBtn">Sign up</button>
       <!-- User options -->
       <button class="acct-option user-only hidden" id="profileBtn">Profile</button>
+      <button class="acct-option user-only hidden" id="myBookingsBtn">My Bookings</button>
       <button class="acct-option user-only hidden" id="settingsBtn">Settings</button>
       <button class="acct-option user-only hidden" id="logoutBtn">Logout</button>
     </div>
@@ -225,6 +226,16 @@
         <button id="closeCriteria" class="search-btn" style="width: 100%; border-radius: 8px;">Got it!</button>
     </div>
 </div>
+<div id="myBookingsModal" class="modal hidden">
+    <div class="modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 20px; border-bottom: 1px solid #eee;">
+            <h2 style="margin:0;">My Bookings 🎒</h2>
+            <button onclick="document.getElementById('myBookingsModal').classList.add('hidden')" style="background:none; border:none; font-size:2rem; cursor:pointer;">&times;</button>
+        </div>
+        <div id="bookingsList"></div>
+    </div>
+</div>
+<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script type="module" src="assets/js/home.js"></script>
 </body>

@@ -5,6 +5,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebas
 import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 import { addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+import { deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 let myMap;
 
 const firebaseConfig = {
@@ -15,7 +16,20 @@ const firebaseConfig = {
   messagingSenderId: "976654836537",
   appId: "1:976654836537:web:4d9b292611ccd5328b3ee8"
 };
+// Replace alert() with this modern toast
+window.showToast = (message) => {
+    const container = document.getElementById("toast-container");
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.innerText = message;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
+};
 
+// Replace confirm() with a cleaner check
+window.confirmAction = (msg, callback) => {
+    if (confirm(msg)) callback(); // You can build a custom modal for this later!
+};
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -43,6 +57,76 @@ window.initiateBooking = async (name, type) => {
     } catch (error) {
         console.error("Firebase Error:", error);
         alert("Booking failed. Please check your connection.");
+    }
+};
+
+
+// SEARCH REDIRECTION
+document.getElementById("hotelSearchBtn").onclick = (e) => {
+    e.preventDefault();
+    const city = document.getElementById("hotelCity").value;
+    const checkIn = document.getElementById("checkIn").value;
+    const guests = document.getElementById("guestSelect").value;
+    if (!city) return alert("Enter a city");
+    
+    window.location.href = `hotels.html?city=${city}&checkIn=${checkIn}&guests=${guests}`;
+};
+
+// GLOBAL VIEW BOOKINGS
+window.viewMyBookings = async () => {
+    const user = auth.currentUser;
+    if (!user) return window.showToast("Please login first!");
+
+    const list = document.getElementById("bookingsList");
+    const modal = document.getElementById("myBookingsModal");
+    
+    modal.classList.remove("hidden");
+    list.innerHTML = `<div style="text-align:center; padding:20px;">🔄 Loading your trips...</div>`;
+
+    try {
+        const q = query(collection(db, "bookings"), where("userId", "==", user.uid));
+        const snap = await getDocs(q);
+        list.innerHTML = "";
+
+        if (snap.empty) {
+            list.innerHTML = `<div style="text-align:center; padding:30px;">
+                <p style="font-size:3rem;">📭</p>
+                <p>No trips found. Time to book one!</p>
+            </div>`;
+            return;
+        }
+
+        snap.forEach(docSnap => {
+            const b = docSnap.data();
+            const card = document.createElement("div");
+            card.className = "booking-card";
+            
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:start;">
+                    <div>
+                        <span class="status-pill">Confirmed</span>
+                        <h4 style="margin:8px 0 2px 0; font-size:1.1rem;">${b.hotelName || b.itemName}</h4>
+                        <p style="margin:0; font-size:0.8rem; color:#777;">📅 Check-in: ${b.checkIn}</p>
+                    </div>
+                    <div style="text-align:right;">
+                        <p style="margin:0; font-weight:bold; color:#0b74e7;">₹${b.amount || '0'}</p>
+                    </div>
+                </div>
+                <div style="margin-top:15px; display:flex; gap:10px;">
+                    <button onclick="window.showToast('Voucher feature coming soon!')" 
+                            style="flex:1; background:#0b74e7; color:#fff; border:none; padding:8px; border-radius:6px; cursor:pointer; font-weight:600;">
+                        Download Ticket
+                    </button>
+                    <button onclick="window.confirmAction('Cancel this trip?', () => cancelBooking('${docSnap.id}'))" 
+                            style="flex:1; background:#fff; color:#ff4d4d; border:1px solid #ff4d4d; padding:8px; border-radius:6px; cursor:pointer;">
+                        Cancel
+                    </button>
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    } catch (e) {
+        window.showToast("Error loading bookings");
     }
 };
 // ===============================
@@ -102,7 +186,6 @@ function updateUI(user) {
   }
 }
 onAuthStateChanged(auth, updateUI);
-
 // ===============================
 // CHATBOT LOGIC
 // ===============================
@@ -466,5 +549,29 @@ async function boot() {
     updateSlider();
   }, 3000);
 }
-
+// This tells the "My Bookings" button to open the modal
+document.addEventListener('DOMContentLoaded', () => {
+    const myBookingsBtn = document.getElementById("myBookingsBtn");
+    if (myBookingsBtn) {
+        myBookingsBtn.onclick = (e) => {
+            e.preventDefault();
+            // This line closes your Account Menu so you can see the Modal
+            accountMenu.classList.remove("show"); 
+            // This line runs the function that gets your trips from Firebase
+            window.viewMyBookings();
+        };
+    }
+});
+//cancel booking
+window.cancelBooking = async (id) => {
+    if (!confirm("Are you sure you want to cancel this trip?")) return;
+    try {
+        await deleteDoc(doc(db, "bookings", id));
+        alert("Trip cancelled successfully.");
+        window.viewMyBookings(); // This refreshes the list automatically
+    } catch (e) {
+        console.error("Cancel failed:", e);
+        alert("Error cancelling booking.");
+    }
+};
 boot();

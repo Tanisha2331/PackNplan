@@ -627,6 +627,7 @@ body,html{
 /* 7. AUTOMATIC ICONS (CSS Magic) 
    This adds emojis before the text without changing HTML */
 #profileBtn::before  { content: "👤"; font-size: 16px; }
+#myBookingsBtn::before { content: "🎒"; font-size: 16px; }
 #settingsBtn::before { content: "⚙️"; font-size: 16px; }
 #logoutBtn::before   { content: "🚪"; font-size: 16px; }
 #loginBtn::before    { content: "🔑"; font-size: 16px; }
@@ -1110,4 +1111,78 @@ body,html{
 #savedTripsList::-webkit-scrollbar-thumb {
     background: #0b74e7;
     border-radius: 10px;
+}
+/* Modern Booking Cards */
+.booking-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-left: 5px solid #0b74e7;
+}
+
+.status-pill {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* Toast Notifications */
+.toast {
+    background: #333;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Fix the Modal Container */
+.modal-content {
+    max-height: 85vh; /* Limits height to 85% of the screen */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Keeps the header from scrolling away */
+    border-radius: 20px;
+    padding: 0 !important; /* We will use padding on inner elements instead */
+}
+
+/* Fix the Header */
+.modal-content h2 {
+    padding: 20px;
+    margin: 0;
+    border-bottom: 1px solid #eee;
+    background: #fff;
+}
+
+/* Fix the Scrollable List */
+#bookingsList {
+    flex-grow: 1;
+    overflow-y: auto; /* This adds the scrollbar only when needed */
+    padding: 20px;
+    background: #fcfcfc;
+}
+
+/* Design a Modern Scrollbar */
+#bookingsList::-webkit-scrollbar {
+    width: 8px;
+}
+#bookingsList::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+#bookingsList::-webkit-scrollbar-thumb {
+    background: #0b74e7; /* Matches your theme blue */
+    border-radius: 10px;
+}
+#bookingsList::-webkit-scrollbar-thumb:hover {
+    background: #0856ab;
+}
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
 }
