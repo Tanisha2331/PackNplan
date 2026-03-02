@@ -164,44 +164,73 @@ sendBtn?.addEventListener('click', async () => {
 });
 
 // =========================================
-// SAVED TRIPS LOGIC
+// SAVED TRIPS LOGIC (With Delete & Scroll)
 // =========================================
 const savedModal = document.getElementById("savedTripsModal");
 const savedList = document.getElementById("savedTripsList");
 const closeSavedBtn = document.getElementById("closeSavedModal");
 
-if (savedTrips) {
-  savedTrips.addEventListener("click", async () => {
-    const user = auth.currentUser;
-    if (!user) {
-      showLoginModal();
-      return;
-    }
-    closeDrawer();
-    savedModal.classList.remove("hidden");
-    savedList.innerHTML = `<p style="text-align:center; padding:20px;">Loading adventures... 🎒</p>`;
-
+// Global function to handle deletion
+window.deleteTrip = async (docId) => {
+    if (!confirm("Are you sure you want to remove this trip?")) return;
+    
     try {
-      const q = query(collection(db, "savedTrips"), where("userId", "==", user.uid));
-      const snap = await getDocs(q);
-      if (snap.empty) {
-        savedList.innerHTML = `<div style="text-align:center; padding:20px;"><h3>No saved trips yet</h3></div>`;
-        return;
-      }
-      savedList.innerHTML = "";
-      snap.forEach(doc => {
-        const trip = doc.data();
-        const card = document.createElement("div");
-        card.innerHTML = `
-          <div style="padding:15px; background:#f8f9fa; border-radius:10px; margin-bottom:10px; border-left:5px solid #0b74e7;">
-            <h4>📍 ${trip.city}</h4>
-            <p>${trip.days} Days</p>
-            <button onclick="window.location.href='itinerary.html?city=${encodeURIComponent(trip.city)}&days=${trip.days}'" style="background:#0b74e7; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">View Plan</button>
-          </div>`;
-        savedList.appendChild(card);
-      });
-    } catch (e) { console.error(e); }
-  });
+        const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js");
+        await deleteDoc(doc(db, "savedTrips", docId));
+        
+        // Refresh the list immediately after deleting
+        savedTrips.click(); 
+    } catch (e) {
+        console.error("Delete failed:", e);
+        alert("Error deleting trip.");
+    }
+};
+
+if (savedTrips) {
+    savedTrips.addEventListener("click", async () => {
+        const user = auth.currentUser;
+        if (!user) { showLoginModal(); return; }
+        
+        closeDrawer();
+        savedModal.classList.remove("hidden");
+        savedList.innerHTML = `<p style="text-align:center; padding:20px;">Loading adventures... 🎒</p>`;
+
+        try {
+            const q = query(collection(db, "savedTrips"), where("userId", "==", user.uid));
+            const snap = await getDocs(q);
+            
+            if (snap.empty) {
+                savedList.innerHTML = `<div style="text-align:center; padding:20px;"><h3>No saved trips yet</h3></div>`;
+                return;
+            }
+            
+            savedList.innerHTML = "";
+            snap.forEach(docSnap => {
+                const trip = docSnap.data();
+                const tripId = docSnap.id;
+                const card = document.createElement("div");
+                
+                card.innerHTML = `
+                  <div style="padding:15px; background:#f8f9fa; border-radius:10px; margin-bottom:12px; border-left:5px solid #0b74e7; position:relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                    <h4 style="margin:0 0 5px 0;">📍 ${trip.city}</h4>
+                    <p style="margin:0 0 10px 0; color:#666; font-size:0.9rem;">${trip.days} Days</p>
+                    
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="window.location.href='itinerary.html?city=${encodeURIComponent(trip.city)}&days=${trip.days}'" 
+                                style="background:#0b74e7; color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer; font-size:0.85rem;">
+                            View Plan
+                        </button>
+                        
+                        <button onclick="deleteTrip('${tripId}')" 
+                                style="background:#ff4d4d; color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer; font-size:0.85rem;">
+                            Delete
+                        </button>
+                    </div>
+                  </div>`;
+                savedList.appendChild(card);
+            });
+        } catch (e) { console.error(e); }
+    });
 }
 
 // =========================================
@@ -219,7 +248,13 @@ if (visitedTrips) {
     visitedList.innerHTML = `<div style="text-align:center; padding:20px;"><h3>No visited trips yet</h3></div>`;
   });
 }
-
+// Close Modals
+closeSavedBtn?.addEventListener("click", () => savedModal.classList.add("hidden"));
+closeVisitedBtn?.addEventListener("click", () => visitedModal.classList.add("hidden"));
+window.addEventListener("click", (e) => {
+  if (e.target === savedModal) savedModal.classList.add("hidden");
+  if (e.target === visitedModal) visitedModal.classList.add("hidden");
+});
 // ===============================
 // MAP LOGIC
 // ===============================

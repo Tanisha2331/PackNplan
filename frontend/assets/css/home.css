@@ -1086,3 +1086,28 @@ body,html{
     font-weight: bold;
     margin-bottom: 15px;
 }
+/* Ensure the modal content doesn't grow off-screen */
+#savedTripsModal .modal-content {
+    max-height: 80vh; /* Modal takes up max 80% of screen height */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Make the list area scrollable */
+#savedTripsList {
+    overflow-y: auto; /* Enable vertical scroll */
+    padding-right: 10px; /* Space for scrollbar */
+    max-height: 400px; /* Fixed height for the list area */
+}
+
+/* Custom Scrollbar for a cleaner look */
+#savedTripsList::-webkit-scrollbar {
+    width: 6px;
+}
+#savedTripsList::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+#savedTripsList::-webkit-scrollbar-thumb {
+    background: #0b74e7;
+    border-radius: 10px;
+}
