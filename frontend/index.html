@@ -86,17 +86,17 @@
          <!-- HOTELS -->
         <form class="tab-panel active" id="hotels">
           <div class="field-row">
-            <input type="text" placeholder="City" class="field mid">
+            <input type="text" id="hotelCity" placeholder="City" class="field mid">
             <div class="date-group">
-            <input type="text" placeholder="Check-in" onfocus="(this.type='date')" class="field short">
-            <input type="text" placeholder="Check-out" onfocus="(this.type='date')" class="field short">
+            <input type="text" id="checkIn" placeholder="Check-in" onfocus="(this.type='date')" class="field short">
+            <input type="text" id="checkOut" placeholder="Check-out" onfocus="(this.type='date')" class="field short">
         </div>
-        <select class="field short">
+        <select id="guestSelect"class="field short">
             <option>2 Guests, 1 Room</option>
             <option>1 Guest, 1 Room</option>
             <option>Family (2 Adults, 2 Kids)</option>
         </select>
-        <button class="search-btn">Search Hotels</button>
+        <button type="button" id="hotelSearchBtn"class="search-btn">Search Hotels</button>
       </div>
     </form>
         <!-- TRANSPORT -->

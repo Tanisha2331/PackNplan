@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pack & Plan — Book Hotels</title>
+    <link rel="stylesheet" href="assets/css/hotels.css">
+</head>
+<body>
+    <header class="hotel-header">
+        <button onclick="window.location.href='index.html'" class="back-btn">← Back to home</button>
+        <h1 id="headerCity">Find a Place to Stay</h1>
+    </header>
+
+    <main class="container">
+        <div id="hotelGrid" class="hotel-grid">
+            <div class="loader">Searching for the best stays... 🏨</div>
+        </div>
+    </main>
+
+    <div id="bookingModal" class="modal hidden">
+    <div class="modal-content" id="modalContainer">
+        <div id="step1">
+    <h2 id="modalHotelName">Hotel Name</h2>
+    
+    <div style="background: #f0f7ff; padding: 12px; border-radius: 8px; margin: 15px 0; font-size: 0.9rem; border: 1px solid #d0e4ff;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <span>📅 <strong>Check-in:</strong></span>
+            <span id="summaryCheckIn">--/--/----</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span>👥 <strong>Guests:</strong></span>
+            <span id="summaryGuests">2 Guests</span>
+        </div>
+    </div>
+    <div class="input-group">
+        <label>Full Name</label>
+        <input type="text" id="guestName" placeholder="Enter guest name" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px;">
+    </div>
+
+    <div class="input-group">
+        <label>Email Address</label>
+        <input type="email" id="guestEmail" placeholder="email@example.com" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px;">
+    </div>
+
+    <div class="input-group">
+        <label>Phone Number</label>
+      <input type="text" 
+           id="guestPhone" 
+           inputmode="numeric"
+           placeholder="10-digit mobile number" 
+           oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
+           maxlength="10"
+           style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px;">
+    <button id="goToPayment" class="book-btn">Proceed to Payment</button>
+    <button id="closeModal" style="background:none; border:none; color:#777; width:100%; margin-top:10px; cursor:pointer;">Cancel</button>
+</div>
+
+        <div id="step2" class="hidden">
+            <h3 style="margin-top:0;">Secure Payment</h3>
+            <p style="font-size:0.8rem; color:#444;">Total Amount: <strong id="payAmount">₹0</strong></p>
+            
+            <div class="input-group">
+                <label>Card Number</label>
+                <input type="text" placeholder="xxxx xxxx xxxx 4242" maxlength="19">
+            </div>
+            <div style="display:flex; gap:10px;">
+                <div class="input-group">
+                    <label>Expiry</label>
+                    <input type="text" placeholder="MM/YY" maxlength="5">
+                </div>
+                <div class="input-group">
+                    <label>CVV</label>
+                    <input type="password" placeholder="***" maxlength="3">
+                </div>
+            </div>
+            <button id="confirmFinalBooking" class="book-btn">Pay & Confirm</button>
+            <button id="backToStep1" style="background:none; border:none; color:#777; width:100%; margin-top:10px; cursor:pointer;">Back</button>
+        </div>
+    </div>
+</div>
+
+    <script type="module" src="assets/js/hotels.js"></script>
+</body>
+</html>

@@ -280,7 +280,35 @@ closeMapBtn?.addEventListener('click', () => {
   mapSection.style.display = 'none';
   pageWrapper.style.display = 'block';
 });
+// ==========================================
+// HOTEL SEARCH REDIRECTION LOGIC
+// ==========================================
+document.getElementById("hotelSearchBtn").onclick = function(e) {
+    // Prevent form from reloading the page
+    e.preventDefault();
 
+    const city = document.getElementById("hotelCity").value;
+    const checkIn = document.getElementById("checkIn").value;
+    const checkOut = document.getElementById("checkOut").value;
+    const guests = document.getElementById("guestSelect").value;
+
+    // Basic validation
+    if (!city) {
+        alert("Please enter a city to search for hotels!");
+        return;
+    }
+
+    // Build the URL with parameters
+    const queryParams = new URLSearchParams({
+        city: city,
+        checkIn: checkIn,
+        checkOut: checkOut,
+        guests: guests
+    });
+
+    // Redirect to your dedicated hotels page
+    window.location.href = `hotels.html?${queryParams.toString()}`;
+};
 // ===============================
 // UI HELPERS
 // ===============================
