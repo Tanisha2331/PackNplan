@@ -123,7 +123,21 @@
             margin-bottom: 10px;
             font-weight: 600;
         }
-
+.book-btn {
+    background: #0b74e7;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 15px;
+    width: 100%;
+    transition: background 0.3s;
+}
+.book-btn:hover {
+    background: #085bb5;
+}
         /* Loading State */
         .loading { text-align: center; padding: 40px; color: #777; font-size: 1.1rem; }
     </style>
@@ -151,7 +165,7 @@
             <div class="loading">Loading attractions...</div>
         </div>
     </div>
-        <script>
+        <script type="module">
         // =========================================================
         // 🛑 PASTE YOUR API KEY BELOW
         // =========================================================
@@ -217,6 +231,7 @@
             }
 
             data.features.forEach(place => {
+                const type = typeLabel; // 'Stay' or 'Attraction'
                 const props = place.properties;
                 const name = props.name;
                 
@@ -226,21 +241,71 @@
                     const randomImg = `https://loremflickr.com/300/200/${searchKeyword}?lock=${Math.random()}`;
 
                     const address = props.address_line2 || props.formatted || "Address unavailable";
-
+                    const placeName = name.replace(/'/g, "\\'");
+                    
                     container.innerHTML += `
                         <div class="card">
                             <div class="card-img">
-                                <img src="${randomImg}" alt="${name}" loading="lazy">
+                                <img src="${randomImg}" alt="${placeName}" loading="lazy">
                             </div>
                             <div class="card-body">
                                 <span class="card-badge">${typeLabel}</span>
                                 <h4>${name}</h4>
                                 <p>📍 ${address}</p>
+                                <button class="book-btn" onclick="initiateBooking('${placeName}', '${typeLabel}')">
+                                    Book ${typeLabel}
+                                </button>
                             </div>
                         </div>`;
                 }
             });
         }
+        // =========================================================
+// 🚀 INTERNAL BOOKING LOGIC
+// =========================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDfP1XaMtkGuBeSrl4fRw-Zi3l7_5sPm_w",
+    authDomain: "packnplan-3312d.firebaseapp.com",
+    projectId: "packnplan-3312d",
+    storageBucket: "packnplan-3312d.firebasestorage.app",
+    messagingSenderId: "976654836537",
+    appId: "1:976654836537:web:4d9b292611ccd5328b3ee8"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+window.initiateBooking = async (name, type) => {
+        const user = auth.currentUser;
+
+        if (!user) {
+            alert("Please login to book this trip!");
+            window.location.href = "login.html"; // Redirect to login if not signed in
+            return;
+        }
+
+        try {
+            // This creates the 'bookings' collection automatically if it doesn't exist
+            await addDoc(collection(db, "bookings"), {
+                userId: user.uid,
+                userName: user.displayName || user.email,
+                itemName: name,
+                itemType: type,
+                status: "Reserved",
+                timestamp: serverTimestamp()
+            });
+
+            alert(`✅ Success! ${name} has been added to your planned trips.`);
+        } catch (error) {
+            console.error("Error saving booking:", error);
+            alert("Something went wrong. Please try again.");
+        }
+    };
     </script>
 </body>
 </html>

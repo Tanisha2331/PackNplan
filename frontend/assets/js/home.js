@@ -4,7 +4,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
 import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
-
+import { addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 let myMap;
 
 const firebaseConfig = {
@@ -20,18 +20,31 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// =========================================
-// 🚀 NEW: DYNAMIC BOOKING HANDLER
-// =========================================
-window.initiateBooking = (url) => {
+window.initiateBooking = async (name, type) => {
     const user = auth.currentUser;
+    // 1. Check if user is logged in
     if (!user) {
-        showLoginModal(); //
+        showLoginModal(); 
         return;
     }
-    window.open(url, '_blank'); //
+    try {
+        // 2. Save the booking to YOUR "bookings" collection
+        const docRef = await addDoc(collection(db, "bookings"), {
+            userId: user.uid,
+            userEmail: user.email,
+            itemName: name,       // The name of the hotel/attraction
+            itemType: type,       // 'Stay' or 'Attraction'
+            status: "Reserved",    // You can change this to "Confirmed" later
+            bookingDate: serverTimestamp()
+        });
+        // 3. Give the user feedback on YOUR site
+        alert(` Success! Your trip to ${name} has been reserved. View it in your profile.`);
+        console.log("Booking saved with ID: ", docRef.id);
+    } catch (error) {
+        console.error("Firebase Error:", error);
+        alert("Booking failed. Please check your connection.");
+    }
 };
-
 // ===============================
 // DOM ELEMENTS
 // ===============================
@@ -311,7 +324,7 @@ async function loadDestinations() {
     // ✅ DYNAMIC BOOKING LOGIC FOR ATTRACTIONS
     slide.addEventListener("click", () => {
       if (d.bookingUrl) {
-          window.initiateBooking(d.bookingUrl);
+          window.initiateBooking(d.name, 'Attraction');
       } else {
           window.location.href = `destination-details.html?city=${encodeURIComponent(d.name)}&hero=${encodeURIComponent(d.image)}`;
       }
