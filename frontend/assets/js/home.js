@@ -383,19 +383,17 @@ async function loadOffers() {
 
         snap.forEach(docSnap => {
             const offer = docSnap.data();
-            
-            // ✅ FIX: Check if offer.image exists, otherwise use a fallback icon
             const imageUrl = offer.image || "https://cdn-icons-png.flaticon.com/512/1162/1162250.png";
 
             const card = document.createElement("div");
             card.className = "offer-card";
             
+            // ✅ Removed button and fixed the "discount" text
             card.innerHTML = `
                 <img src="${imageUrl}" alt="Offer Icon" class="offer-img">
                 <div class="offer-info">
-                    <p>${offer.discount || "Special"} off</p>
-                    <h3>${offer.title || "Limited Deal"}</h3>
-                    <button class="claim-btn">${offer.buttonText || 'Claim All'}</button>
+                    <p>${offer.discount}</p>
+                    <h3>${offer.title}</h3>
                 </div>
             `;
             container.appendChild(card);
