@@ -364,7 +364,7 @@ function moveToIndex() {
 
 async function boot() {
   await loadDestinations();
-  await loadOffers(); // <--- ADD THIS LINE
+  await loadOffers(); 
   startAutoplay();
 }
 
@@ -375,6 +375,11 @@ function startAutoplay() { autoplayId = setInterval(() => {
 //offers section//
 async function loadOffers() {
     const container = document.getElementById("offersContainer");
+    const criteriaModal = document.getElementById("criteriaModal");
+    const criteriaText = document.getElementById("criteriaText");
+    const criteriaTitle = document.getElementById("criteriaTitle");
+    const closeBtn = document.getElementById("closeCriteria");
+
     if (!container) return;
 
     try {
@@ -383,21 +388,31 @@ async function loadOffers() {
 
         snap.forEach(docSnap => {
             const offer = docSnap.data();
-            const imageUrl = offer.image || "https://cdn-icons-png.flaticon.com/512/1162/1162250.png";
-
             const card = document.createElement("div");
             card.className = "offer-card";
             
-            // ✅ Removed button and fixed the "discount" text
+            // Render the card UI
             card.innerHTML = `
-                <img src="${imageUrl}" alt="Offer Icon" class="offer-img">
+                <img src="${offer.image}" alt="Icon" class="offer-img">
                 <div class="offer-info">
                     <p>${offer.discount}</p>
                     <h3>${offer.title}</h3>
                 </div>
             `;
+
+            // ✅ CLICK EVENT: Show unique criteria for this specific card
+            card.addEventListener("click", () => {
+                criteriaTitle.innerText = `${offer.title} Rules`;
+                criteriaText.innerText = offer.criteria || "Standard terms apply. Check booking page for details.";
+                criteriaModal.classList.remove("hidden");
+            });
+
             container.appendChild(card);
         });
+
+        // Close modal logic
+        closeBtn.onclick = () => criteriaModal.classList.add("hidden");
+        
     } catch (error) {
         console.error("Error loading offers:", error);
         container.innerHTML = "<p>Check back later for exclusive deals!</p>";

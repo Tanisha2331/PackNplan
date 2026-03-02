@@ -1024,8 +1024,8 @@ body,html{
 .offer-card {
     transition: all 0.3s ease; /* Smooth transition for all properties */
     cursor: pointer;
+    user-select: none;
 }
-
 .offer-card:hover {
     transform: translateY(-5px); /* Lifts the ticket up slightly */
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); /* Deepens the shadow */
