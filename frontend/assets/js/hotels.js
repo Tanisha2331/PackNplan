@@ -20,6 +20,7 @@ const API_KEY = "1158d45a31c54d4fa492f618703b1f7f";
 const urlParams = new URLSearchParams(window.location.search);
 const city = urlParams.get('city') || "Mumbai";
 const searchedCheckIn = urlParams.get('checkIn') || "2026-03-04";
+const searchedCheckOut = urlParams.get('checkOut') || "2026-03-05";
 const searchedGuests = urlParams.get('guests') || "2";
 
 let selectedHotel = null;
@@ -138,11 +139,15 @@ function showSuccessVoucher() {
     const container = document.getElementById("modalMainContent");
     const bookingId = "PNP-" + Math.random().toString(36).substr(2, 7).toUpperCase();
     
+    // Grabbing the details for the ticket
+    const gName = document.getElementById("guestName").value;
+    const gPhone = document.getElementById("guestPhone").value;
+
     container.innerHTML = `
         <div style="text-align:center; padding:30px;">
             <div class="success-check">✔</div>
             <h2 style="color:var(--text-main); margin-bottom:5px;">Booking Confirmed!</h2>
-            <p style="color:var(--text-muted); font-size:0.9rem;">Pack your bags, ${document.getElementById("guestName").value}!</p>
+            <p style="color:var(--text-muted); font-size:0.9rem;">Confirmation sent to ${gName}</p>
             
             <div class="voucher-card">
                 <div class="voucher-header">
@@ -152,9 +157,13 @@ function showSuccessVoucher() {
                 <div class="voucher-body">
                     <h3>${selectedHotel.name}</h3>
                     <div class="voucher-info">
-                        <div><strong>Check-in:</strong> ${searchedCheckIn}</div>
-                        <div><strong>Guests:</strong> ${searchedGuests}</div>
-                        <div><strong>Paid:</strong> ₹${selectedHotelPrice}</div>
+                        <div><strong>Guest:</strong> ${gName} (${gPhone})</div>
+                        <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                            <span><strong>Check-in:</strong> ${searchedCheckIn}</span>
+                            <span><strong>Check-out:</strong> ${searchedCheckOut}</span>
+                        </div>
+                        <div style="margin-top:5px;"><strong>Guests:</strong> ${searchedGuests} People</div>
+                        <div style="margin-top:5px;"><strong>Total Paid:</strong> ₹${selectedHotelPrice}</div>
                     </div>
                 </div>
             </div>

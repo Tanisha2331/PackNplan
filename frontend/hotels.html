@@ -70,17 +70,22 @@
 
                     <div class="input-block">
                         <label>Card Number</label>
-                        <input type="text" placeholder="xxxx xxxx xxxx xxxx" maxlength="19">
+                       <input type="text" id="cardNumber" placeholder="xxxx xxxx xxxx xxxx" 
+                            maxlength="19" inputmode="numeric" 
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                     </div>
 
                     <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                         <div style="flex: 1;">
                             <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 5px;">Expiry</label>
-                            <input type="text" placeholder="MM/YY" maxlength="5" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border-clr);">
+                            <input type="text" id="cardExpiry"placeholder="MM/YY" maxlength="5" inputmode="numeric"
+                            style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border-clr);">
                         </div>
                         <div style="flex: 1;">
                             <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 5px;">CVV</label>
-                            <input type="password" placeholder="***" maxlength="3" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border-clr);">
+                            <input type="password" placeholder="***" maxlength="3"
+                            inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                            style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border-clr);">
                         </div>
                     </div>
 
