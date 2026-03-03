@@ -3,6 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+    // This runs BEFORE the page even draws, preventing a "white flash"
+    (function() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+        }
+    })();
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script type="text/javascript">
+   (function(){
+      emailjs.init("53BVm2o9NncGGbxho"); // Replace with your actual key
+   })();
+</script>
     <link rel="stylesheet" href="assets/css/settings.css">
     <title>Settings</title>
 </head>
@@ -14,42 +29,58 @@
         <img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" class="title-icon">
         Settings
     </h2>
-
     <div class="settings-list">
-
-        <div class="setting-option">
-            <h3>Account</h3>
-            <p>Update your profile details and login information.</p>
+        <div class="setting-option" id="account-opt" style="cursor: pointer;">
+            <h3 class="lang-account-title">Account</h3>
+            <p class="lang-account-desc">Update your traveler profile name.</p>
         </div>
-
-        <div class="setting-option">
-            <h3>Privacy & Security</h3>
-            <p>Manage passwords, permissions, and safety.</p>
+    <div class="setting-option" id="privacy-opt" style="cursor: pointer;">
+        <div class="option-info">
+            <h3 class="lang-privacy-title">Privacy & Security</h3>
+            <p class="lang-privacy-desc">Add an extra layer of security to your account.</p>
         </div>
-
-        <div class="setting-option">
-            <h3>Notifications</h3>
-            <p>Control alerts, reminders, and updates.</p>
+</div>
+    <div class="setting-option toggle-row">
+    <div class="option-info">
+        <h3>Dark Mode</h3>
+        <p>Switch between light and dark themes.</p>
+    </div>
+    <label class="switch">
+        <input type="checkbox" id="appearance-toggle">
+        <span class="slider round"></span>
+    </label>
+</div>
+   <div class="setting-option toggle-row" id="language-option">
+        <div class="option-info">
+            <h3 class="lang-language-title">Language</h3>
+            <p class="lang-language-desc">Choose your language.</p>
         </div>
-
-        <div class="setting-option">
-            <h3>Appearance</h3>
-            <p>Customize themes and brightness.</p>
+        <div class="language-buttons">
+            <button onclick="changeLanguageManual('en')" class="lang-btn">English</button>
+            <button onclick="changeLanguageManual('hi')" class="lang-btn">हिन्दी</button>
         </div>
-
-        <div class="setting-option">
-            <h3>Language</h3>
-            <p>Select your preferred language.</p>
-        </div>
-
-        <div class="setting-option">
+    </div>
+</div>
+<div class="setting-option">
             <h3>Help & Support</h3>
             <p>Get help or contact customer support.</p>
         </div>
-
-    </div>
-
 </div>
+<div id="twoFactorModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>Two-Factor Security</h2>
+        <p id="2fa-msg">Enter your email to receive a code.</p>
+        
+        <input type="email" id="user-email" placeholder="yourname@gmail.com" style="width: 80%; padding: 10px; margin-bottom: 10px;">
+        <input type="text" id="otp-input" placeholder="Enter Code" maxlength="6" style="display:none; width: 80%; padding: 10px; margin-bottom: 10px; text-align: center;">
 
+        <div class="status-box">
+            <button id="send-email-btn">Send Code</button>
+            <button id="verify-btn" style="display:none; background-color: #4CAF50; color: white;">Verify & Enable</button>
+        </div>
+    </div>
+</div>
+<script src="assets/js/settings.js"></script>
 </body>
 </html>

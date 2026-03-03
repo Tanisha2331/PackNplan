@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Pack & Plan — Home</title>
   <link rel="stylesheet" href="assets/css/home.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' rel='stylesheet' />  
+  <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
 </head>
 <body>
   <header class="topbar">
@@ -53,17 +53,23 @@
   <div id="overlay" class="overlay" tabindex="-1"></div>
   <!-- Everything wrapped inside #content -->
   <main id="content" class="page-content">
-     <section id="mapSection" class="page-section hidden" style="padding: 30px 20px; background: white; margin: 0; min-height: 100vh;">
-      <div class="section-header" style="display: flex; flex-direction: column; align-items: flex-start; gap: 15px; margin-bottom: 20px;">
-        <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-size: 2rem; width: 100%; white-space: nowrap;">
-        Explore the World
-        </h2>
-        <button id="closeMap" style="background: #0b74e7; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; z-index: 1001; transition: transform 0.2s;">
-        ← Back to Search
-        </button>
-      </div>
-      <div id="map" style="height: 600px; width: 100%; border-radius: 15px; border: 2px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.05);"></div>
-    </section>
+      <!-- map section -->
+      <section id="mapSection" class="page-section hidden" style="padding: 30px 20px; background: white; margin: 0; min-height: 100vh;">
+  <button id="resetMap" style="position: absolute; bottom: 30px; right: 20px; z-index: 1000; background: white; border: none; padding: 10px; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); width: 45px; height: 45px;">
+  🇮🇳
+</button>
+  <div class="section-header" style="display: flex; flex-direction: column; align-items: flex-start; gap: 15px; margin-bottom: 20px;">
+    
+    <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-size: 2rem; width: 100%; white-space: nowrap;">
+      Explore the World
+    </h2>
+    <button id="closeMap" style="background: #0b74e7; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; z-index: 1001; transition: transform 0.2s;">
+      ← Back to Search
+    </button>
+  </div>
+
+  <div id="map" style="height: 600px; width: 100%; border-radius: 15px; border: 2px solid #eee; box-shadow: 0 4px 15px rgba(0,0,0,0.05);"></div>
+</section>
 <div class="page-wrapper">
     <!-- VIDEO SECTION -->
     <div class="video-container">

@@ -1,3 +1,31 @@
+// --- 1. Global Variables & Theme Sync ---
+const MAPTILER_KEY = '4G7v9b1O1Y7yMoUxDgSM'; 
+let myMap; // Declare map variable globally
+
+function syncTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const root = document.documentElement;
+
+    if (savedTheme === 'dark') {
+        root.classList.add('dark-mode');
+        // Only update style if map is initialized AND loaded
+        if (myMap && myMap.loaded()) {
+            myMap.setStyle(`https://api.maptiler.com/maps/chapt-dark/style.json?key=${MAPTILER_KEY}`);
+        }
+    } else {
+        root.classList.remove('dark-mode');
+        if (myMap && myMap.loaded()) {
+            myMap.setStyle(`https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`);
+        }
+    }
+}
+
+// RUN IMMEDIATELY (Add this line right here)
+syncTheme();
+
+// Force check when returning from Settings
+window.addEventListener('pageshow', syncTheme);
+
 // ===============================
 // FIREBASE INIT
 // ===============================
@@ -5,7 +33,40 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebas
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut,sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
-let myMap;
+const famousPlaces = [
+  { name: "Taj Mahal", coords: [27.1751, 78.0421], desc: "Agra, Uttar Pradesh" },
+  { name: "Munnar Tea Gardens", coords: [10.0889, 77.0595], desc: "Munnar, Kerala" },
+  { name: "Golden Temple", coords: [31.6200, 74.8765], desc: "Amritsar, Punjab" },
+  { name: "Hawa Mahal", coords: [26.9239, 75.8267], desc: "Jaipur, Rajasthan" },
+  { name: "Gateway of India", coords: [18.9220, 72.8347], desc: "Mumbai, Maharashtra" },
+  { name: "Meenakshi Temple", coords: [9.9195, 78.1193], desc: "Madurai, Tamil Nadu" },
+  { name: "Victoria Memorial", coords: [22.5448, 88.3426], desc: "Kolkata, West Bengal" },
+  { name: "Qutub Minar", coords: [28.5245, 77.1855], desc: "Delhi" },
+  { name: "Varanasi Ghats", coords: [25.3176, 83.0062], desc: "Varanasi - The oldest living city on Earth." },
+  { name: "Mysore Palace", coords: [12.3052, 76.6552], desc: "Mysore - A masterpiece of Indo-Saracenic architecture." },
+  { name: "Hampi Ruins", coords: [15.3350, 76.4600], desc: "Hampi - UNESCO world heritage boulder-strewn landscape." },
+  { name: "Sri Harmandir Sahib", coords: [31.6200, 74.8765], desc: "Amritsar - The Golden Temple." },
+  { name: "Red Fort", coords: [28.6562, 77.2410], desc: "Delhi - The iconic Mughal residence." },
+  { name: "India Gate", coords: [28.6129, 77.2295], desc: "Delhi - The war memorial archway." },
+  { name: "Taj Mahal", coords: [27.1751, 78.0421], desc: "Agra - The white marble masterpiece." },
+  { name: "Amber Palace", coords: [26.9855, 75.8513], desc: "Jaipur - The majestic hilltop fort." },
+  { name: "Mehrangarh Fort", coords: [26.2981, 73.0189], desc: "Jodhpur - One of the largest forts in India." },
+  { name: "Statue of Unity", coords: [21.8380, 73.7191], desc: "Gujarat - The world's tallest statue." },
+  { name: "Ellora Caves", coords: [20.0258, 75.1780], desc: "Maharashtra - Ancient rock-cut temples." },
+  { name: "Charminar", coords: [17.3616, 78.4747], desc: "Hyderabad - The four-minaret monument." },
+  { name: "Mysore Palace", coords: [12.3052, 76.6552], desc: "Mysore - A palace of 97,000 lightbulbs." },
+  { name: "Marine Drive", coords: [18.9431, 72.8230], desc: "The Queen's Necklace - Mumbai’s iconic seaside promenade." },
+    { name: "Hanging Gardens", coords: [18.9564, 72.8055], desc: "Terraced gardens perched atop Malabar Hill." },
+    { name: "Haji Ali Dargah", coords: [18.9827, 72.8089], desc: "The stunning mosque and tomb located in the middle of the sea." },
+    { name: "Jehangir Art Gallery", coords: [18.9274, 72.8317], desc: "The center of Mumbai's vibrant art scene." },
+    { name: "Shree Siddhivinayak Temple", coords: [19.0170, 72.8302], desc: "The famous temple dedicated to Lord Ganesha." },
+    { name: "Nehru Science Center", coords: [18.9912, 72.8190], desc: "India's largest interactive science museum." },
+    { name: "Bandra Fort", coords: [19.0413, 72.8185], desc: "Castella de Aguada - Historic fort with Bandra-Worli Sea Link views." },
+    { name: "Elephanta Caves", coords: [18.9633, 72.9315], desc: "Ancient rock-cut cave temples on Elephanta Island." },
+    { name: "Sanjay Gandhi National Park", coords: [19.2288, 72.9182], desc: "A massive protected forest area within the city." },
+    { name: "Kanheri Caves", coords: [19.2059, 72.9069], desc: "Buddhist caves carved into the basalt hills inside the park." }
+];
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyDfP1XaMtkGuBeSrl4fRw-Zi3l7_5sPm_w",
@@ -621,36 +682,62 @@ const closeMapBtn = document.getElementById('closeMap');
 
 if (mapsTrigger) {
   mapsTrigger.addEventListener('click', () => {
-  pageWrapper.style.display = 'none'; 
-  mapSection.classList.remove('hidden');
-  mapSection.style.display = 'block'; 
-  closeDrawer(); 
+    pageWrapper.style.display = 'none';
+    mapSection.classList.remove('hidden');
+    mapSection.style.display = 'block';
+    closeDrawer();
 
-  if (!myMap) {
-    // 1. Create the map with a "Fly" animation feel
-    myMap = L.map('map', {
-      zoomControl: false, // We'll move this to a better spot
-      scrollWheelZoom: true
-    }).setView([20.5937, 78.9629], 5); // Default to a central location (e.g., India)
+    if (!myMap) {
+      // 2. INITIALIZE MAPLIBRE (The "Credit Card Free" Mapbox)
+      myMap = new maplibregl.Map({
+        container: 'map',
+        style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`,
+        center: [78.9629, 20.5937], // [Lng, Lat]
+        zoom: 4,
+        pitch: 45,    // 3D Tilt
+        bearing: -10  // Slight Rotation
+      });
 
-    // 2. Add high-quality Voyager tiles immediately
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '©OpenStreetMap'
-    }).addTo(myMap);
+      myMap.addControl(new maplibregl.NavigationControl());
 
-    // 3. Move zoom buttons to bottom-right (looks cleaner)
-    L.control.zoom({ position: 'bottomright' }).addTo(myMap);
-
-  } else {
-    // If it exists, reset it to a "clean" starting zoom
-    myMap.setView([20.5937, 78.9629], 5);
-  }
-  
-  // 4. Force refresh with almost zero delay
-  setTimeout(() => { myMap.invalidateSize(); }, 50);
+      myMap.on('load', () => {
+        addMarkersToMap();
+        myMap.addSource('famous-locations', {
+    'type': 'geojson',
+    'data': getFamousPlacesGeoJSON()
 });
-}
 
+myMap.addLayer({
+    'id': 'famous-labels',
+    'type': 'symbol',
+    'source': 'famous-locations',
+    'layout': {
+        'text-field': ['get', 'title'],
+        'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+        'text-offset': [0, 0.6], // Positions text slightly below/beside the marker
+        'text-anchor': 'top',
+        'text-size': 14,
+        'text-ignore-placement': false, // This hides labels if they overlap with others
+        'text-allow-overlap': false     // Keeps the map from looking cluttered
+    },
+    'paint': {
+        'text-color': '#007cbf', // Matches your blue marker
+        'text-halo-color': '#ffffff', // White outline so it's readable over any background
+        'text-halo-width': 2
+    }
+});
+        // 3. Add 3D Buildings (MapTiler supports this automatically)
+        add3DBuildings();
+        highlightFamousPlacesMapLibre();
+      });
+
+    } else {
+      myMap.flyTo({ center: [78.9629, 20.5937], zoom: 4 });
+    }
+
+    setTimeout(() => { myMap.resize(); }, 200);
+  });
+}
 // Logic for the "Back to Search" button
 if (closeMapBtn) {
   closeMapBtn.addEventListener('click', () => {
@@ -662,61 +749,148 @@ if (closeMapBtn) {
     pageWrapper.style.display = 'block';
   });
 }
-// ===============================
-// THE "FLY TO CITY" SEARCH LOGIC
-// ===============================
-async function flyToCity(cityName) {
-  try {
-    // 1. Get coordinates from the free OpenStreetMap 'Nominatim' API
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityName)}`);
-    const data = await response.json();
+// Data for famous places
 
-    if (data && data.length > 0) {
-      const lat = data[0].lat;
-      const lon = data[0].lon;
+// Function to drop these markers
+function highlightFamousPlaces() {
+  // Define a custom star icon for famous places
+  const starIcon = L.divIcon({
+    className: 'custom-star-marker',
+    html: `<div style="background:#ff9800; width:12px; height:12px; border-radius:50%; border:2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3);"></div>`,
+    iconSize: [12, 12],
+    iconAnchor: [6, 6]
+  });
 
-      // 2. Hide the main UI and show the Map Section
-      pageWrapper.style.display = 'none';
-      mapSection.classList.remove('hidden');
-      mapSection.style.display = 'block';
-
-      // 3. Initialize the map if it doesn't exist yet
-      if (!myMap) {
-        myMap = L.map('map').setView([lat, lon], 12);
-       L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-       attribution: '©OpenStreetMap, ©CartoDB'
-}).addTo(myMap);
-      } else {
-        // If map exists, move it to the new city
-        myMap.setView([lat, lon], 12);
-      }
-
-      // 4. Add a marker for the destination
-      // We clear old markers so it doesn't get cluttered
-      const customIcon = L.divIcon({
-  className: 'pulse-marker',
-  iconSize: [12, 12]
-});
-
-L.marker([lat, lon]).addTo(myMap)
-  .bindPopup(`
-    <div style="text-align:center;">
-      <h3 style="margin:0; color:#0b74e7;">${cityName}</h3>
-    </div>
-  `)
-  .openPopup();
-
-      // 5. Vital: Force the map to fill the container size
-      setTimeout(() => {
-        myMap.invalidateSize();
-      }, 250);
-
-    } else {
-      alert("We couldn't find that location on the map. Try a city name!");
-    }
-  } catch (error) {
-    console.error("Map search error:", error);
-    alert("Map service is currently busy. Please try again.");
-  }
+  famousPlaces.forEach(place => {
+    L.marker(place.coords, { icon: starIcon })
+      .addTo(myMap)
+      .bindPopup(`
+        <div style="text-align:center;">
+          <strong style="color:#ff9800;">⭐ Famous Landmark</strong>
+          <h4 style="margin:5px 0;">${place.name}</h4>
+          <p style="font-size:12px; margin:0;">${place.desc}</p>
+        </div>
+      `);
+  });
 }
+// STEP 3: The Marker Logic Function
+function highlightFamousPlacesMapbox() {
+  famousPlaces.forEach(place => {
+    // 1. Create the visual element for the marker
+    const el = document.createElement('div');
+    el.className = 'mapbox-marker';
+    el.style.width = '20px';
+    el.style.height = '20px';
+    el.style.backgroundColor = '#FF9933'; // Saffron
+    el.style.borderRadius = '50%';
+    el.style.border = '2px solid white';
+    el.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)';
+    el.style.cursor = 'pointer';
+    const marker = new mapboxgl.Marker(el)
+      .setLngLat([place.coords[1], place.coords[0]])
+      .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<h3>${place.name}</h3>`))
+      .addTo(myMap);
+
+    // --- ADD THE CLICK EVENT HERE ---
+    el.addEventListener('click', () => {
+      smoothFlyTo(place.coords);
+    });
+    // 2. Add the marker to the map
+    // Remember: Mapbox uses [Longitude, Latitude]
+    new mapboxgl.Marker(el)
+      .setLngLat([place.coords[1], place.coords[0]]) 
+      .setPopup(new mapboxgl.Popup({ offset: 25 }) 
+      .setHTML(`<h3 style="color:#FF9933; margin:0;">${place.name}</h3><p style="margin:5px 0 0;">${place.desc}</p>`))
+      .addTo(myMap);
+  });
+}
+function smoothFlyTo(coords) {
+    if (!myMap) return; // Safety check
+
+    myMap.flyTo({
+        center: [coords[1], coords[0]], // [Lng, Lat]
+        zoom: 12,                       // Closer zoom for "Famous Places"
+        pitch: 60,                      // Dramatic 3D tilt
+        bearing: -20,                   // Slight rotation
+        essential: true, 
+        duration: 3000                  // 3 seconds of smooth travel
+    });
+}
+document.getElementById('resetMap').addEventListener('click', () => {
+    myMap.flyTo({
+        center: [78.9629, 20.5937],
+        zoom: 4,
+        pitch: 0,
+        bearing: 0,
+        essential: true,
+        duration: 2000
+    });
+});
+// MARKER FUNCTION
+function highlightFamousPlacesMapLibre() {
+  famousPlaces.forEach(place => {
+    const el = document.createElement('div');
+    el.className = 'map-marker';
+    el.style.cssText = "width:15px; height:15px; background:#FF9933; border-radius:50%; border:2px solid white; cursor:pointer;";
+
+    new maplibregl.Marker(el)
+      .setLngLat([place.coords[1], place.coords[0]])
+      .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(`<b>${place.name}</b>`))
+      .addTo(myMap);
+
+    el.addEventListener('click', () => smoothFlyTo(place.coords));
+  });
+}
+
+// 3D BUILDINGS FUNCTION
+function add3DBuildings() {
+    myMap.addLayer({
+        'id': '3d-buildings',
+        'source': 'openmaptiles',
+        'source-layer': 'building',
+        'type': 'fill-extrusion',
+        'minzoom': 14,
+        'paint': {
+            'fill-extrusion-color': '#aaa',
+            'fill-extrusion-height': ['get', 'render_height'],
+            'fill-extrusion-base': ['get', 'render_min_height'],
+            'fill-extrusion-opacity': 0.7
+        }
+    });
+}
+
+function getFamousPlacesGeoJSON() {
+    return {
+        'type': 'FeatureCollection',
+        'features': famousPlaces.map(place => ({
+            'type': 'Feature',
+            'geometry': {
+                'type': 'Point',
+                'coordinates': [place.coords[1], place.coords[0]] // [Lng, Lat]
+            },
+            'properties': {
+                'title': place.name
+            }
+        }))
+    };
+}
+// --- Put this at the VERY BOTTOM of home.js ---
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Buttons are now being linked...");
+
+    const tourBtn = document.getElementById('startTour'); // Use your actual button ID
+    if (tourBtn) {
+        tourBtn.onclick = () => {
+            console.log("Tour button clicked!");
+            startIndiaTour(); // Your tour function name
+        };
+    }
+
+    const settingsBtn = document.getElementById('settingsBtn'); // Use your actual button ID
+    if (settingsBtn) {
+        settingsBtn.onclick = () => {
+            window.location.href = 'settings.html';
+        };
+    }
+});
 boot();

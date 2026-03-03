@@ -815,7 +815,7 @@ body,html{
 .message.bot p {
     margin: 0 0 8px 0;
 }
-/*MAP SECTION*/
+/* map section */
 #mapSection {
   width: 100%;
   min-height: 100vh; /* Make it fill the whole screen */
@@ -874,4 +874,188 @@ body,html{
 #closeMap:hover {
   background: #085cb1;
   transform: scale(1.02); /* Slight pop effect on hover */
+}
+  .custom-star-marker {
+  background: #FF9933; /* Saffron color */
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(255, 153, 51, 0.6);
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.custom-star-marker:hover {
+  transform: scale(1.4);
+  filter: brightness(1.2);
+  cursor: pointer;
+  background: #138808;
+}
+
+/* Optional: Add a label that appears on hover */
+.custom-star-marker::after {
+  content: 'Landmark';
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.custom-star-marker:hover::after {
+  opacity: 1;
+}
+/* Make popups look premium over satellite imagery */
+.leaflet-popup-content-wrapper {
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(10px); /* Frosted glass effect */
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.leaflet-popup-tip {
+    background: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Style the Layer Toggle button to be less "clunky" */
+.leaflet-control-layers {
+    border: none !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
+    border-radius: 8px !important;
+}
+/* --- Global Dark Mode Styles for Home --- */
+.dark-mode, .dark-mode body {
+    background-color: #121212 !important;
+    color: #ffffff !important;
+}
+
+/* If you have a sidebar or header on the home page, style them too */
+.dark-mode .sidebar, 
+.dark-mode .nav-bar,
+.dark-mode #map-section {
+    background-color: #1a1a1a;
+    border-color: #333;
+}
+
+/* Make sure the text in your home page is readable */
+.dark-mode h1, 
+.dark-mode h2, 
+.dark-mode p {
+    color: #f1f1f1;
+}
+
+/* Optional: Make your buttons glow a bit more in the dark */
+.dark-mode .btn-primary {
+    box-shadow: 0 0 10px rgba(255, 153, 51, 0.3);
+}
+/* This targets the entire screen when .dark-mode is active */
+html.dark-mode, 
+html.dark-mode body {
+    background-color: #121212 !important;
+    color: #ffffff !important;
+}
+
+/* Specific fix for your settings cards/sidebar */
+html.dark-mode .settings-container, 
+html.dark-mode .setting-option,
+html.dark-mode .sidebar {
+    background-color: #1e1e1e !important;
+    border-color: #333 !important;
+    color: #f1f1f1 !important;
+}
+/* --- THE ULTIMATE PROFILE DARK FIX --- */
+
+/* 1. Target by common class names */
+.dark-mode .profile, 
+.dark-mode .profile-container, 
+.dark-mode .user-profile, 
+.dark-mode .sidebar, 
+.dark-mode .header, 
+.dark-mode .top-nav,
+.dark-mode .account-section {
+    background-color: #1a1a1a !important; /* Forces it to Dark Grey */
+    background: #1a1a1a !important;        /* Extra backup */
+    color: #ffffff !important;            /* Forces White Text */
+    border-color: #333 !important;
+}
+
+/* 2. Target the blue specifically (if it's a generic div) */
+.dark-mode div[style*="blue"], 
+.dark-mode section[style*="blue"],
+.dark-mode header[style*="blue"] {
+    background-color: #1a1a1a !important;
+}
+
+/* 3. Make sure icons or text inside turn white */
+.dark-mode .profile h2, 
+.dark-mode .profile p, 
+.dark-mode .profile span {
+    color: #ffffff !important;
+}
+/* This targets the blue/white top bar where the logo and account buttons are */
+.dark-mode .topbar {
+    background: #1a1a1a !important; /* Dark Grey */
+    border-bottom: 1px solid #333 !important;
+    backdrop-filter: blur(10px);
+}
+
+/* Make sure the hamburger menu icon turns white */
+.dark-mode .hamburger {
+    color: #ffffff !important;
+}
+/* This forces the white map section to turn dark */
+.dark-mode #mapSection {
+    background-color: #121212 !important;
+}
+
+/* This styles the text inside the map section */
+.dark-mode #mapSection h2 {
+    color: #ffffff !important;
+}
+
+/* This styles the container that holds the actual map */
+.dark-mode #map {
+    background-color: #1a1a1a !important;
+    border: 1px solid #444 !important;
+}
+
+/* Style the 'Back to Search' button so it doesn't look out of place */
+.dark-mode #closeMap {
+    background: #1a1a1a !important;
+    border: 1px solid #0b74e7 !important;
+    color: #0b74e7 !important;
+}
+.dark-mode .drawer {
+    background-color: #1a1a1a !important;
+    color: #ffffff !important;
+}
+
+.dark-mode .drawer-item {
+    color: #bbbbbb !important;
+}
+
+.dark-mode .drawer-item:hover {
+    background-color: #2c2c2c !important;
+    color: #0b74e7 !important;
+}
+
+/* Fix the divider line */
+.dark-mode .drawer-divider {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+/* Hide the Google Translate top bar and attribution */
+.goog-te-banner-frame.skiptranslate, .goog-logo-link, .goog-te-gadget span {
+    display: none !important;
+}
+body {
+    top: 0px !important;
+}
+.skiptranslate {
+    display: none !important;
 }

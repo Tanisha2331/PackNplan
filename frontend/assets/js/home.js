@@ -1,3 +1,31 @@
+
+// --- 1. Global Variables & Theme Sync ---
+const MAPTILER_KEY = '4G7v9b1O1Y7yMoUxDgSM'; 
+let myMap; // Declare map variable globally
+
+function syncTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const root = document.documentElement;
+
+    if (savedTheme === 'dark') {
+        root.classList.add('dark-mode');
+        // Only update style if map is initialized AND loaded
+        if (myMap && myMap.loaded()) {
+            myMap.setStyle(`https://api.maptiler.com/maps/chapt-dark/style.json?key=${MAPTILER_KEY}`);
+        }
+    } else {
+        root.classList.remove('dark-mode');
+        if (myMap && myMap.loaded()) {
+            myMap.setStyle(`https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`);
+        }
+    }
+}
+
+// RUN IMMEDIATELY (Add this line right here)
+syncTheme();
+
+// Force check when returning from Settings
+window.addEventListener('pageshow', syncTheme);
 // ===============================
 // FIREBASE INIT
 // ===============================
@@ -6,7 +34,40 @@ import { getFirestore, collection, getDocs, query, where } from "https://www.gst
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 import { addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 import { deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-let myMap;
+
+const famousPlaces = [
+  { name: "Taj Mahal", coords: [27.1751, 78.0421], desc: "Agra, Uttar Pradesh" },
+  { name: "Munnar Tea Gardens", coords: [10.0889, 77.0595], desc: "Munnar, Kerala" },
+  { name: "Golden Temple", coords: [31.6200, 74.8765], desc: "Amritsar, Punjab" },
+  { name: "Hawa Mahal", coords: [26.9239, 75.8267], desc: "Jaipur, Rajasthan" },
+  { name: "Gateway of India", coords: [18.9220, 72.8347], desc: "Mumbai, Maharashtra" },
+  { name: "Meenakshi Temple", coords: [9.9195, 78.1193], desc: "Madurai, Tamil Nadu" },
+  { name: "Victoria Memorial", coords: [22.5448, 88.3426], desc: "Kolkata, West Bengal" },
+  { name: "Qutub Minar", coords: [28.5245, 77.1855], desc: "Delhi" },
+  { name: "Varanasi Ghats", coords: [25.3176, 83.0062], desc: "Varanasi - The oldest living city on Earth." },
+  { name: "Mysore Palace", coords: [12.3052, 76.6552], desc: "Mysore - A masterpiece of Indo-Saracenic architecture." },
+  { name: "Hampi Ruins", coords: [15.3350, 76.4600], desc: "Hampi - UNESCO world heritage boulder-strewn landscape." },
+  { name: "Sri Harmandir Sahib", coords: [31.6200, 74.8765], desc: "Amritsar - The Golden Temple." },
+  { name: "Red Fort", coords: [28.6562, 77.2410], desc: "Delhi - The iconic Mughal residence." },
+  { name: "India Gate", coords: [28.6129, 77.2295], desc: "Delhi - The war memorial archway." },
+  { name: "Taj Mahal", coords: [27.1751, 78.0421], desc: "Agra - The white marble masterpiece." },
+  { name: "Amber Palace", coords: [26.9855, 75.8513], desc: "Jaipur - The majestic hilltop fort." },
+  { name: "Mehrangarh Fort", coords: [26.2981, 73.0189], desc: "Jodhpur - One of the largest forts in India." },
+  { name: "Statue of Unity", coords: [21.8380, 73.7191], desc: "Gujarat - The world's tallest statue." },
+  { name: "Ellora Caves", coords: [20.0258, 75.1780], desc: "Maharashtra - Ancient rock-cut temples." },
+  { name: "Charminar", coords: [17.3616, 78.4747], desc: "Hyderabad - The four-minaret monument." },
+  { name: "Mysore Palace", coords: [12.3052, 76.6552], desc: "Mysore - A palace of 97,000 lightbulbs." },
+  { name: "Marine Drive", coords: [18.9431, 72.8230], desc: "The Queen's Necklace - Mumbai’s iconic seaside promenade." },
+    { name: "Hanging Gardens", coords: [18.9564, 72.8055], desc: "Terraced gardens perched atop Malabar Hill." },
+    { name: "Haji Ali Dargah", coords: [18.9827, 72.8089], desc: "The stunning mosque and tomb located in the middle of the sea." },
+    { name: "Jehangir Art Gallery", coords: [18.9274, 72.8317], desc: "The center of Mumbai's vibrant art scene." },
+    { name: "Shree Siddhivinayak Temple", coords: [19.0170, 72.8302], desc: "The famous temple dedicated to Lord Ganesha." },
+    { name: "Nehru Science Center", coords: [18.9912, 72.8190], desc: "India's largest interactive science museum." },
+    { name: "Bandra Fort", coords: [19.0413, 72.8185], desc: "Castella de Aguada - Historic fort with Bandra-Worli Sea Link views." },
+    { name: "Elephanta Caves", coords: [18.9633, 72.9315], desc: "Ancient rock-cut cave temples on Elephanta Island." },
+    { name: "Sanjay Gandhi National Park", coords: [19.2288, 72.9182], desc: "A massive protected forest area within the city." },
+    { name: "Kanheri Caves", coords: [19.2059, 72.9069], desc: "Buddhist caves carved into the basalt hills inside the park." }
+];
 
 const firebaseConfig = {
   apiKey: "AIzaSyDfP1XaMtkGuBeSrl4fRw-Zi3l7_5sPm_w",
@@ -339,60 +400,6 @@ window.addEventListener("click", (e) => {
   if (e.target === visitedModal) visitedModal.classList.add("hidden");
 });
 // ===============================
-// MAP LOGIC
-// ===============================
-const mapsTrigger = document.getElementById('mapsTrigger');
-const mapSection = document.getElementById('mapSection');
-const pageWrapper = document.querySelector('.page-wrapper');
-const closeMapBtn = document.getElementById('closeMap');
-
-mapsTrigger?.addEventListener('click', () => {
-  pageWrapper.style.display = 'none';
-  mapSection.classList.remove('hidden');
-  mapSection.style.display = 'block';
-  closeDrawer();
-  if (!myMap) {
-    myMap = L.map('map', { zoomControl: false }).setView([20.5937, 78.9629], 5);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(myMap);
-    L.control.zoom({ position: 'bottomright' }).addTo(myMap);
-  }
-  setTimeout(() => { myMap.invalidateSize(); }, 50);
-});
-
-closeMapBtn?.addEventListener('click', () => {
-  mapSection.style.display = 'none';
-  pageWrapper.style.display = 'block';
-});
-// ==========================================
-// HOTEL SEARCH REDIRECTION LOGIC
-// ==========================================
-document.getElementById("hotelSearchBtn").onclick = function(e) {
-    // Prevent form from reloading the page
-    e.preventDefault();
-
-    const city = document.getElementById("hotelCity").value;
-    const checkIn = document.getElementById("checkIn").value;
-    const checkOut = document.getElementById("checkOut").value;
-    const guests = document.getElementById("guestSelect").value;
-
-    // Basic validation
-    if (!city) {
-        alert("Please enter a city to search for hotels!");
-        return;
-    }
-
-    // Build the URL with parameters
-    const queryParams = new URLSearchParams({
-        city: city,
-        checkIn: checkIn,
-        checkOut: checkOut,
-        guests: guests
-    });
-
-    // Redirect to your dedicated hotels page
-    window.location.href = `hotels.html?${queryParams.toString()}`;
-};
-// ===============================
 // UI HELPERS
 // ===============================
 accountBtn.addEventListener("click", (e) => {
@@ -574,4 +581,112 @@ window.cancelBooking = async (id) => {
         alert("Error cancelling booking.");
     }
 };
+// ===============================
+// MAP LOGIC (MapLibre & 3D)
+// ===============================
+const mapsTrigger = document.getElementById('mapsTrigger');
+const mapSection = document.getElementById('mapSection');
+const pageWrapper = document.querySelector('.page-wrapper');
+const closeMapBtn = document.getElementById('closeMap');
+
+if (mapsTrigger) {
+  mapsTrigger.addEventListener('click', () => {
+    pageWrapper.style.display = 'none';
+    mapSection.classList.remove('hidden');
+    mapSection.style.display = 'block';
+    closeDrawer();
+
+    if (!myMap) {
+      // Initialize MapLibre
+      myMap = new maplibregl.Map({
+        container: 'map',
+        style: localStorage.getItem('theme') === 'dark' 
+          ? `https://api.maptiler.com/maps/chapt-dark/style.json?key=${MAPTILER_KEY}`
+          : `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`,
+        center: [78.9629, 20.5937], 
+        zoom: 4,
+        pitch: 45,
+        bearing: -10
+      });
+
+      myMap.addControl(new maplibregl.NavigationControl());
+
+      myMap.on('load', () => {
+        add3DBuildings();
+        highlightFamousPlacesMapLibre();
+      });
+    } else {
+      myMap.resize(); // Fix for maps loading in hidden divs
+      myMap.flyTo({ center: [78.9629, 20.5937], zoom: 4 });
+    }
+  });
+}
+
+// Logic for the "Back to Search" button
+if (closeMapBtn) {
+  closeMapBtn.addEventListener('click', () => {
+    mapSection.style.display = 'none';
+    mapSection.classList.add('hidden');
+    pageWrapper.style.display = 'block';
+  });
+}
+
+// RESET MAP TO INDIA
+document.getElementById('resetMap')?.addEventListener('click', () => {
+    myMap?.flyTo({
+        center: [78.9629, 20.5937],
+        zoom: 4,
+        pitch: 0,
+        bearing: 0,
+        essential: true,
+        duration: 2000
+    });
+});
+
+// MARKER FUNCTION (Lng, Lat Order)
+function highlightFamousPlacesMapLibre() {
+  famousPlaces.forEach(place => {
+    const el = document.createElement('div');
+    el.className = 'custom-star-marker'; // Use your existing CSS class!
+    el.style.cssText = "width:15px; height:15px; background:#FF9933; border-radius:50%; border:2px solid white; cursor:pointer;";
+
+    new maplibregl.Marker(el)
+      .setLngLat([place.coords[1], place.coords[0]]) // IMPORTANT: [Lng, Lat]
+      .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(`<b>${place.name}</b><p>${place.desc}</p>`))
+      .addTo(myMap);
+
+    el.addEventListener('click', () => smoothFlyTo(place.coords));
+  });
+}
+
+function smoothFlyTo(coords) {
+    myMap?.flyTo({
+        center: [coords[1], coords[0]], 
+        zoom: 12,
+        pitch: 60,
+        duration: 3000
+    });
+}
+
+function add3DBuildings() {
+    // 1. Get all sources currently loaded in your MapTiler style
+    const sources = myMap.getStyle().sources;
+    
+    // 2. Find the one that is a vector source (usually 'maptiler_planet' or 'vector')
+    const sourceName = Object.keys(sources).find(key => sources[key].type === 'vector') || 'openmaptiles';
+
+    myMap.addLayer({
+        'id': '3d-buildings',
+        'source': sourceName, // Now it uses the dynamic name!
+        'source-layer': 'building',
+        'type': 'fill-extrusion',
+        'minzoom': 14,
+        'paint': {
+            'fill-extrusion-color': localStorage.getItem('theme') === 'dark' ? '#444' : '#aaa',
+            'fill-extrusion-height': ['get', 'render_height'],
+            'fill-extrusion-base': ['get', 'render_min_height'],
+            'fill-extrusion-opacity': 0.7
+        }
+    });
+}
 boot();
