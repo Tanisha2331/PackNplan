@@ -107,33 +107,52 @@ if (btnBack) btnBack.onclick = () => {
 };
 
 // --- 3. FIREBASE SAVE & VOUCHER ---
+// MODIFIED: Replacing alert with Shake Validation
 const btnFinal = document.getElementById("confirmFinalBooking");
 if (btnFinal) {
     btnFinal.onclick = async () => {
-        btnFinal.innerText = "Verifying Payment...";
+        const cardInput = document.getElementById("cardNumber");
+        const cvvInput = document.getElementById("cardCVV");
+        const expiryInput = document.querySelector('input[placeholder="MM/YY"]');
+
+        let hasError = false;
+
+        // Validation Check (No Alerts!)
+        const fields = [
+            { element: cardInput, min: 16 },
+            { element: cvvInput, min: 3 },
+            { element: expiryInput, min: 5 }
+        ];
+
+        fields.forEach(field => {
+            if (!field.element || !field.element.value || field.element.value.length < field.min) {
+                field.element?.classList.add("input-error");
+                hasError = true;
+                setTimeout(() => field.element?.classList.remove("input-error"), 500);
+            }
+        });
+
+        if (hasError) return; // Hard stop if fields are empty/wrong
+
+        // PROCEED TO FIREBASE (Your original code below)
+        btnFinal.innerText = "Verifying Securely...";
         btnFinal.disabled = true;
 
         try {
             await addDoc(collection(db, "bookings"), {
                 hotelName: selectedHotel.name,
-                checkIn: searchedCheckIn,
-                guests: searchedGuests,
                 guestName: document.getElementById("guestName").value,
-                guestEmail: document.getElementById("guestEmail").value,
                 amount: selectedHotelPrice,
                 status: "Confirmed",
                 createdAt: serverTimestamp()
             });
-            showSuccessVoucher(); // Show ticket instead of alert
+            showSuccessVoucher(); //
         } catch (e) {
-            console.error(e);
-            alert("Payment Failed.");
             btnFinal.innerText = "Pay & Confirm Booking";
             btnFinal.disabled = false;
         }
     };
 }
-
 // ADDED: Function to show professional success ticket
 function showSuccessVoucher() {
     const container = document.getElementById("modalMainContent");
@@ -170,7 +189,11 @@ function showSuccessVoucher() {
             <button onclick="window.location.href='index.html'" class="btn-primary-large">Return Home</button>
         </div>`;
 }
-
+document.querySelector('input[placeholder="MM/YY"]').oninput = function() {
+    let v = this.value.replace(/\D/g, '').substring(0, 4);
+    if (v.length > 2) v = v.substring(0, 2) + '/' + v.substring(2);
+    this.value = v;
+};
 document.getElementById("closeModal").onclick = () => {
     document.getElementById("bookingModal").classList.add("hidden");
 };

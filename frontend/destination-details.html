@@ -5,141 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Destination Details</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/hotels.css">
     
     <style>
-        /* --- BEAUTIFUL UI STYLES --- */
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            margin: 0; 
-            background: #f4f7f6; 
-            color: #333;
-        }
-
-        /* Hero Header */
-        .hero { 
-            height: 350px; 
-            background: #222; 
-            position: relative; 
-            overflow: hidden;
-        }
-        .hero img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            opacity: 0.6; 
-        }
-        .hero-content {
-            position: absolute; 
-            bottom: 30px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            text-align: center;
-            color: white;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.7);
-            width: 90%;
-        }
+        /* --- KEEPING YOUR ORIGINAL UI STYLES --- */
+        body { font-family: 'Poppins', sans-serif; margin: 0; background: #f4f7f6; color: #333; }
+        .hero { height: 350px; background: #222; position: relative; overflow: hidden; }
+        .hero img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+        .hero-content { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); text-align: center; color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.7); width: 90%; }
         .hero h1 { margin: 0; font-size: 3.5rem; letter-spacing: 1px; }
         .hero p { font-size: 1.2rem; margin-top: 5px; opacity: 0.9; }
-
-        /* Container */
-        .container { 
-            max-width: 1100px; 
-            margin: -50px auto 40px; /* Pull up over hero */
-            padding: 20px; 
-            position: relative;
-            z-index: 10;
-        }
-
-        /* Back Button */
-        .back-btn { 
-            display: inline-block;
-            background: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            transition: transform 0.2s;
-        }
+        .container { max-width: 1100px; margin: -50px auto 40px; padding: 20px; position: relative; z-index: 10; }
+        .back-btn { display: inline-block; background: white; padding: 10px 20px; border-radius: 30px; text-decoration: none; color: #333; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; transition: transform 0.2s; }
         .back-btn:hover { transform: translateY(-2px); }
-
-        /* Section Titles */
-        .section-title { 
-            font-size: 1.5rem; 
-            color: #0b74e7; 
-            margin: 40px 0 20px; 
-            border-left: 5px solid #0b74e7;
-            padding-left: 15px;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        /* Grid Layout */
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 25px; 
-        }
-
-        /* Card Style */
-        .card { 
-            background: white; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
+        .section-title { font-size: 1.5rem; color: #0b74e7; margin: 40px 0 20px; border-left: 5px solid #0b74e7; padding-left: 15px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: transform 0.3s ease; display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
-
-        /* Card Image Placeholder */
-        .card-img {
-            height: 160px;
-            background: #ddd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #777;
-            font-size: 3rem;
-            overflow: hidden;
-        }
+        .card-img { height: 160px; background: #ddd; display: flex; align-items: center; justify-content: center; color: #777; font-size: 3rem; overflow: hidden; }
         .card-img img { width: 100%; height: 100%; object-fit: cover; }
-
         .card-body { padding: 20px; flex-grow: 1; }
         .card h4 { margin: 0 0 8px; color: #222; font-size: 1.1rem; }
         .card p { margin: 0; font-size: 0.9rem; color: #666; line-height: 1.5; }
-        .card-badge {
-            display: inline-block;
-            font-size: 0.75rem;
-            background: #e3f2fd;
-            color: #0b74e7;
-            padding: 4px 8px;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-.book-btn {
-    background: #0b74e7;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    margin-top: 15px;
-    width: 100%;
-    transition: background 0.3s;
-}
-.book-btn:hover {
-    background: #085bb5;
-}
-        /* Loading State */
+        .card-badge { display: inline-block; font-size: 0.75rem; background: #e3f2fd; color: #0b74e7; padding: 4px 8px; border-radius: 4px; margin-bottom: 10px; font-weight: 600; }
+        .book-btn { background: #0b74e7; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 15px; width: 100%; transition: background 0.3s; }
+        .book-btn:hover { background: #085bb5; }
         .loading { text-align: center; padding: 40px; color: #777; font-size: 1.1rem; }
+        /* ADDED: Error Messaging & Animations */
+        .error-msg {color: #ff4d4d;font-size: 0.75rem; margin-top: 4px; display: none; /* Hidden by default */}
+        .input-error {border-color: #ff4d4d !important; animation: shake 0.4s ease-in-out;}
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
     </style>
 </head>
 <body>
@@ -165,147 +64,220 @@
             <div class="loading">Loading attractions...</div>
         </div>
     </div>
-        <script type="module">
-        // =========================================================
-        // 🛑 PASTE YOUR API KEY BELOW
-        // =========================================================
-        const API_KEY = "1158d45a31c54d4fa492f618703b1f7f"; 
-        // =========================================================
 
+    <div id="bookingModal" class="modal hidden">
+        <div class="modal-content premium-modal" id="modalMainContent">
+            <div class="modal-header-main">
+                <h2 id="modalHotelName">Hotel Name</h2>
+                <p id="modalHotelAddress" class="sub-address">📍 Loading address...</p>
+            </div>
+            <div class="modal-body-scroll">
+                <div class="trip-summary-card">
+                    <div class="summary-item"><span class="label">CHECK-IN</span><span id="summaryCheckIn" class="value">04/03/2026</span></div>
+                    <div class="summary-divider"></div>
+                    <div class="summary-item"><span class="label">GUESTS</span><span id="summaryGuests" class="value">2 Guests</span></div>
+                </div>
+
+                <div id="step1" class="booking-form">
+                    <div class="input-block"><label>Guest Full Name</label><input type="text" id="guestName" placeholder="e.g. John Doe"></div>
+                    <div class="input-block"><label>Email Address</label><input type="email" id="guestEmail" placeholder="name@example.com"></div>
+                    <div class="input-block"><label>Phone Number</label>
+                        <div class="phone-input-wrapper"><span class="country-code">+91</span><input type="text" id="guestPhone" inputmode="numeric" maxlength="10" placeholder="00000 00000"></div>
+                    </div>
+                    <button id="goToPayment" class="btn-primary-large">Proceed to Secure Payment</button>
+                    <button id="closeModal" class="btn-link-cancel">Cancel Booking</button>
+                </div>
+
+                <div id="step2" class="booking-form hidden">
+                    <div class="payment-summary-box"><span>AMOUNT TO PAY:</span><strong id="payAmount">₹0</strong></div>
+                    <div class="input-block"><label>Card Number</label><input type="text" id="cardNumber" placeholder="xxxx xxxx xxxx xxxx" maxlength="19" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div>
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <div style="flex: 1;"><label style="font-size: 0.8rem; font-weight: 600;">Expiry</label><input type="text" placeholder="MM/YY" maxlength="5"></div>
+                        <div style="flex: 1;"><label style="font-size: 0.8rem; font-weight: 600;">CVV</label><input type="password" id="cardCVV" placeholder="***" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div>
+                    </div>
+                    <button id="confirmFinalBooking" class="btn-primary-large">Pay & Confirm Booking</button>
+                    <button id="backToStep1" class="btn-link-cancel">← Back to Details</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfP1XaMtkGuBeSrl4fRw-Zi3l7_5sPm_w",
+            authDomain: "packnplan-3312d.firebaseapp.com",
+            projectId: "packnplan-3312d",
+            storageBucket: "packnplan-3312d.firebasestorage.app",
+            messagingSenderId: "976654836537",
+            appId: "1:976654836537:web:4d9b292611ccd5328b3ee8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        const API_KEY = "1158d45a31c54d4fa492f618703b1f7f"; 
         const params = new URLSearchParams(window.location.search);
         const city = params.get("city");
         const heroImage = params.get("hero");
 
+        let selectedPlace = null;
+        let selectedPrice = 0;
+
         if(city) {
             document.getElementById("cityName").innerText = city;
-            
-            // 1. SET HERO IMAGE
-            if (heroImage && heroImage !== "undefined") {
-                document.getElementById("cityImg").src = decodeURIComponent(heroImage);
-            } else {
-                document.getElementById("cityImg").src = `https://loremflickr.com/1600/900/${city},travel/all`;
-            }
-            
+            document.getElementById("cityImg").src = heroImage && heroImage !== "undefined" ? decodeURIComponent(heroImage) : `https://loremflickr.com/1600/900/${city},travel/all`;
             fetchData(city);
-        } else {
-             document.getElementById("cityName").innerText = "No City Selected";
         }
 
         async function fetchData(cityName) {
             try {
-                // 1. Get Coordinates
                 const geoUrl = `https://api.geoapify.com/v1/geocode/search?text=${cityName}&apiKey=${API_KEY}`;
                 const geoRes = await fetch(geoUrl);
                 const geoData = await geoRes.json();
-                
-                if(!geoData.features || geoData.features.length === 0) {
-                     alert("Location not found");
-                     return;
-                }
-
+                if(!geoData.features?.length) return;
                 const { lat, lon } = geoData.features[0].properties;
 
-                // 2. Get Hotels & Attractions
-                // UPDATED: "accommodation" covers resorts/homestays (common in Coorg)
-                // UPDATED: Radius increased to 15,000 meters (15km)
                 getPlaces(lat, lon, "accommodation", "hotel-list", "Stay");
                 getPlaces(lat, lon, "tourism.attraction", "attraction-list", "Attraction");
-
-            } catch (e) { 
-                console.error(e); 
-            }
+            } catch (e) { console.error(e); }
         }
 
         async function getPlaces(lat, lon, category, containerId, typeLabel) {
-            // FIX: Changed radius from 5000 -> 20000 (20km) to catch resorts in spread-out areas
             const url = `https://api.geoapify.com/v2/places?categories=${category}&filter=circle:${lon},${lat},50000&limit=15&apiKey=${API_KEY}`;
             const res = await fetch(url);
             const data = await res.json();
-            
             const container = document.getElementById(containerId);
             container.innerHTML = ""; 
 
-            if(!data.features || data.features.length === 0) {
-                 container.innerHTML = "<p>No results found nearby. Try a more specific location name.</p>";
-                 return;
-            }
-
-            data.features.forEach(place => {
-                const type = typeLabel; // 'Stay' or 'Attraction'
+            data.features?.forEach(place => {
                 const props = place.properties;
-                const name = props.name;
-                
-                if(name) {
-                    // Smart Image Keywords
-                    let searchKeyword = typeLabel === 'Stay' ? 'resort,hotel,bedroom' : 'landmark,nature,tourism';
-                    const randomImg = `https://loremflickr.com/300/200/${searchKeyword}?lock=${Math.random()}`;
-
-                    const address = props.address_line2 || props.formatted || "Address unavailable";
-                    const placeName = name.replace(/'/g, "\\'");
-                    
-                    container.innerHTML += `
-                        <div class="card">
-                            <div class="card-img">
-                                <img src="${randomImg}" alt="${placeName}" loading="lazy">
-                            </div>
-                            <div class="card-body">
-                                <span class="card-badge">${typeLabel}</span>
-                                <h4>${name}</h4>
-                                <p>📍 ${address}</p>
-                                <button class="book-btn" onclick="initiateBooking('${placeName}', '${typeLabel}')">
-                                    Book ${typeLabel}
-                                </button>
-                            </div>
+                if(props.name) {
+                    const randomPrice = Math.floor(Math.random() * (8000 - 3000) + 3000);
+                    const card = document.createElement("div");
+                    card.className = "card";
+                    card.innerHTML = `
+                        <div class="card-img"><img src="https://loremflickr.com/300/200/${typeLabel === 'Stay' ? 'hotel' : 'landmark'}?lock=${Math.random()}" loading="lazy"></div>
+                        <div class="card-body">
+                            <span class="card-badge">${typeLabel}</span>
+                            <h4>${props.name}</h4>
+                            <p>📍 ${props.address_line2 || "Address unavailable"}</p>
+                            <button class="book-btn">Book ${typeLabel}</button>
                         </div>`;
+                    
+                    // MODIFIED: Button now opens the Premium Modal instead of showing an alert
+                    card.querySelector(".book-btn").onclick = () => openBookingModal(props, randomPrice, typeLabel);
+                    container.appendChild(card);
                 }
             });
         }
-        // =========================================================
-// 🚀 INTERNAL BOOKING LOGIC
-// =========================================================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyDfP1XaMtkGuBeSrl4fRw-Zi3l7_5sPm_w",
-    authDomain: "packnplan-3312d.firebaseapp.com",
-    projectId: "packnplan-3312d",
-    storageBucket: "packnplan-3312d.firebasestorage.app",
-    messagingSenderId: "976654836537",
-    appId: "1:976654836537:web:4d9b292611ccd5328b3ee8"
+        // --- ADDED: MODAL ENGINE FUNCTIONS ---
+        function openBookingModal(place, price, type) {
+            selectedPlace = place;
+            selectedPrice = price;
+            document.getElementById("modalHotelName").innerText = place.name;
+            document.getElementById("modalHotelAddress").innerText = `📍 ${place.address_line2 || city}`;
+            document.getElementById("payAmount").innerText = `₹${price}`;
+            
+            document.getElementById("step1").classList.remove("hidden");
+            document.getElementById("step2").classList.add("hidden");
+            document.getElementById("bookingModal").classList.remove("hidden");
+        }
+
+        document.getElementById("goToPayment").onclick = () => {
+            const name = document.getElementById("guestName").value;
+            if (name.length < 3) return alert("Please enter guest name.");
+            document.getElementById("step1").classList.add("hidden");
+            document.getElementById("step2").classList.remove("hidden");
+        };
+
+        document.getElementById("confirmFinalBooking").onclick = async () => {
+    const btn = document.getElementById("confirmFinalBooking");
+    const fields = [
+        { id: "cardNumber", length: 16 },
+        { id: "cardCVV", length: 3 }
+    ];
+
+    let hasError = false;
+
+    // Validate Card and CVV
+    fields.forEach(field => {
+        const input = document.getElementById(field.id);
+        if (!input.value || input.value.length < field.length) {
+            input.classList.add("input-error");
+            hasError = true;
+            // Remove error after animation so user can try again
+            setTimeout(() => input.classList.remove("input-error"), 500);
+        }
+    });
+
+    // Validate Expiry (Special case for the placeholder input)
+    const expiryInput = document.querySelector('input[placeholder="MM/YY"]');
+    if (!expiryInput.value || expiryInput.value.length < 5) {
+        expiryInput.classList.add("input-error");
+        hasError = true;
+        setTimeout(() => expiryInput.classList.remove("input-error"), 500);
+    }
+
+    if (hasError) return; // Stop if there are flaws
+
+    // PROCEED TO FIREBASE SAVE
+    btn.innerText = "Verifying Securely...";
+    btn.disabled = true;
+
+    try {
+        const user = auth.currentUser;
+        await addDoc(collection(db, "bookings"), {
+            userId: user ? user.uid : "Guest",
+            hotelName: selectedPlace.name,
+            guestName: document.getElementById("guestName").value,
+            amount: selectedPrice,
+            status: "Confirmed",
+            createdAt: serverTimestamp()
+        });
+        showSuccessVoucher(); // Launch Success Voucher
+    } catch (e) {
+        btn.innerText = "Retry Payment";
+        btn.disabled = false;
+    }
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-window.initiateBooking = async (name, type) => {
-        const user = auth.currentUser;
-
-        if (!user) {
-            alert("Please login to book this trip!");
-            window.location.href = "login.html"; // Redirect to login if not signed in
-            return;
+        function showSuccessVoucher() {
+            const container = document.getElementById("modalMainContent");
+            container.innerHTML = `
+                <div style="text-align:center; padding:30px;">
+                    <div class="success-check">✔</div>
+                    <h2>Booking Confirmed!</h2>
+                    <p>Pack your bags, ${document.getElementById("guestName").value}!</p>
+                    <div class="voucher-card">
+                        <div class="voucher-header"><span>VOUCHER</span><span>PNP-${Math.random().toString(36).substr(2,5).toUpperCase()}</span></div>
+                        <div class="voucher-body">
+                            <h3>${selectedPlace.name}</h3>
+                            <p><strong>Paid:</strong> ₹${selectedPrice}</p>
+                        </div>
+                    </div>
+                    <button onclick="window.location.href='index.html'" class="btn-primary-large">Return Home</button>
+                </div>`;
         }
+        // handle the MM/YY formatting
+document.querySelector('input[placeholder="MM/YY"]').oninput = function (e) {
+    let inputs = this.value.replace(/\D/g, ''); // Remove non-digits
+    if (inputs.length > 4) inputs = inputs.substr(0, 4); // Limit to 4 digits
+    
+    if (inputs.length > 2) {
+        this.value = inputs.substr(0, 2) + '/' + inputs.substr(2);
+    } else {
+        this.value = inputs;
+    }
+};
 
-        try {
-            // This creates the 'bookings' collection automatically if it doesn't exist
-            await addDoc(collection(db, "bookings"), {
-                userId: user.uid,
-                userName: user.displayName || user.email,
-                itemName: name,
-                itemType: type,
-                status: "Reserved",
-                timestamp: serverTimestamp()
-            });
-
-            alert(`✅ Success! ${name} has been added to your planned trips.`);
-        } catch (error) {
-            console.error("Error saving booking:", error);
-            alert("Something went wrong. Please try again.");
-        }
-    };
+        document.getElementById("closeModal").onclick = () => document.getElementById("bookingModal").classList.add("hidden");
+        document.getElementById("backToStep1").onclick = () => { document.getElementById("step2").classList.add("hidden"); document.getElementById("step1").classList.remove("hidden"); };
     </script>
 </body>
 </html>

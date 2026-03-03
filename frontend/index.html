@@ -131,7 +131,7 @@
             <option value="mountain">🏔️ Mountains & Trek</option>
             <option value="temple">🛕 Heritage & Culture</option>
         </select>
-        <button class="search-btn">Explore</button>
+        <button id="destExploreBtn" class="search-btn">Explore</button>
         </div>
       </form>
         <!-- ITINERARY -->
@@ -242,6 +242,82 @@
     </div>
 </div>
 <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+<div id="bookingModal" class="modal hidden">
+        <div class="modal-content premium-modal" id="modalMainContent">
+            <div class="modal-header-main">
+                <h2 id="modalHotelName">Hotel Name</h2>
+                <p id="modalHotelAddress" class="sub-address">📍 Loading address...</p>
+            </div>
+
+            <div class="modal-body-scroll">
+                <div class="trip-summary-card">
+                    <div class="summary-item">
+                        <span class="label">CHECK-IN</span>
+                        <span id="summaryCheckIn" class="value">--/--/----</span>
+                    </div>
+                    <div class="summary-divider"></div>
+                    <div class="summary-item">
+                        <span class="label">GUESTS</span>
+                        <span id="summaryGuests" class="value">2 Guests</span>
+                    </div>
+                </div>
+
+                <div id="step1" class="booking-form">
+                    <div class="input-block">
+                        <label>Guest Full Name</label>
+                        <input type="text" id="guestName" placeholder="e.g. John Doe">
+                    </div>
+
+                    <div class="input-block">
+                        <label>Email Address</label>
+                        <input type="email" id="guestEmail" placeholder="name@example.com">
+                    </div>
+
+                    <div class="input-block">
+                        <label>Phone Number</label>
+                        <div class="phone-input-wrapper">
+                            <span class="country-code">+91</span>
+                            <input type="text" id="guestPhone" inputmode="numeric" maxlength="10" placeholder="00000 00000">
+                        </div>
+                    </div>
+
+                    <button id="goToPayment" class="btn-primary-large">Proceed to Secure Payment</button>
+                    <button id="closeModal" class="btn-link-cancel">Cancel Booking</button>
+                </div>
+
+                <div id="step2" class="booking-form hidden">
+                    <div style="background: var(--bg-summary); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px dashed var(--accent);">
+                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">AMOUNT TO PAY:</span>
+                        <strong id="payAmount" style="font-size: 1.2rem; color: var(--accent);">₹0</strong>
+                    </div>
+
+                    <div class="input-block">
+                        <label>Card Number</label>
+                       <input type="text" id="cardNumber" placeholder="xxxx xxxx xxxx xxxx" 
+                            maxlength="19" inputmode="numeric" 
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <div style="flex: 1;">
+                            <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 5px;">Expiry</label>
+                            <input type="text" id="cardExpiry"placeholder="MM/YY" maxlength="5" inputmode="numeric"
+                            style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border-clr);">
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 5px;">CVV</label>
+                            <input type="password" placeholder="***" maxlength="3"
+                            inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                            style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border-clr);">
+                        </div>
+                    </div>
+
+                    <button id="confirmFinalBooking" class="btn-primary-large">Pay & Confirm Booking</button>
+                    <button id="backToStep1" class="btn-link-cancel">← Back to Details</button>
+                </div>
+            </div>
+        </div>
+    </div>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script type="module" src="assets/js/home.js"></script>
 </body>

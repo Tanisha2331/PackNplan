@@ -689,4 +689,31 @@ function add3DBuildings() {
         }
     });
 }
+// 1. Target the button by the ID you just added
+const exploreBtn = document.getElementById("destExploreBtn");
+
+if (exploreBtn) {
+    exploreBtn.onclick = (e) => {
+        // 🛑 CRITICAL: This stops the <form> from refreshing the page
+        e.preventDefault(); 
+
+        // 2. Get the values from your input and select fields
+        const cityInput = document.querySelector("#destination input[type='text']");
+        const vibeSelect = document.querySelector("#destination select");
+        
+        const city = cityInput.value.trim();
+        const vibe = vibeSelect.value;
+
+        // 3. Shake validation if empty (Premium TechNirmaan style)
+        if (!city) {
+            cityInput.classList.add("input-error");
+            setTimeout(() => cityInput.classList.remove("input-error"), 500);
+            return;
+        }
+
+        // 4. Redirect to your details page with the parameters
+        // This ensures the "same interface" pops up as requested
+        window.location.href = `destination-details.html?city=${encodeURIComponent(city)}&vibe=${vibe}`;
+    };
+}
 boot();

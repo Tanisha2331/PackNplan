@@ -212,3 +212,15 @@ html.dark-mode .btn-link-cancel {
     line-height: 1.6;
     color: var(--text-main);
 }
+.input-error {
+    border-color: #ff4d4d !important;
+    animation: shake 0.4s ease-in-out;
+}
+  .back-btn { display: inline-block; background: white; padding: 10px 20px; border-radius: 30px; text-decoration: none; color: #333; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; transition: transform 0.2s; }
+        .back-btn:hover { transform: translateY(-2px); }
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
