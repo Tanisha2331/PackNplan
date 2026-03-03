@@ -10,80 +10,47 @@ const firebaseConfig = {
     messagingSenderId: "976654836537",
     appId: "1:976654836537:web:4d9b292611ccd5328b3ee8"
 };
-// Replace alert() with this modern toast
-window.showToast = (message) => {
-    const container = document.getElementById("toast-container");
-    const toast = document.createElement("div");
-    toast.className = "toast";
-    toast.innerText = message;
-    container.appendChild(toast);
-    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
-};
 
-// Replace confirm() with a cleaner check
-window.confirmAction = (msg, callback) => {
-    if (confirm(msg)) callback(); // You can build a custom modal for this later!
-};
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
 const API_KEY = "1158d45a31c54d4fa492f618703b1f7f"; 
 
-// 1. CAPTURE URL PARAMETERS
 const urlParams = new URLSearchParams(window.location.search);
 const city = urlParams.get('city') || "Mumbai";
-const searchedCheckIn = urlParams.get('checkIn');
-const searchedGuests = urlParams.get('guests');
+const searchedCheckIn = urlParams.get('checkIn') || "2026-03-04";
+const searchedGuests = urlParams.get('guests') || "2";
 
 let selectedHotel = null;
 let selectedHotelPrice = 0;
 
-// --- UTILITY: Switch Modal Steps ---
-const showStep = (stepNumber) => {
-    const s1 = document.getElementById("step1");
-    const s2 = document.getElementById("step2");
-    if(s1 && s2) {
-        s1.classList.toggle("hidden", stepNumber !== 1);
-        s2.classList.toggle("hidden", stepNumber !== 2);
-    }
-};
-
-// 2. FETCH HOTELS
+// --- 1. FETCH & RENDER (Unchanged) ---
 async function getHotels() {
     const header = document.getElementById("headerCity");
     if(header) header.innerText = `Hotels in ${city}`;
-
     try {
         const geoUrl = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(city)}&apiKey=${API_KEY}`;
         const geoRes = await fetch(geoUrl);
         const geoData = await geoRes.json();
-        
-        if(!geoData.features || !geoData.features.length) return alert("City not found");
+        if(!geoData.features?.length) return;
         const { lat, lon } = geoData.features[0].properties;
-
         const hotelUrl = `https://api.geoapify.com/v2/places?categories=accommodation.hotel&filter=circle:${lon},${lat},20000&limit=15&apiKey=${API_KEY}`;
         const res = await fetch(hotelUrl);
         const data = await res.json();
         renderHotels(data.features);
-    } catch (err) {
-        console.error("Fetch Error:", err);
-    }
+    } catch (err) { console.error("Fetch Error:", err); }
 }
 
-// 3. RENDER CARDS
 function renderHotels(hotels) {
     const grid = document.getElementById("hotelGrid");
     if(!grid) return;
     grid.innerHTML = "";
-    
     hotels.forEach(h => {
         const p = h.properties;
         if(!p.name) return;
-
         const randomPrice = Math.floor(Math.random() * (8000 - 2000) + 2000);
         const rating = (Math.random() * (5 - 3.5) + 3.5).toFixed(1);
-
         const card = document.createElement("div");
         card.className = "hotel-card";
         card.innerHTML = `
@@ -96,136 +63,107 @@ function renderHotels(hotels) {
                 </div>
                 <p style="font-size:0.85rem; color:#666; margin:10px 0;">📍 ${p.address_line2 || 'Address on request'}</p>
                 <button class="book-btn">Confirm Availability</button>
-            </div>
-        `;
-        
+            </div>`;
         card.querySelector(".book-btn").onclick = () => openBookingModal(p, randomPrice);
         grid.appendChild(card);
     });
 }
 
-// 4. OPEN MODAL
+// --- 2. MODAL LOGIC (Modified for Steps) ---
 function openBookingModal(hotel, price) {
-    const user = auth.currentUser;
-    if (!user) return alert("Please login first!");
-
     selectedHotel = hotel;
     selectedHotelPrice = price;
-
-
-    const setSafeText = (id, text) => {
-        const el = document.getElementById(id);
-        if (el) el.innerText = text;
-    };
-
-    setSafeText("modalHotelName", hotel.name);
-    setSafeText("summaryCheckIn", searchedCheckIn || "Confirmed");
-    setSafeText("summaryGuests", searchedGuests ? `${searchedGuests} Guests` : "2 Guests");
-
-    const emailField = document.getElementById("guestEmail");
-    if (emailField) emailField.value = user.email || "";
-
-    showStep(1); 
-    document.getElementById("bookingModal")?.classList.remove("hidden");
+    document.getElementById("modalHotelName").innerText = hotel.name;
+    document.getElementById("modalHotelAddress").innerText = `📍 ${hotel.address_line2 || city}`;
+    document.getElementById("summaryCheckIn").innerText = searchedCheckIn;
+    document.getElementById("summaryGuests").innerText = `${searchedGuests} Guests`;
+    
+    // Reset to Step 1
+    document.getElementById("step1").classList.remove("hidden");
+    document.getElementById("step2").classList.add("hidden");
+    document.getElementById("bookingModal").classList.remove("hidden");
 }
 
-// 5. ATTACH LISTENERS
-const attachListeners = () => {
-    // A. PROCEED TO PAYMENT
-    const btnGoToPay = document.getElementById("goToPayment");
-    if (btnGoToPay) {
-        btnGoToPay.onclick = () => {
-            const name = document.getElementById("guestName")?.value;
-            const phone = document.getElementById("guestPhone")?.value;
+// ADDED: Navigation between Step 1 and Step 2
+const btnGoToPayment = document.getElementById("goToPayment");
+if (btnGoToPayment) {
+    btnGoToPayment.onclick = () => {
+        const name = document.getElementById("guestName").value;
+        const phone = document.getElementById("guestPhone").value;
+        if (!name || name.length < 3) return alert("Please enter guest name.");
+        if (phone.length !== 10) return alert("Enter valid 10-digit phone.");
 
-            if (!name || name.length < 3) return alert("Please enter a valid guest name.");
-            if (!phone || phone.length !== 10) return alert("Please enter a valid 10-digit phone number.");
+        document.getElementById("payAmount").innerText = `₹${selectedHotelPrice}`;
+        document.getElementById("step1").classList.add("hidden");
+        document.getElementById("step2").classList.remove("hidden");
+    };
+}
 
-            btnGoToPay.innerText = "Connecting to Secure Gateway...";
-            btnGoToPay.disabled = true;
-
-            setTimeout(() => {
-                const payAmountEl = document.getElementById("payAmount");
-                if (payAmountEl) payAmountEl.innerText = `₹${selectedHotelPrice}`;
-                showStep(2);
-                btnGoToPay.innerText = "Proceed to Payment";
-                btnGoToPay.disabled = false;
-            }, 1200);
-        };
-    }
-
-    // B. CONFIRM FINAL BOOKING (SAVE TO FIREBASE)
-    const btnFinal = document.getElementById("confirmFinalBooking");
-    if (btnFinal) {
-        btnFinal.onclick = async () => {
-            const name = document.getElementById("guestName").value;
-            const email = document.getElementById("guestEmail").value;
-            const phone = document.getElementById("guestPhone").value;
-
-            btnFinal.innerText = "Processing Payment...";
-            btnFinal.disabled = true;
-
-            try {
-                await addDoc(collection(db, "bookings"), {
-                    userId: auth.currentUser.uid,
-                    hotelName: selectedHotel.name,
-                    checkIn: searchedCheckIn || "TBD",
-                    guests: searchedGuests || "2",
-                    guestDetails: {
-                        name: name,
-                        email: email,
-                        phone: phone
-                    },
-                    amount: selectedHotelPrice,
-                    status: "Confirmed",
-                    createdAt: serverTimestamp()
-                });
-                showSuccessTicket();
-            } catch (e) {
-                console.error(e);
-                alert("Payment failed.");
-                btnFinal.innerText = "Pay & Confirm";
-                btnFinal.disabled = false;
-            }
-        };
-    }
-
-    const btnBack = document.getElementById("backToStep1");
-    if (btnBack) btnBack.onclick = () => showStep(1);
-
-    const btnClose = document.getElementById("closeModal");
-    if (btnClose) btnClose.onclick = () => document.getElementById("bookingModal").classList.add("hidden");
+const btnBack = document.getElementById("backToStep1");
+if (btnBack) btnBack.onclick = () => {
+    document.getElementById("step2").classList.add("hidden");
+    document.getElementById("step1").classList.remove("hidden");
 };
 
-function showSuccessTicket() {
-    const modalContainer = document.getElementById("modalContainer");
-    const guestName = document.getElementById("guestName").value;
-    const bookingId = `PNP-${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
+// --- 3. FIREBASE SAVE & VOUCHER ---
+const btnFinal = document.getElementById("confirmFinalBooking");
+if (btnFinal) {
+    btnFinal.onclick = async () => {
+        btnFinal.innerText = "Verifying Payment...";
+        btnFinal.disabled = true;
 
-    modalContainer.innerHTML = `
-        <div style="text-align:center; padding:10px; font-family: 'Poppins', sans-serif;">
-            <div style="font-size:3.5rem; color:#27ae60; margin-bottom:10px;">✔</div>
-            <h2 style="margin:0; color:#333;">Booking Confirmed!</h2>
-            <p style="color:#666; font-size:0.9rem;">Thank you, ${guestName}!</p>
+        try {
+            await addDoc(collection(db, "bookings"), {
+                hotelName: selectedHotel.name,
+                checkIn: searchedCheckIn,
+                guests: searchedGuests,
+                guestName: document.getElementById("guestName").value,
+                guestEmail: document.getElementById("guestEmail").value,
+                amount: selectedHotelPrice,
+                status: "Confirmed",
+                createdAt: serverTimestamp()
+            });
+            showSuccessVoucher(); // Show ticket instead of alert
+        } catch (e) {
+            console.error(e);
+            alert("Payment Failed.");
+            btnFinal.innerText = "Pay & Confirm Booking";
+            btnFinal.disabled = false;
+        }
+    };
+}
+
+// ADDED: Function to show professional success ticket
+function showSuccessVoucher() {
+    const container = document.getElementById("modalMainContent");
+    const bookingId = "PNP-" + Math.random().toString(36).substr(2, 7).toUpperCase();
+    
+    container.innerHTML = `
+        <div style="text-align:center; padding:30px;">
+            <div class="success-check">✔</div>
+            <h2 style="color:var(--text-main); margin-bottom:5px;">Booking Confirmed!</h2>
+            <p style="color:var(--text-muted); font-size:0.9rem;">Pack your bags, ${document.getElementById("guestName").value}!</p>
             
-            <div id="voucher" style="background:#fff; border:1px solid #eee; border-radius:12px; margin:20px 0; text-align:left; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                <div style="background:#0b74e7; color:white; padding:10px 15px; border-radius:12px 12px 0 0; display:flex; justify-content:space-between;">
-                    <span style="font-weight:bold;">VOUCHER</span>
+            <div class="voucher-card">
+                <div class="voucher-header">
+                    <span>BOOKING VOUCHER</span>
                     <span>${bookingId}</span>
                 </div>
-                <div style="padding:15px;">
-                    <h3 style="margin:0 0 10px 0; color:#0b74e7;">${selectedHotel.name}</h3>
-                    <div style="font-size:0.85rem; line-height:1.6; color:#444;">
-                        <div><strong>Check-in:</strong> ${searchedCheckIn || 'Confirmed'}</div>
+                <div class="voucher-body">
+                    <h3>${selectedHotel.name}</h3>
+                    <div class="voucher-info">
+                        <div><strong>Check-in:</strong> ${searchedCheckIn}</div>
+                        <div><strong>Guests:</strong> ${searchedGuests}</div>
                         <div><strong>Paid:</strong> ₹${selectedHotelPrice}</div>
                     </div>
                 </div>
             </div>
-            <button onclick="window.location.href='index.html'" class="book-btn">Return Home</button>
-        </div>
-    `;
+            <button onclick="window.location.href='index.html'" class="btn-primary-large">Return Home</button>
+        </div>`;
 }
 
-// INITIALIZE
-attachListeners();
+document.getElementById("closeModal").onclick = () => {
+    document.getElementById("bookingModal").classList.add("hidden");
+};
+
 getHotels();

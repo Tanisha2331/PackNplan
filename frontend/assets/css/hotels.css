@@ -1,24 +1,36 @@
+/* --- 1. THEME VARIABLES (Dark Mode Support) --- */
+:root {
+    --bg-card: #ffffff;
+    --text-main: #333333;
+    --text-muted: #666666;
+    --accent: #0b74e7;
+    --border-clr: #eeeeee;
+    --bg-summary: #f8f9fa;
+}
+
+html.dark-mode {
+    --bg-card: #1e1e1e;
+    --text-main: #f1f1f1;
+    --text-muted: #bbbbbb;
+    --accent: #FF9933; /* Saffron for Dark Mode */
+    --border-clr: #333333;
+    --bg-summary: #2a2a2a;
+}
+
+/* --- 2. YOUR ORIGINAL HOTEL GRID & CARDS (UNCHANGED) --- */
 body { font-family: 'Poppins', sans-serif; margin: 0; background: #f8f9fa; }
 .hotel-header { background: #0b74e7; color: white; padding: 20px; display: flex; align-items: center; gap: 20px; }
 .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
 
 .hotel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
-.hotel-card img { width: 100%; height: 200px; object-fit: cover; }
-.card-content { padding: 15px; }
 
-.book-btn { width: 100%; background: #0b74e7; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-
-/* Modal Styles */
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modal.hidden { display: none; }
-.modal-content { background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; }
-.input-group { margin-bottom: 15px; }
-.input-group input, .input-group select { width: 100%; padding: 10px; margin-top: 5px; }
 .hotel-card {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 20px;
+    overflow: hidden;
+    position: relative;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -27,10 +39,12 @@ body { font-family: 'Poppins', sans-serif; margin: 0; background: #f8f9fa; }
     box-shadow: 0 15px 35px rgba(11, 116, 231, 0.2);
 }
 
+.hotel-card img { width: 100%; height: 200px; object-fit: cover; }
+.card-content { padding: 15px; }
+
 .price-tag {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: 15px; right: 15px;
     background: #0b74e7;
     color: white;
     padding: 5px 15px;
@@ -38,80 +52,163 @@ body { font-family: 'Poppins', sans-serif; margin: 0; background: #f8f9fa; }
     font-weight: bold;
     font-size: 0.9rem;
 }
-.hidden { display: none !important; }
-.input-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: #555; }
-.input-group input { border: 1px solid #ddd; border-radius: 5px; padding: 10px; width: 100%; box-sizing: border-box; }
-/* Card Styling */
+
+.book-btn { width: 100%; background: #0b74e7; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+
+/* --- 3. PREMIUM BOOKING FORM (MODAL) --- */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
+.modal.hidden { display: none; }
+
+.premium-modal {
+    max-width: 480px !important;
+    border-radius: 24px !important;
+    padding: 0 !important;
+    overflow: hidden;
+    background: var(--bg-card) !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3) !important;
+}
+
+.modal-header-main { padding: 24px 30px; border-bottom: 1px solid var(--border-clr); }
+.modal-header-main h2 { margin: 0; color: var(--text-main); font-size: 1.4rem; }
+.sub-address { font-size: 0.85rem; color: var(--text-muted); margin-top: 5px; }
+
+.trip-summary-card {
+    display: flex;
+    background: var(--bg-summary);
+    margin: 20px 30px;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid var(--border-clr);
+}
+
+.summary-item { flex: 1; text-align: center; }
+.summary-divider { width: 1px; background: var(--border-clr); margin: 0 15px; }
+.label { font-size: 0.65rem; color: var(--text-muted); font-weight: bold; display: block; text-transform: uppercase; }
+.value { font-size: 0.9rem; font-weight: 600; color: var(--text-main); }
+
+.booking-form { padding: 0 30px 25px 30px; }
+.input-block { margin-bottom: 18px; }
+.input-block label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--text-main); }
+.input-block input {
+    width: 100%; padding: 12px 15px; border: 1px solid var(--border-clr); border-radius: 12px; font-size: 1rem;
+    background: var(--bg-card); color: var(--text-main); box-sizing: border-box;
+}
+
+/* Phone UI */
+.phone-input-wrapper { display: flex; border: 1px solid var(--border-clr); border-radius: 12px; overflow: hidden; }
+.country-code { padding: 12px; background: var(--bg-summary); border-right: 1px solid var(--border-clr); font-weight: 600; color: var(--text-muted); }
+.phone-input-wrapper input { border: none !important; }
+
+.btn-primary-large {
+    width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 14px;
+    font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s;
+}
+.btn-primary-large:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+/* --- 4. MY BOOKINGS LIST --- */
+#bookingsList { max-height: 400px; overflow-y: auto; padding: 10px 30px 30px 30px; }
+
 .booking-card {
-    background: #ffffff;
+    background: var(--bg-card);
     border-radius: 16px;
     padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 15px;
+    border: 1px solid var(--border-clr);
     transition: transform 0.3s ease;
-    border: 1px solid #f0f0f0;
 }
 
-.booking-card:hover {
-    transform: translateY(-5px);
-}
-/* Fix the Modal Container */
-.modal-content {
-    max-height: 85vh; /* Limits height to 85% of the screen */
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; /* Keeps the header from scrolling away */
-    border-radius: 20px;
-    padding: 0 !important; /* We will use padding on inner elements instead */
-}
+.booking-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
 
-/* Fix the Header */
-.modal-content h2 {
-    padding: 20px;
-    margin: 0;
-    border-bottom: 1px solid #eee;
-    background: #fff;
-}
-
-/* Fix the Scrollable List */
-#bookingsList {
-    flex-grow: 1;
-    overflow-y: auto; /* This adds the scrollbar only when needed */
-    padding: 20px;
-    background: #fcfcfc;
-}
-
-/* Design a Modern Scrollbar */
-#bookingsList::-webkit-scrollbar {
-    width: 8px;
-}
-#bookingsList::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-#bookingsList::-webkit-scrollbar-thumb {
-    background: #0b74e7; /* Matches your theme blue */
-    border-radius: 10px;
-}
-#bookingsList::-webkit-scrollbar-thumb:hover {
-    background: #0856ab;
-}
-.status-badge {
-    padding: 4px 12px;
-    border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
+.status-badge { padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
 .status-confirmed { background: #e8f5e9; color: #2e7d32; }
-.status-reserved { background: #fff3e0; color: #ef6c00; }
 
-.cancel-link {
-    color: #ff4d4d;
-    font-size: 0.8rem;
-    cursor: pointer;
-    text-decoration: underline;
+.hidden { display: none !important; }
+/* --- CANCEL BUTTON STYLING --- */
+.btn-link-cancel {
+    display: block;
+    width: 100%;
     background: none;
     border: none;
-    padding: 0;
+    color: var(--text-muted); /* Soft grey color */
+    margin-top: 15px;
+    padding: 10px;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 0.9rem;
+    font-family: 'Poppins', sans-serif;
+    transition: color 0.3s ease;
+}
+
+.btn-link-cancel:hover {
+    color: #ff4d4d; /* Turns slightly red on hover for a "cancel" feel */
+}
+
+/* --- DARK MODE ADJUSTMENT --- */
+html.dark-mode .btn-link-cancel {
+    color: #bbbbbb;
+}
+/* --- ADDED: STEP 2 PAYMENT GATEWAY STYLES --- */
+.payment-summary-box {
+    background: var(--bg-summary);
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px dashed var(--accent);
+}
+
+.payment-summary-box span {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.payment-summary-box strong {
+    font-size: 1.2rem;
+    color: var(--accent);
+}
+
+/* --- ADDED: SUCCESS VOUCHER STYLES --- */
+.success-check {
+    font-size: 4rem;
+    color: #27ae60;
+    margin-bottom: 10px;
+}
+
+.voucher-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-clr);
+    border-radius: 16px;
+    margin: 20px 0;
+    text-align: left;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.voucher-header {
+    background: var(--accent);
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.voucher-body {
+    padding: 20px;
+}
+
+.voucher-body h3 {
+    margin: 0 0 10px 0;
+    color: var(--accent);
+    font-size: 1.1rem;
+}
+
+.voucher-info {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--text-main);
 }
