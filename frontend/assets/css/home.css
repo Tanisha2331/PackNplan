@@ -1202,3 +1202,38 @@ body,html{
 .dark-mode .drawer-divider {
     background: rgba(255, 255, 255, 0.1) !important;
 }
+ .error-msg {color: #ff4d4d;font-size: 0.75rem; margin-top: 4px; display: none; /* Hidden by default */}
+        .input-error {border-color: #ff4d4d !important; animation: shake 0.4s ease-in-out;}
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        #customConfirmModal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    display: none; /* Controlled by JS flex/none */
+    align-items: center;
+    justify-content: center;
+    z-index: 999999 !important; /* Higher than EVERYTHING else */
+}
+
+#customConfirmModal .modal-content {
+    background: white;
+    padding: 0;
+    border-radius: 15px;
+    overflow: hidden;
+    width: 90%;
+    max-width: 400px;
+    animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+@keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}

@@ -174,13 +174,13 @@ window.viewMyBookings = async () => {
                     </div>
                 </div>
                 <div style="margin-top:15px; display:flex; gap:10px;">
-                    <button onclick="window.showToast('Voucher feature coming soon!')" 
+                     <button onclick="window.showToast('Voucher feature coming soon!')" 
                             style="flex:1; background:#0b74e7; color:#fff; border:none; padding:8px; border-radius:6px; cursor:pointer; font-weight:600;">
                         Download Ticket
-                    </button>
-                    <button onclick="window.confirmAction('Cancel this trip?', () => cancelBooking('${docSnap.id}'))" 
-                            style="flex:1; background:#fff; color:#ff4d4d; border:1px solid #ff4d4d; padding:8px; border-radius:6px; cursor:pointer;">
-                        Cancel
+                    </button> 
+                    <button onclick="window.cancelBooking('${docSnap.id}')" 
+                      style="flex:1; background:#fff; color:#ff4d4d; border:1.5px solid #ff4d4d; padding:8px; border-radius:6px; cursor:pointer;"> 
+                      Cancel
                     </button>
                 </div>
             `;
@@ -307,6 +307,92 @@ sendBtn?.addEventListener('click', async () => {
   }
 });
 
+// ==========================================
+// TRANSPORT SEARCH LOGIC
+// ==========================================
+
+const searchTransportBtn = document.getElementById("searchTransportBtn");
+const resultsContainer = document.getElementById("transport-results");
+
+if (searchTransportBtn) {
+    searchTransportBtn.onclick = async (e) => {
+        e.preventDefault(); // 🛑 Stop the page refresh
+
+        const from = document.getElementById("fromCity").value.trim() || "Your Location";
+        const to = document.getElementById("toCity").value.trim();
+        const type = document.getElementById("transportType").value;
+
+        if (!to) return window.showToast("⚠️ Please enter a destination city.");
+
+        resultsContainer.innerHTML = `<p>🔍 Scanning for available ${type}s to ${to}...</p>`;
+
+        // --- DYNAMIC DATA GENERATOR (NOT HARD-CODED) ---
+        // This generates names based on the "toCity" input
+        const generateOptions = (city, mode) => {
+            const data = [];
+            const brands = {
+                train: ["Express", "Shatabdi", "Superfast", "Special"],
+                flight: ["IndiGo", "Air India", "Vistara", "Akasa Air"],
+                bus: ["Volvo AC", "Sleeper", "Intercity", "Express Bus"],
+                cab: ["Uber Intercity", "Ola Outstation", "Private Cab"]
+            };
+
+            // Generate 3 unique options for the specific city
+            for (let i = 0; i < 3; i++) {
+                const brand = brands[mode][i] || brands[mode][0];
+                const time = `${Math.floor(Math.random() * 12 + 1)}:${Math.random() > 0.5 ? '30' : '00'} ${Math.random() > 0.5 ? 'AM' : 'PM'}`;
+                const price = mode === 'flight' ? Math.floor(Math.random() * 3000 + 4000) : Math.floor(Math.random() * 1000 + 500);
+                
+                data.push({
+                    // This makes the name dynamic: e.g., "Amritsar Shatabdi"
+                    name: mode === 'flight' ? `${brand} ${Math.floor(Math.random()*900 + 100)}` : `${city} ${brand}`,
+                    time: time,
+                    price: price,
+                    duration: mode === 'flight' ? "2h 15m" : "8h 45m"
+                });
+            }
+            return data;
+        };
+
+       // Render logic
+        setTimeout(() => {
+            resultsContainer.innerHTML = "";
+            
+            // FIX: You must call the function to get the data!
+            const options = generateOptions(to, type); 
+
+            options.forEach(item => {
+                resultsContainer.innerHTML += `
+                    <div class="booking-card" style="margin-bottom:15px; border-left: 5px solid #0b74e7;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <h4 style="margin:0;">${item.name}</h4>
+                                <p style="margin:5px 0 0 0; font-size:0.8rem; color:#777;">🕒 ${item.time} • ₹${item.price}</p>
+                            </div>
+                            <div style="text-align:right;">
+                                <button class="btn-primary-small" onclick="openTransportModal('${item.name}', ${item.price})">Book</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+           
+        }, 800);
+    };
+}
+// Get all your tab buttons (update the selector to match your class name)
+const tabButtons = document.querySelectorAll('.tab-panel'); 
+
+tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        // When any tab is clicked, clear the previous transport results
+        const results = document.getElementById("transport-results");
+        if (results) {
+            results.innerHTML = ""; 
+        }
+    });
+});
 // =========================================
 // SAVED TRIPS LOGIC (With Delete & Scroll)
 // =========================================
@@ -569,18 +655,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 });
-//cancel booking
-window.cancelBooking = async (id) => {
-    if (!confirm("Are you sure you want to cancel this trip?")) return;
-    try {
-        await deleteDoc(doc(db, "bookings", id));
-        alert("Trip cancelled successfully.");
-        window.viewMyBookings(); // This refreshes the list automatically
-    } catch (e) {
-        console.error("Cancel failed:", e);
-        alert("Error cancelling booking.");
-    }
-};
 // ===============================
 // MAP LOGIC (MapLibre & 3D)
 // ===============================
@@ -716,4 +790,42 @@ if (exploreBtn) {
         window.location.href = `destination-details.html?city=${encodeURIComponent(city)}&vibe=${vibe}`;
     };
 }
+// FORCE RESET: Overriding the cancel flow
+window.cancelBooking = (id) => {
+    const confirmModal = document.getElementById("customConfirmModal");
+    
+    // 1. Force the modal to show using direct style (bypassing CSS classes)
+    confirmModal.classList.remove("hidden");
+    confirmModal.style.display = "flex"; 
+    confirmModal.style.position = "fixed";
+    confirmModal.style.zIndex = "99999";
+
+    // 2. Clear previous listeners to prevent multiple deletions
+    const yesBtn = document.getElementById("confirmYes");
+    const noBtn = document.getElementById("confirmNo");
+
+    // 3. Set the "Yes" action
+    yesBtn.onclick = async () => {
+        confirmModal.style.display = "none"; // Hide immediately
+        confirmModal.classList.add("hidden");
+
+        try {
+            // Reference the specific doc and delete it
+            const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js");
+            await deleteDoc(doc(db, "bookings", id));
+            
+            window.showToast("✅ Trip removed successfully.");
+            window.viewMyBookings(); // Refresh the list
+        } catch (e) {
+            console.error(e);
+            window.showToast("❌ Error: Permission denied.");
+        }
+    };
+
+    // 4. Set the "No" action
+    noBtn.onclick = () => {
+        confirmModal.style.display = "none";
+        confirmModal.classList.add("hidden");
+    };
+};
 boot();
