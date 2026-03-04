@@ -7,14 +7,20 @@
   --bg-main: #ffffff;
   --bg-card: #ffffff;
   --text-main: #111111;
-  --border-clr: rgba(0, 0, 0, 0.1);
+  --text-on-card: #111111; /* default text color when card is light */
+  --border-clr: rgba(0, 0, 0, 0.10);
+  --drawer-hover-bg: #f0f9ff;
+  --drawer-hover-color: #0b74e7;
 }
 
 html.dark-mode {
   --bg-main: #121212;
   --bg-card: #1e1e1e;
-  --text-main: #f1f1f1;
+  --text-main: #ffffff; /* brighter for readability */
+  --text-on-card: #ffffff; /* card text flips to light when card dark */
   --border-clr: #333333;
+  --drawer-hover-bg: rgba(255,255,255,0.1);
+  --drawer-hover-color: var(--accent);
 }
 
 body {
@@ -32,7 +38,9 @@ body {
 body,html{
   margin:0;
   font-family:Inter,system-ui,Arial,Helvetica,sans-serif;
-  color:#111}
+  /* use theme variable so dark mode can override */
+  color: var(--text-main);
+}
 
 .topbar{
   display: flex;
@@ -85,7 +93,9 @@ body,html{
   left:0; top:0; bottom:0;
   width:var(--drawer-width);
   transform:translateX(-110%);
-  background:#fff;
+  /* sidebar background/text use variables so theme can flip them */
+  background: var(--bg-card);
+  color: var(--text-main);
   z-index:80;
   padding:28px 16px;
   box-shadow:4px 0 30px rgba(0,0,0,0.15);
@@ -118,7 +128,8 @@ body,html{
   font-size: 20px;
 }
 .drawer-header h2{
-  color:rgba(6, 83, 237, 0.962);
+  /* use theme text color or accent for welcome message */
+  color: var(--text-main);
   margin:3px; 
   font-size: 22px;
   font-family: 'Times New Roman', Times, serif;
@@ -147,7 +158,7 @@ body,html{
   
   font-size: 15px;
   font-weight: 500;
-  color: #4a5568;          /* Professional dark grey */
+  color: var(--text-main);
   cursor: pointer;
   
   transition: all 0.2s ease; /* Smooth hover animation */
@@ -155,47 +166,35 @@ body,html{
 
 /* 2. Hover Effect (Matches your Dropdown) */
 .drawer-item:hover {
-  background-color: #f0f9ff; /* Light blue background */
-  color: #0b74e7;            /* Your Accent Blue text */
+  background-color: var(--drawer-hover-bg);
+  color: var(--drawer-hover-color);
   transform: translateX(5px); /* Subtle slide to the right */
   box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Tiny shadow pop */
 }
 
 /* 3. Automatic Icons (No HTML changes needed!) */
 
-/* 1st Item: Hotels & Transport */
+/* 1st Item: Saved Trips */
 .drawer-item:nth-child(1)::before { 
-  content: "🏨"; 
-  font-size: 1.2em; 
-}
-
-/* 2nd Item: Saved Trips */
-.drawer-item:nth-child(2)::before { 
   content: "❤️"; 
   font-size: 1.2em; 
 }
 
-/* 3rd Item: Visited Trips */
-.drawer-item:nth-child(3)::before { 
+/* 2nd Item: Visited Trips */
+.drawer-item:nth-child(2)::before { 
   content: "🕒"; 
   font-size: 1.2em; 
 }
 
-/* 4th Item: Maps */
-.drawer-item:nth-child(4)::before { 
+/* 3rd Item: Maps */
+.drawer-item:nth-child(3)::before { 
   content: "🗺️"; 
   font-size: 1.2em; 
 }
 
-/* 5th Item: Chatbot */
-.drawer-item:nth-child(5)::before { 
+/* 4th Item: Chatbot */
+.drawer-item:nth-child(4)::before { 
   content: "🤖"; 
-  font-size: 1.2em; 
-}
-
-/* 6th Item: Itinerary */
-.drawer-item:nth-child(6)::before { 
-  content: "📅"; 
   font-size: 1.2em; 
 }
 /* overlay */
@@ -842,14 +841,15 @@ body,html{
 }
 
 .offer-card {
-    background: white;
+    /* card background follows theme variable instead of being hard‑coded */
+    background: var(--bg-card);
     border-radius: 12px;
     padding: 15px;
     display: flex;
     align-items: center;
     gap: 15px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    border: 1px solid #f0f0f0;
+    border: 1px solid var(--border-clr);
     position: relative;
     overflow: hidden;
 }
@@ -896,8 +896,9 @@ body,html{
 .offer-card:hover {
     transform: translateY(-5px); /* Lifts the ticket up slightly */
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); /* Deepens the shadow */
-    border-color: #0b74e7; /* Changes border to your theme blue */
-    background-color: #fafdff; /* Very slight blue tint on hover */
+    border-color: var(--accent); /* Changes border to your theme blue */
+    /* hover tint can remain light regardless of theme for subtle effect */
+    background-color: rgba(250, 253, 255, 0.8);
 }
 
 /* Subtle icon animation on hover */
@@ -920,12 +921,12 @@ body,html{
 }
 
 .hotel-card {
-    background: white;
+    background: var(--bg-card);
     border-radius: 15px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     transition: transform 0.3s ease;
-    border: 1px solid #eee;
+    border: 1px solid var(--border-clr);
 }
 
 .hotel-card:hover {

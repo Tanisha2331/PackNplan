@@ -14,8 +14,9 @@ html.dark-mode {
     --bg-main: #121212;
     --bg-container: rgba(30, 30, 30, 0.95);
     --bg-card: #252525;
-    --text-title: #FF9933; /* Saffron Accent */
-    --text-main: #bbbbbb;
+    /* make both title and body text white for maximum contrast */
+    --text-title: #ffffff;
+    --text-main: #ffffff;
     --accent: #FF9933;
     --card-hover: #333333;
     --border-clr: #444444;
@@ -162,6 +163,17 @@ input:checked + .slider:before { transform: translateX(22px); }
     border-radius: 5px;
     cursor: pointer;
     transition: 0.3s;
+}
+
+/* ensure any leftover hard‑coded text becomes readable in dark mode */
+html.dark-mode body,
+html.dark-mode .settings-container,
+html.dark-mode h1, html.dark-mode h2, html.dark-mode h3,
+html.dark-mode h4, html.dark-mode h5, html.dark-mode h6,
+html.dark-mode p,
+html.dark-mode button,
+html.dark-mode label {
+    color: var(--text-main) !important;
 }
 
 .lang-btn:hover, .lang-btn.active {
