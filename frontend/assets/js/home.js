@@ -162,21 +162,25 @@ window.viewMyBookings = async () => {
             const card = document.createElement("div");
             card.className = "booking-card";
             
+            // Format the booking date if it exists
+            const bookingDate = b.bookingDate ? new Date(b.bookingDate.seconds * 1000).toLocaleDateString() : 'N/A';
+            
             card.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:start;">
                     <div>
-                        <span class="status-pill">Confirmed</span>
-                        <h4 style="margin:8px 0 2px 0; font-size:1.1rem;">${b.hotelName || b.itemName}</h4>
-                        <p style="margin:0; font-size:0.8rem; color:#777;">📅 Check-in: ${b.checkIn}</p>
+                        <span class="status-pill">${b.status || 'Pending'}</span>
+                        <h4 style="margin:8px 0 2px 0; font-size:1.1rem;">${b.itemName || 'Trip'}</h4>
+                        <p style="margin:0; font-size:0.8rem; color:#777;">📅 Booked: ${bookingDate}</p>
+                        <p style="margin:5px 0 0 0; font-size:0.8rem; color:#999;">Type: ${b.itemType || 'N/A'}</p>
                     </div>
                     <div style="text-align:right;">
-                        <p style="margin:0; font-weight:bold; color:#0b74e7;">₹${b.amount || '0'}</p>
+                        <p style="margin:0; font-weight:bold; color:#0b74e7;">${b.price ? '₹' + b.price : 'View Details'}</p>
                     </div>
                 </div>
                 <div style="margin-top:15px; display:flex; gap:10px;">
-                     <button onclick="window.showToast('Voucher feature coming soon!')" 
+                     <button onclick="window.showToast('Ticket for ${b.itemName} - Valid for 30 days')" 
                             style="flex:1; background:#0b74e7; color:#fff; border:none; padding:8px; border-radius:6px; cursor:pointer; font-weight:600;">
-                        Download Ticket
+                        View Ticket
                     </button> 
                     <button onclick="window.cancelBooking('${docSnap.id}')" 
                       style="flex:1; background:#fff; color:#ff4d4d; border:1.5px solid #ff4d4d; padding:8px; border-radius:6px; cursor:pointer;"> 
@@ -293,7 +297,12 @@ sendBtn?.addEventListener('click', async () => {
   chatMessages.appendChild(typingDiv);
 
   try {
-    const response = await fetch('https://packn-plan.vercel.app/api/chat', {
+    // Try local backend first, then fallback to production
+    const apiUrl = window.location.hostname === 'localhost' 
+      ? 'http://localhost:5000/api/chat' 
+      : '/api/chat';
+      
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: userText })
@@ -304,6 +313,7 @@ sendBtn?.addEventListener('click', async () => {
   } catch (error) {
     const indicator = document.getElementById(typingId);
     if (indicator) indicator.textContent = "Error: Could not connect to AI server.";
+    console.error("Chat API Error:", error);
   }
 });
 
@@ -524,6 +534,24 @@ function showLoginModal() { modal.classList.remove("hidden"); }
 function hideLoginModal() { modal.classList.add("hidden"); }
 modalClose.addEventListener("click", hideLoginModal);
 modalLogin.addEventListener("click", () => window.location.href = "login.html");
+
+// ===============================
+// TRANSPORT BOOKING MODAL
+// ===============================
+window.openTransportModal = (transportName, price) => {
+    const user = auth.currentUser;
+    if (!user) {
+        showLoginModal();
+        return;
+    }
+    
+    // Simple confirmation for transport booking
+    const confirmed = confirm(`\n Book ${transportName}?\n\nPrice: ₹${price}\n\nClick "OK" to confirm your booking.`);
+    
+    if (confirmed) {
+        window.initiateBooking(transportName, 'Transport');
+    }
+};
 
 loginBtn.onclick = () => window.location.href = "login.html";
 signupBtn.onclick = () => window.location.href = "signup.html";

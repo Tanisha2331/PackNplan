@@ -1149,6 +1149,153 @@ body,html{
 .custom-star-marker:hover::after {
   opacity: 1;
 }
+
+/* ===== FOOTER STYLES ===== */
+footer.footer {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-top: 2px solid var(--accent);
+  padding: 50px 20px 30px;
+  margin-top: 80px;
+}
+
+.footer-content {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-column h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 18px;
+  color: var(--text-main);
+  font-family: 'Poppins', sans-serif;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column li {
+  margin-bottom: 12px;
+}
+
+.footer-column a {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.3s ease;
+  display: inline-block;
+}
+
+.footer-column a:hover {
+  color: var(--accent);
+}
+
+html.dark-mode .footer-column a {
+  color: #ccc;
+}
+
+html.dark-mode .footer-column a:hover {
+  color: var(--accent);
+}
+
+.social-icons {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.social-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 1.3rem;
+}
+
+html.dark-mode .social-icon {
+  background: rgba(11, 116, 231, 0.8);
+}
+
+.partners {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.partner-link {
+  color: #666;
+  font-size: 0.95rem;
+  transition: color 0.3s ease;
+  cursor: pointer;
+}
+
+.partner-link:hover {
+  color: var(--accent);
+}
+
+html.dark-mode .partner-link {
+  color: #ccc;
+}
+
+.footer-bottom {
+  border-top: 1px solid var(--border-clr);
+  padding-top: 25px;
+  text-align: center;
+  color: #999;
+  font-size: 0.9rem;
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+html.dark-mode .footer-bottom {
+  color: #aaa;
+}
+
+/* Responsive Footer */
+@media (max-width: 768px) {
+  footer.footer {
+    padding: 40px 15px 25px;
+    margin-top: 60px;
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+
+  .footer-column h3 {
+    font-size: 1rem;
+    margin-bottom: 15px;
+  }
+
+  .footer-column a {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .footer-bottom p {
+    font-size: 0.8rem;
+  }
+}
 /* Make popups look premium over satellite imagery */
 .leaflet-popup-content-wrapper {
     background: rgba(255, 255, 255, 0.8) !important;

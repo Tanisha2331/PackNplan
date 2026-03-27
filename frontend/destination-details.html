@@ -160,8 +160,19 @@
                     const randomPrice = Math.floor(Math.random() * (8000 - 3000) + 3000);
                     const card = document.createElement("div");
                     card.className = "card";
+
+                    // Use a stable unique image per place to avoid repetition
+                    const placeSlug = (props.name || `${typeLabel}-${Math.random()}`).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                    const seed = `${typeLabel}-${placeSlug}`;
+                    const imageSource = `https://picsum.photos/seed/${encodeURIComponent(seed)}/300/200`;
+
                     card.innerHTML = `
-                        <div class="card-img"><img src="https://loremflickr.com/300/200/${typeLabel === 'Stay' ? 'hotel' : 'landmark'}?lock=${Math.random()}" loading="lazy"></div>
+                        <div class="card-img">
+                            <img src="${imageSource}"
+                                 alt="${props.name}"
+                                 loading="lazy"
+                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=Image+not+available';" />
+                        </div>
                         <div class="card-body">
                             <span class="card-badge">${typeLabel}</span>
                             <h4>${props.name}</h4>

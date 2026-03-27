@@ -54,9 +54,15 @@ function renderHotels(hotels) {
         const rating = (Math.random() * (5 - 3.5) + 3.5).toFixed(1);
         const card = document.createElement("div");
         card.className = "hotel-card";
+
+        // Generate unique image per hotel using picsum.photos with seed
+        const hotelSlug = (p.name || `hotel-${Math.random()}`).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        const seed = `hotel-${hotelSlug}`;
+        const imageSource = `https://picsum.photos/seed/${encodeURIComponent(seed)}/400/300`;
+
         card.innerHTML = `
             <div class="price-tag">₹${randomPrice}/night</div>
-            <img src="https://loremflickr.com/400/300/hotel,resort?lock=${Math.random()}">
+            <img src="${imageSource}" alt="${p.name}" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300?text=Image+not+available';">
             <div class="card-content">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h3 style="margin:0; font-size:1.1rem;">${p.name}</h3>

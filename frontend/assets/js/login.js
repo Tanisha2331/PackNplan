@@ -149,7 +149,9 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
       msg.innerText = "Error: " + error.message;
     }
   }
- // ===============================
+});
+
+// ===============================
 // FORGOT PASSWORD LOGIC
 // ===============================
 const forgotBtn = document.getElementById("forgotPasswordBtn");
@@ -188,4 +190,3 @@ if (forgotBtn) {
     }
   });
 }
-});

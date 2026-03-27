@@ -5,7 +5,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai"); // Use the stan
 require('dotenv').config(); // Optional: if you use .env files
 // Add this to your backend/index.js
 const corsOptions = {
-    origin: "https://packnplan.vercel.app", // Your ACTUAL frontend URL from the error
+    origin: process.env.FRONTEND_URL || "http://localhost:3000", // Use env variable, fallback to localhost
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
     optionsSuccessStatus: 204
@@ -40,6 +40,20 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
-//const PORT = 5000;
-//app.listen(PORT, () => console.log(`🚀 Server speeding on http://localhost:${PORT}`));
+// ===============================
+// SERVER STARTUP
+// ===============================
+const PORT = process.env.PORT || 5000;
+
+// Start server only if not being imported as a module
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`\n🚀 Pack & Plan Backend Server`);
+        console.log(`📍 Running on http://localhost:${PORT}`);
+        console.log(`API Endpoints:`);
+        console.log(`  POST /api/chat - AI Travel Assistant`);
+        console.log(`\nFrontend connected from: ${corsOptions.origin}\n`);
+    });
+}
+
 module.exports = app;
