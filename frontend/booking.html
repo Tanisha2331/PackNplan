@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pack & Plan — Booking Details</title>
+    <link rel="stylesheet" href="assets/css/hotels.css">
+</head>
+<body>
+    <header class="hotel-header">
+        <button onclick="window.location.href='hotels.html'" class="back-btn">← Back to Hotels</button>
+        <h1>Complete Your Booking</h1>
+    </header>
+
+    <main class="container">
+        <div class="booking-form-container">
+            <div class="hotel-summary">
+                <h2 id="hotelName">Hotel Name</h2>
+                <p id="hotelAddress">Address</p>
+                <div class="price-summary">
+                    <span>Price per night: ₹<span id="pricePerNight">0</span></span>
+                </div>
+            </div>
+
+            <form id="bookingForm" class="booking-form">
+                <div class="form-section">
+                    <h3>Personal Details</h3>
+                    <div class="input-block">
+                        <label>Full Name</label>
+                        <input type="text" id="guestName" required>
+                    </div>
+                    <div class="input-block">
+                        <label>Email Address</label>
+                        <input type="email" id="guestEmail" required>
+                    </div>
+                    <div class="input-block">
+                        <label>Phone Number</label>
+                        <div class="phone-input-wrapper">
+                            <span class="country-code">+91</span>
+                            <input type="text" id="guestPhone" inputmode="numeric" maxlength="10" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Booking Details</h3>
+                    <div class="input-block">
+                        <label>Number of Travelers</label>
+                        <input type="number" id="travelers" min="1" value="2" required>
+                    </div>
+                    <div class="input-block">
+                        <label>Number of Nights</label>
+                        <input type="number" id="nights" min="1" value="1" required>
+                    </div>
+                </div>
+
+                <div class="booking-summary">
+                    <h3>Booking Summary</h3>
+                    <div class="summary-item">
+                        <span>Hotel:</span>
+                        <span id="summaryHotel">Hotel Name</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Travelers:</span>
+                        <span id="summaryTravelers">2</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Nights:</span>
+                        <span id="summaryNights">1</span>
+                    </div>
+                    <div class="summary-item total">
+                        <span>Total Amount:</span>
+                        <span id="totalAmount">₹0</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary-large">Proceed to Payment</button>
+            </form>
+        </div>
+    </main>
+
+    <script type="module" src="assets/js/booking.js"></script>
+</body>
+</html>

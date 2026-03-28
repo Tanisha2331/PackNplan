@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pack & Plan — Payment Successful</title>
+    <link rel="stylesheet" href="assets/css/hotels.css">
+</head>
+<body>
+    <header class="hotel-header">
+        <button onclick="window.location.href='index.html'" class="back-btn">← Back to Home</button>
+        <h1>Payment Successful!</h1>
+    </header>
+
+    <main class="container">
+        <div class="success-container">
+            <div class="success-check">✔</div>
+            <h2>Booking Confirmed!</h2>
+            <p>Your payment has been processed successfully.</p>
+
+            <div class="booking-details">
+                <h3>Booking Details</h3>
+                <div class="detail-item">
+                    <span>Booking ID:</span>
+                    <span id="bookingId">Loading...</span>
+                </div>
+                <div class="detail-item">
+                    <span>Hotel:</span>
+                    <span id="hotelName">Loading...</span>
+                </div>
+                <div class="detail-item">
+                    <span>Guest Name:</span>
+                    <span id="guestName">Loading...</span>
+                </div>
+                <div class="detail-item">
+                    <span>Total Amount:</span>
+                    <span id="totalAmount">Loading...</span>
+                </div>
+                <div class="detail-item">
+                    <span>Status:</span>
+                    <span id="status">Confirmed</span>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button onclick="window.location.href='index.html'" class="btn-primary-large">Return Home</button>
+                <button onclick="window.print()" class="btn-secondary">Print Receipt</button>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="assets/js/success.js"></script>
+</body>
+</html>

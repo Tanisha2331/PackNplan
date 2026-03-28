@@ -40,6 +40,13 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
+// Static Instamojo Link (no API needed)
+const INSTAMOJO_LINK = 'https://imjo.in/Fuw7bp';
+
+app.get('/api/payment-link', (req, res) => {
+    res.json({ payment_link: INSTAMOJO_LINK });
+});
+
 // ===============================
 // SERVER STARTUP
 // ===============================

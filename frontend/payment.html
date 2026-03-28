@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pack & Plan — Secure Payment</title>
+    <link rel="stylesheet" href="assets/css/hotels.css">
+    <style>
+        .payment-container {
+            max-width: 600px;
+            margin: 30px auto;
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .payment-header {
+            background: #f8f9ff;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #0b74e7;
+        }
+
+        .payment-header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #0b74e7;
+            font-weight: 700;
+        }
+
+        .booking-summary {
+            background: var(--bg-summary);
+            padding: 20px;
+            border-bottom: 1px solid var(--border-clr);
+            color: #222222;
+        }
+
+        .booking-summary h3 {
+            color: #0b74e7;
+            margin-bottom: 10px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+
+        .summary-item strong {
+            color: #0b74e7;
+        }
+
+        .payment-methods {
+            padding: 20px;
+        }
+
+        .method-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-clr);
+        }
+
+        .method-tab {
+            flex: 1;
+            padding: 12px;
+            background: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .method-tab.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .payment-form {
+            display: none;
+        }
+
+        .payment-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-clr);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .card-inputs {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .pay-btn {
+            width: 100%;
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .pay-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .pay-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: var(--accent);
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .secure-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            color: #666;
+            font-size: 0.8rem;
+            margin-top: 15px;
+        }
+
+        .secure-badge::before {
+            content: "🔒";
+        }
+    </style>
+</head>
+<body>
+    <header class="hotel-header">
+        <button onclick="window.location.href='booking.html'" class="back-btn">← Back to Booking</button>
+        <h1>Secure Payment</h1>
+    </header>
+
+    <main class="container">
+        <div class="payment-container">
+            <div class="payment-header">
+                <h1>Complete Your Payment</h1>
+            </div>
+
+            <div class="booking-summary">
+                <h3 style="margin-bottom: 15px;">Booking Summary</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <span>Hotel:</span>
+                        <strong id="summaryHotel">Loading...</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Travelers:</span>
+                        <strong id="summaryTravelers">Loading...</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Nights:</span>
+                        <strong id="summaryNights">Loading...</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Total Amount:</span>
+                        <strong id="summaryTotal">Loading...</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="payment-methods">
+                <div class="method-tabs">
+                    <button class="method-tab active" onclick="switchPaymentMethod('card')">💳 Credit/Debit Card</button>
+                    <button class="method-tab" onclick="switchPaymentMethod('upi')">📱 UPI</button>
+                </div>
+
+                <form id="cardForm" class="payment-form active">
+                    <div class="form-group">
+                        <label>Card Number</label>
+                        <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                    </div>
+                    <div class="card-inputs">
+                        <div class="form-group">
+                            <label>Expiry Date</label>
+                            <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>CVV</label>
+                            <input type="text" id="cvv" placeholder="123" maxlength="3" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Card Name</label>
+                            <input type="text" id="cardName" placeholder="John Doe" required>
+                        </div>
+                    </div>
+                </form>
+
+                <form id="upiForm" class="payment-form">
+                    <div class="form-group">
+                        <label>UPI ID</label>
+                        <input type="text" id="upiId" placeholder="yourname@upi" required>
+                    </div>
+                </form>
+
+                <button type="button" class="pay-btn" onclick="processPayment()">Pay Now</button>
+
+                <div class="loading" id="loadingMessage">
+                    🔄 Processing Payment...
+                </div>
+
+                <div class="secure-badge">
+                    🔒 Your payment is secured with 256-bit SSL encryption
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Load booking details from localStorage
+        const bookingDetails = JSON.parse(localStorage.getItem('bookingDetails') || '{}');
+
+        // Populate summary
+        document.getElementById('summaryHotel').textContent = bookingDetails.hotelName || 'N/A';
+        document.getElementById('summaryTravelers').textContent = bookingDetails.travelers || 'N/A';
+        document.getElementById('summaryNights').textContent = bookingDetails.nights || 'N/A';
+        document.getElementById('summaryTotal').textContent = `₹${bookingDetails.totalAmount || 0}`;
+
+        function switchPaymentMethod(method) {
+            // Update tab buttons
+            document.querySelectorAll('.method-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Show selected form
+            document.querySelectorAll('.payment-form').forEach(form => form.classList.remove('active'));
+            document.getElementById(method + 'Form').classList.add('active');
+        }
+
+        function processPayment() {
+            const payBtn = document.querySelector('.pay-btn');
+            const loading = document.getElementById('loadingMessage');
+
+            // Basic validation
+            const activeForm = document.querySelector('.payment-form.active');
+            const inputs = activeForm.querySelectorAll('input[required]');
+            let isValid = true;
+
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    input.style.borderColor = 'red';
+                    isValid = false;
+                } else {
+                    input.style.borderColor = 'var(--border-clr)';
+                }
+            });
+
+            if (!isValid) {
+                alert('Please fill all required fields');
+                return;
+            }
+
+            // Show loading
+            payBtn.disabled = true;
+            payBtn.textContent = 'Processing...';
+            loading.style.display = 'block';
+
+            // Simulate payment processing
+            setTimeout(() => {
+                // Store payment completion in localStorage
+                localStorage.setItem('paymentCompleted', 'true');
+
+                // Redirect to success page
+                window.location.href = 'success.html';
+            }, 2000);
+        }
+
+        // Format card number input
+        document.getElementById('cardNumber').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            e.target.value = formattedValue;
+        });
+
+        // Format expiry date input
+        document.getElementById('expiryDate').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+    </script>
+</body>
+</html></content>
+<parameter name="filePath">d:\PackNPlan\frontend\payment.html
