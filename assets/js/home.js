@@ -521,55 +521,37 @@ if (chatbotTrigger) {
 closeChat?.addEventListener('click', () => chatWidget.classList.add('hidden'));
 
 sendBtn?.addEventListener('click', async () => {
-  const userText = chatInput.value.trim();
-  if (!userText) return;
+    const userText = chatInput.value.trim();
+    if (!userText) return;
 
-  addMessage(userText, 'user');
-  chatInput.value = "";
+    addMessage(userText, 'user');
+    chatInput.value = "";
 
-  const typingId = "typing-" + Date.now();
-  const typingDiv = document.createElement('div');
-  typingDiv.classList.add('message', 'bot');
-  typingDiv.id = typingId;
-  typingDiv.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div>`;
-  chatMessages.appendChild(typingDiv);
+    // Show a temporary loading state
+    const typingId = "typing-" + Date.now();
+    addMessage("...", 'bot'); 
 
-  try {
-    // Try local backend first, then fallback to production
-    const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port === '5500')
-      ? 'http://localhost:5000/api/chat'
-      : 'https://packn-plan.vercel.app/api/chat';
-
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: userText })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => "<empty>");
-      throw new Error(`Chat API ${response.status} ${response.statusText} - ${errorText}`);
-    }
-
-    const text = await response.text();
-    if (!text) {
-      throw new Error('Chat API returned empty response body');
-    }
-
-    let data;
     try {
-      data = JSON.parse(text);
-    } catch (parseError) {
-      throw new Error(`Chat API JSON parse error: ${parseError.message} (body: ${text})`);
-    }
+        // Use the DIRECT URL to bypass any localhost confusion
+        const response = await fetch('https://pack-nplan.vercel.app/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: userText })
+        });
 
-    document.getElementById(typingId)?.remove();
-    addMessage(data.reply || "Sorry, I couldn't parse that response.", 'bot');
-  } catch (error) {
-    const indicator = document.getElementById(typingId);
-    if (indicator) indicator.textContent = "Error: Could not connect to AI server.";
-    console.error("Chat API Error:", error);
-  }
+        if (!response.ok) {
+            throw new Error(`Server responded with ${response.status}`);
+        }
+
+        const data = await response.json();
+        // Remove the "..." and add the real message
+        chatMessages.lastElementChild.remove();
+        addMessage(data.reply, 'bot');
+
+    } catch (error) {
+        console.error("Detailed Chat Error:", error);
+        window.showToast("🤖 Bot is sleeping. Check Vercel Logs!");
+    }
 });
 
 // ==========================================
