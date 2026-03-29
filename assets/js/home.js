@@ -538,7 +538,7 @@ sendBtn?.addEventListener('click', async () => {
     // Try local backend first, then fallback to production
     const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port === '5500')
       ? 'http://localhost:5000/api/chat'
-      : 'packn-plan.vercel.app/api/chat';
+      : 'https://packn-plan.vercel.app/api/chat';
 
     const response = await fetch(apiUrl, {
       method: 'POST',
