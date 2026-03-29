@@ -57,13 +57,13 @@
                         <input type="number" id="travelers" min="1" value="2" required>
                     </div>
                     <div class="input-block">
-                        <button id="addHotelTravelerBtn" type="button" class="btn-primary-small">Add Traveler</button>
-                    </div>
-                    <div id="hotelTravelerFormsContainer" class="traveler-forms"></div>
-                    <div class="input-block">
                         <label>Number of Nights</label>
                         <input type="number" id="nights" min="1" value="1" required>
                     </div>
+                    <div class="input-block">
+                        <button id="addHotelTravelerBtn" type="button" class="btn-primary-small">Add Hotel Guest</button>
+                    </div>
+                    <div id="hotelTravelerFormsContainer" class="traveler-forms"></div>
                 </div>
 
                 <div id="transportDetails" class="form-section" style="display:none;">
@@ -80,14 +80,6 @@
                     <div class="input-block">
                         <label>Travel Date</label>
                         <input type="text" id="travelDate" placeholder="Select travel date" onfocus="(this.type='date')" required>
-                    </div>
-
-                    <div id="flightOptions" class="input-block" style="display:none;">
-                        <label>Seat Class</label>
-                        <select id="seatClass" class="field">
-                            <option value="Economy">Economy</option>
-                            <option value="Business">Business</option>
-                        </select>
                     </div>
 
                     <div id="busCabOptions" class="form-section" style="display:none;">

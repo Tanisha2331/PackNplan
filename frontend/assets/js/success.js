@@ -70,7 +70,6 @@ async function saveBookingToFirebase(bookingDetails, user) {
             transportMode: bookingDetails.transportMode || null,
             transportData: bookingDetails.transportData || null,
             travelerDetails: bookingDetails.transportData?.travelerDetails || bookingDetails.hotelTravelerDetails || [],
-            hotelTravelerDetails: bookingDetails.hotelTravelerDetails || [],
             status: 'Confirmed',
             bookingDate: serverTimestamp(),
             // Additional details from booking flow

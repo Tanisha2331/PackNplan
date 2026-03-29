@@ -536,18 +536,35 @@ sendBtn?.addEventListener('click', async () => {
 
   try {
     // Try local backend first, then fallback to production
-    const apiUrl = window.location.hostname === 'localhost' 
-      ? 'http://localhost:5000/api/chat' 
+    const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port === '5500')
+      ? 'http://localhost:5000/api/chat'
       : '/api/chat';
-      
+
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: userText })
     });
-    const data = await response.json();
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "<empty>");
+      throw new Error(`Chat API ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    const text = await response.text();
+    if (!text) {
+      throw new Error('Chat API returned empty response body');
+    }
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (parseError) {
+      throw new Error(`Chat API JSON parse error: ${parseError.message} (body: ${text})`);
+    }
+
     document.getElementById(typingId)?.remove();
-    addMessage(data.reply, 'bot');
+    addMessage(data.reply || "Sorry, I couldn't parse that response.", 'bot');
   } catch (error) {
     const indicator = document.getElementById(typingId);
     if (indicator) indicator.textContent = "Error: Could not connect to AI server.";

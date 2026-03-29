@@ -97,17 +97,15 @@ document.getElementById('hotelAddress').textContent = address || 'Address';
 const form = document.getElementById('bookingForm');
 const travelersInput = document.getElementById('travelers');
 const nightsInput = document.getElementById('nights');
-const hotelTravelerFormsContainer = document.getElementById('hotelTravelerFormsContainer');
 const addHotelTravelerBtn = document.getElementById('addHotelTravelerBtn');
+const hotelTravelerFormsContainer = document.getElementById('hotelTravelerFormsContainer');
 const transportTravelersInput = document.getElementById('transportTravelers');
 const addTravelerBtn = document.getElementById('addTravelerBtn');
 const travelerFormsContainer = document.getElementById('travelerFormsContainer');
 const travelDateInput = document.getElementById('travelDate');
-const seatClassSelect = document.getElementById('seatClass');
 const pickupLocInput = document.getElementById('pickupLoc');
 const dropLocInput = document.getElementById('dropLoc');
 const travelTimeInput = document.getElementById('travelTime');
-const flightOptions = document.getElementById('flightOptions');
 const busCabOptions = document.getElementById('busCabOptions');
 const totalAmountEl = document.getElementById('totalAmount');
 const summaryTravelers = document.getElementById('summaryTravelers');
@@ -129,16 +127,12 @@ if (isTransport) {
     transportRoute.textContent = address || 'Route info';
     pricePerTicketEl.textContent = basePrice;
 
-    // Show transport-specific fields
-    if (flightOptions) flightOptions.style.display = 'none';
+    // Show shared bus/cab fields only when needed
     if (busCabOptions) busCabOptions.style.display = 'none';
 
-    if (transportMode === 'flight' && flightOptions) {
-        flightOptions.style.display = 'block';
-    } else if ((transportMode === 'bus' || transportMode === 'cab') && busCabOptions) {
-        busCabOptions.style.display = 'block';
+    if (transportMode === 'bus' || transportMode === 'cab') {
+        if (busCabOptions) busCabOptions.style.display = 'block';
     }
-
     // Initialize defaults for transport fields
     if (transportTravelersInput) transportTravelersInput.value = 1;
     if (travelDateInput && checkIn) travelDateInput.value = checkIn;
@@ -290,7 +284,8 @@ function renderHotelTravelerForms(count) {
         `;
 
         card.querySelector('.removeHotelTravelerBtn').addEventListener('click', () => {
-            const newCount = Math.max(1, parseInt(travelersInput.value) - 1);
+            const currentCount = parseInt(travelersInput.value) || 1;
+            const newCount = Math.max(1, currentCount - 1);
             renderHotelTravelerForms(newCount);
             calculateTotal();
         });
@@ -330,6 +325,14 @@ if (addTravelerBtn) {
     });
 }
 
+if (travelersInput) {
+    travelersInput.addEventListener('change', (e) => {
+        const count = parseInt(e.target.value) || 1;
+        renderHotelTravelerForms(count);
+        calculateTotal();
+    });
+}
+
 if (addHotelTravelerBtn) {
     addHotelTravelerBtn.addEventListener('click', () => {
         const count = parseInt(travelersInput.value) || 1;
@@ -338,7 +341,7 @@ if (addHotelTravelerBtn) {
     });
 }
 
-// render default on load if transport tab active
+// render default on load paths
 if (isTransport) {
     renderTravelerForms(parseInt(transportTravelersInput.value) || 1);
 } else {
@@ -405,13 +408,7 @@ if (isTransport && transportTravelersInput) {
 }
 
 if (!isFixedPrice && !isTransport) {
-    if (travelersInput) {
-        travelersInput.addEventListener('input', () => {
-            const cnt = parseInt(travelersInput.value) || 1;
-            renderHotelTravelerForms(cnt);
-            calculateTotal();
-        });
-    }
+    if (travelersInput) travelersInput.addEventListener('input', calculateTotal);
     if (nightsInput) nightsInput.addEventListener('input', calculateTotal);
 }
 
@@ -574,24 +571,18 @@ form.addEventListener('submit', async (e) => {
             transportData = { travelerDetails };
         }
 
+    let hotelTravelerDetails = [];
+
     } else if (!isFixedPrice) {
         travelers = parseInt(travelersInput.value) || 1;
         nights = parseInt(nightsInput.value) || 1;
+        hotelTravelerDetails = getHotelTravelerDetails();
 
-        const hotelTravelerDetails = getHotelTravelerDetails();
-        const hotelTravelerInvalid = hotelTravelerDetails.some(t => !t.name || !t.age || !t.gender);
+        const hotelTravelerInvalid = hotelTravelerDetails.some(h => !h.name || !h.age || !h.gender);
         if (hotelTravelerInvalid) {
-            const firstInvalid = hotelTravelerFormsContainer.querySelector('.input-invalid');
-            if (firstInvalid) {
-                firstInvalid.focus();
-                window.scrollTo({ top: firstInvalid.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
-            }
-            alert('Please complete all hotel traveler detail fields.');
+            alert('Please complete all hotel guest name, age, and gender fields.');
             return;
         }
-
-        // make sure no global dependency exists by preserving separate details
-        window.hotelTravelerDetails = hotelTravelerDetails;
     }
 
     const totals = calculateTotal();
@@ -636,7 +627,7 @@ form.addEventListener('submit', async (e) => {
             city,
             transportMode,
             transportData,
-            hotelTravelerDetails: window.hotelTravelerDetails || []
+            hotelTravelerDetails
         }));
 
         // Redirect to custom payment page
