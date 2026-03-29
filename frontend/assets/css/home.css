@@ -315,6 +315,59 @@ body,html{
   border-radius: 8px;
   border: 1px solid #ddd;
   background: white;
+  transition: all 0.3s ease;
+}
+
+.field:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(11, 116, 231, 0.1);
+}
+
+.field.error {
+  border-color: #f44336;
+  background-color: #ffebee;
+}
+
+.field.error:focus {
+  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.1);
+}
+
+/* Field wrapper for error messages */
+.field-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-wrapper .field {
+  margin: 0;
+}
+
+/* Error message styling */
+.error-message {
+  font-size: 0.75rem;
+  color: #f44336;
+  font-weight: 500;
+  line-height: 1.2;
+  min-height: 16px;
+  display: none;
+  animation: slideDown 0.2s ease-out;
+}
+
+.error-message.show {
+  display: block;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* gallery */

@@ -65,43 +65,6 @@
         </div>
     </div>
 
-    <div id="bookingModal" class="modal hidden">
-        <div class="modal-content premium-modal" id="modalMainContent">
-            <div class="modal-header-main">
-                <h2 id="modalHotelName">Hotel Name</h2>
-                <p id="modalHotelAddress" class="sub-address">📍 Loading address...</p>
-            </div>
-            <div class="modal-body-scroll">
-                <div class="trip-summary-card">
-                    <div class="summary-item"><span class="label">CHECK-IN</span><span id="summaryCheckIn" class="value">04/03/2026</span></div>
-                    <div class="summary-divider"></div>
-                    <div class="summary-item"><span class="label">GUESTS</span><span id="summaryGuests" class="value">2 Guests</span></div>
-                </div>
-
-                <div id="step1" class="booking-form">
-                    <div class="input-block"><label>Guest Full Name</label><input type="text" id="guestName" placeholder="e.g. John Doe"></div>
-                    <div class="input-block"><label>Email Address</label><input type="email" id="guestEmail" placeholder="name@example.com"></div>
-                    <div class="input-block"><label>Phone Number</label>
-                        <div class="phone-input-wrapper"><span class="country-code">+91</span><input type="text" id="guestPhone" inputmode="numeric" maxlength="10" placeholder="00000 00000"></div>
-                    </div>
-                    <button id="goToPayment" class="btn-primary-large">Proceed to Secure Payment</button>
-                    <button id="closeModal" class="btn-link-cancel">Cancel Booking</button>
-                </div>
-
-                <div id="step2" class="booking-form hidden">
-                    <div class="payment-summary-box"><span>AMOUNT TO PAY:</span><strong id="payAmount">₹0</strong></div>
-                    <div class="input-block"><label>Card Number</label><input type="text" id="cardNumber" placeholder="xxxx xxxx xxxx xxxx" maxlength="19" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div>
-                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                        <div style="flex: 1;"><label style="font-size: 0.8rem; font-weight: 600;">Expiry</label><input type="text" placeholder="MM/YY" maxlength="5"></div>
-                        <div style="flex: 1;"><label style="font-size: 0.8rem; font-weight: 600;">CVV</label><input type="password" id="cardCVV" placeholder="***" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div>
-                    </div>
-                    <button id="confirmFinalBooking" class="btn-primary-large">Pay & Confirm Booking</button>
-                    <button id="backToStep1" class="btn-link-cancel">← Back to Details</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
@@ -124,9 +87,6 @@
         const params = new URLSearchParams(window.location.search);
         const city = params.get("city");
         const heroImage = params.get("hero");
-
-        let selectedPlace = null;
-        let selectedPrice = 0;
 
         if(city) {
             document.getElementById("cityName").innerText = city;
@@ -180,115 +140,26 @@
                             <button class="book-btn">Book ${typeLabel}</button>
                         </div>`;
                     
-                    // MODIFIED: Button now opens the Premium Modal instead of showing an alert
-                    card.querySelector(".book-btn").onclick = () => openBookingModal(props, randomPrice, typeLabel);
+                    // MODIFIED: Button now redirects to booking page instead of modal
+                    card.querySelector(".book-btn").onclick = () => {
+                        const params = new URLSearchParams({
+                            hotelName: props.name,
+                            address: props.address_line2 || city,
+                            price: randomPrice,
+                            city: city,
+                            checkIn: "As per availability",
+                            checkOut: "As per availability", 
+                            guests: "1 Guest",
+                            itemType: typeLabel
+                        });
+                        window.location.href = `booking.html?${params.toString()}`;
+                    };
                     container.appendChild(card);
                 }
             });
         }
 
-        // --- ADDED: MODAL ENGINE FUNCTIONS ---
-        function openBookingModal(place, price, type) {
-            selectedPlace = place;
-            selectedPrice = price;
-            document.getElementById("modalHotelName").innerText = place.name;
-            document.getElementById("modalHotelAddress").innerText = `📍 ${place.address_line2 || city}`;
-            document.getElementById("payAmount").innerText = `₹${price}`;
-            
-            document.getElementById("step1").classList.remove("hidden");
-            document.getElementById("step2").classList.add("hidden");
-            document.getElementById("bookingModal").classList.remove("hidden");
-        }
-
-        document.getElementById("goToPayment").onclick = () => {
-            const name = document.getElementById("guestName").value;
-            if (name.length < 3) return alert("Please enter guest name.");
-            document.getElementById("step1").classList.add("hidden");
-            document.getElementById("step2").classList.remove("hidden");
-        };
-
-        document.getElementById("confirmFinalBooking").onclick = async () => {
-    const btn = document.getElementById("confirmFinalBooking");
-    const fields = [
-        { id: "cardNumber", length: 16 },
-        { id: "cardCVV", length: 3 }
-    ];
-
-    let hasError = false;
-
-    // Validate Card and CVV
-    fields.forEach(field => {
-        const input = document.getElementById(field.id);
-        if (!input.value || input.value.length < field.length) {
-            input.classList.add("input-error");
-            hasError = true;
-            // Remove error after animation so user can try again
-            setTimeout(() => input.classList.remove("input-error"), 500);
-        }
-    });
-
-    // Validate Expiry (Special case for the placeholder input)
-    const expiryInput = document.querySelector('input[placeholder="MM/YY"]');
-    if (!expiryInput.value || expiryInput.value.length < 5) {
-        expiryInput.classList.add("input-error");
-        hasError = true;
-        setTimeout(() => expiryInput.classList.remove("input-error"), 500);
-    }
-
-    if (hasError) return; // Stop if there are flaws
-
-    // PROCEED TO FIREBASE SAVE
-    btn.innerText = "Verifying Securely...";
-    btn.disabled = true;
-
-    try {
-        const user = auth.currentUser;
-        await addDoc(collection(db, "bookings"), {
-            userId: user ? user.uid : "Guest",
-            hotelName: selectedPlace.name,
-            guestName: document.getElementById("guestName").value,
-            amount: selectedPrice,
-            status: "Confirmed",
-            createdAt: serverTimestamp()
-        });
-        showSuccessVoucher(); // Launch Success Voucher
-    } catch (e) {
-        btn.innerText = "Retry Payment";
-        btn.disabled = false;
-    }
-};
-
-        function showSuccessVoucher() {
-            const container = document.getElementById("modalMainContent");
-            container.innerHTML = `
-                <div style="text-align:center; padding:30px;">
-                    <div class="success-check">✔</div>
-                    <h2>Booking Confirmed!</h2>
-                    <p>Pack your bags, ${document.getElementById("guestName").value}!</p>
-                    <div class="voucher-card">
-                        <div class="voucher-header"><span>VOUCHER</span><span>PNP-${Math.random().toString(36).substr(2,5).toUpperCase()}</span></div>
-                        <div class="voucher-body">
-                            <h3>${selectedPlace.name}</h3>
-                            <p><strong>Paid:</strong> ₹${selectedPrice}</p>
-                        </div>
-                    </div>
-                    <button onclick="window.location.href='index.html'" class="btn-primary-large">Return Home</button>
-                </div>`;
-        }
-        // handle the MM/YY formatting
-document.querySelector('input[placeholder="MM/YY"]').oninput = function (e) {
-    let inputs = this.value.replace(/\D/g, ''); // Remove non-digits
-    if (inputs.length > 4) inputs = inputs.substr(0, 4); // Limit to 4 digits
-    
-    if (inputs.length > 2) {
-        this.value = inputs.substr(0, 2) + '/' + inputs.substr(2);
-    } else {
-        this.value = inputs;
-    }
-};
-
-        document.getElementById("closeModal").onclick = () => document.getElementById("bookingModal").classList.add("hidden");
-        document.getElementById("backToStep1").onclick = () => { document.getElementById("step2").classList.add("hidden"); document.getElementById("step1").classList.remove("hidden"); };
+        // --- REMOVED: Modal functions - now using unified booking flow ---
     </script>
 </body>
 </html>

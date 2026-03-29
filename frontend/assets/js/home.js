@@ -99,17 +99,29 @@ window.initiateBooking = async (name, type) => {
     const user = auth.currentUser;
     // 1. Check if user is logged in
     if (!user) {
-        showLoginModal(); 
+        showLoginModal();
         return;
     }
+
+    // Get booking details from search form
+    const city = document.getElementById("hotelCity")?.value || "";
+    const checkIn = document.getElementById("checkIn")?.value || "";
+    const checkOut = document.getElementById("checkOut")?.value || "";
+    const guests = document.getElementById("guestSelect")?.value || "2 Guests, 1 Room";
+
     try {
-        // 2. Save the booking to YOUR "bookings" collection
+        // 2. Save the booking to YOUR "bookings" collection with complete details
         const docRef = await addDoc(collection(db, "bookings"), {
             userId: user.uid,
             userEmail: user.email,
-            itemName: name,       // The name of the hotel/attraction
-            itemType: type,       // 'Stay' or 'Attraction'
-            status: "Reserved",    // You can change this to "Confirmed" later
+            hotelName: name,           // Changed from itemName to hotelName
+            itemType: type,           // Keep for backward compatibility
+            location: city,           // Add location from search
+            checkIn: checkIn,         // Add check-in date
+            checkOut: checkOut,       // Add check-out date
+            guests: guests,           // Add guest information
+            totalAmount: 0,           // Placeholder - can be updated later
+            status: "Reserved",       // You can change this to "Confirmed" later
             bookingDate: serverTimestamp()
         });
         // 3. Give the user feedback on YOUR site
@@ -122,16 +134,230 @@ window.initiateBooking = async (name, type) => {
 };
 
 
-// SEARCH REDIRECTION
+// SEARCH REDIRECTION WITH VALIDATION
 document.getElementById("hotelSearchBtn").onclick = (e) => {
     e.preventDefault();
-    const city = document.getElementById("hotelCity").value;
-    const checkIn = document.getElementById("checkIn").value;
-    const guests = document.getElementById("guestSelect").value;
-    if (!city) return alert("Enter a city");
     
-    window.location.href = `hotels.html?city=${city}&checkIn=${checkIn}&guests=${guests}`;
+    const cityField = document.getElementById("hotelCity");
+    const checkInField = document.getElementById("checkIn");
+    const checkOutField = document.getElementById("checkOut");
+    
+    const cityError = document.getElementById("cityError");
+    const checkInError = document.getElementById("checkInError");
+    const checkOutError = document.getElementById("checkOutError");
+    
+    // Reset errors
+    [cityField, checkInField, checkOutField].forEach(field => field.classList.remove('error'));
+    [cityError, checkInError, checkOutError].forEach(err => {
+        err.classList.remove('show');
+        err.textContent = '';
+    });
+    
+    const city = cityField.value.trim();
+    const checkIn = checkInField.value.trim();
+    const checkOut = checkOutField.value.trim();
+    const guests = document.getElementById("guestSelect").value;
+    
+    let hasError = false;
+    
+    // Validate city
+    if (!city) {
+        cityField.classList.add('error');
+        cityError.textContent = 'Please enter a city';
+        cityError.classList.add('show');
+        hasError = true;
+    }
+    
+    // Validate check-in
+    if (!checkIn) {
+        checkInField.classList.add('error');
+        checkInError.textContent = 'Please select check-in date';
+        checkInError.classList.add('show');
+        hasError = true;
+    }
+    
+    // Validate check-out
+    if (!checkOut) {
+        checkOutField.classList.add('error');
+        checkOutError.textContent = 'Please select check-out date';
+        checkOutError.classList.add('show');
+        hasError = true;
+    }
+    
+    // Validate date logic
+    if (checkIn && checkOut) {
+        const checkInDate = new Date(checkIn);
+        const checkOutDate = new Date(checkOut);
+        
+        if (checkOutDate <= checkInDate) {
+            checkOutField.classList.add('error');
+            checkOutError.textContent = 'Check-out date must be after check-in date';
+            checkOutError.classList.add('show');
+            hasError = true;
+        }
+    }
+    
+    // If there are errors, don't proceed
+    if (hasError) {
+        return;
+    }
+    
+    // All validation passed, proceed
+    window.location.href = `hotels.html?city=${encodeURIComponent(city)}&checkIn=${checkIn}&guests=${encodeURIComponent(guests)}`;
 };
+
+// Real-time error clearing when user starts typing/selecting
+document.getElementById("hotelCity").addEventListener('input', function() {
+    if (this.value.trim()) {
+        this.classList.remove('error');
+        document.getElementById("cityError").classList.remove('show');
+    }
+});
+
+document.getElementById("checkIn").addEventListener('change', function() {
+    if (this.value) {
+        this.classList.remove('error');
+        document.getElementById("checkInError").classList.remove('show');
+    }
+});
+
+document.getElementById("checkOut").addEventListener('change', function() {
+    if (this.value) {
+        this.classList.remove('error');
+        document.getElementById("checkOutError").classList.remove('show');
+    }
+});
+
+// Real-time error clearing for transport fields
+document.getElementById("fromCity").addEventListener('input', function() {
+    if (this.value.trim()) {
+        this.classList.remove('error');
+        document.getElementById("fromCityError").classList.remove('show');
+    }
+});
+
+document.getElementById("toCity").addEventListener('input', function() {
+    if (this.value.trim()) {
+        this.classList.remove('error');
+        document.getElementById("toCityError").classList.remove('show');
+    }
+});
+
+document.getElementById("travelDate").addEventListener('change', function() {
+    if (this.value) {
+        this.classList.remove('error');
+        document.getElementById("travelDateError").classList.remove('show');
+    }
+});
+
+// DESTINATION EXPLORATION VALIDATION
+const destExploreBtn = document.getElementById("destExploreBtn");
+if (destExploreBtn) {
+    destExploreBtn.onclick = (e) => {
+        e.preventDefault();
+        
+        const destPlaceField = document.getElementById("destPlace");
+        const destPlaceError = document.getElementById("destPlaceError");
+        
+        // Reset error
+        destPlaceField.classList.remove('error');
+        destPlaceError.classList.remove('show');
+        destPlaceError.textContent = '';
+        
+        const destPlace = destPlaceField.value.trim();
+        
+        // Validate destination
+        if (!destPlace) {
+            destPlaceField.classList.add('error');
+            destPlaceError.textContent = 'Please enter a destination';
+            destPlaceError.classList.add('show');
+            return;
+        }
+        
+        // Proceed to destination details
+        window.location.href = `destination-details.html?city=${encodeURIComponent(destPlace)}`;
+    };
+}
+
+// Real-time error clearing for destination field
+const destPlaceInput = document.getElementById("destPlace");
+if (destPlaceInput) {
+    destPlaceInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+            this.classList.remove('error');
+            document.getElementById("destPlaceError").classList.remove('show');
+        }
+    });
+}
+
+// ITINERARY CREATION VALIDATION
+const itinCreateBtn = document.getElementById("itinCreateBtn");
+if (itinCreateBtn) {
+    itinCreateBtn.onclick = (e) => {
+        e.preventDefault();
+        
+        const itinDestField = document.getElementById("itinDestination");
+        const itinDaysField = document.getElementById("itinDays");
+        
+        const itinDestError = document.getElementById("itinDestError");
+        const itinDaysError = document.getElementById("itinDaysError");
+        
+        // Reset errors
+        [itinDestField, itinDaysField].forEach(field => field.classList.remove('error'));
+        [itinDestError, itinDaysError].forEach(err => {
+            err.classList.remove('show');
+            err.textContent = '';
+        });
+        
+        const itinDest = itinDestField.value.trim();
+        const itinDays = itinDaysField.value.trim();
+        
+        let hasError = false;
+        
+        // Validate destination
+        if (!itinDest) {
+            itinDestField.classList.add('error');
+            itinDestError.textContent = 'Please enter destination';
+            itinDestError.classList.add('show');
+            hasError = true;
+        }
+        
+        // Validate days
+        if (!itinDays) {
+            itinDaysField.classList.add('error');
+            itinDaysError.textContent = 'Please enter number of days';
+            itinDaysError.classList.add('show');
+            hasError = true;
+        } else if (parseInt(itinDays) < 1) {
+            itinDaysField.classList.add('error');
+            itinDaysError.textContent = 'Days must be at least 1';
+            itinDaysError.classList.add('show');
+            hasError = true;
+        }
+        
+        if (hasError) {
+            return;
+        }
+        
+        // Proceed to itinerary page
+        window.location.href = `itinerary.html?city=${encodeURIComponent(itinDest)}&days=${itinDays}`;
+    };
+}
+
+// Real-time error clearing for itinerary fields
+document.getElementById("itinDestination").addEventListener('input', function() {
+    if (this.value.trim()) {
+        this.classList.remove('error');
+        document.getElementById("itinDestError").classList.remove('show');
+    }
+});
+
+document.getElementById("itinDays").addEventListener('change', function() {
+    if (this.value && parseInt(this.value) >= 1) {
+        this.classList.remove('error');
+        document.getElementById("itinDaysError").classList.remove('show');
+    }
+});
 
 // GLOBAL VIEW BOOKINGS
 window.viewMyBookings = async () => {
@@ -165,20 +391,32 @@ window.viewMyBookings = async () => {
             // Format the booking date if it exists
             const bookingDate = b.bookingDate ? new Date(b.bookingDate.seconds * 1000).toLocaleDateString() : 'N/A';
             
+            // Handle different data structures
+            const hotelName = b.hotelName || b.itemName || 'Trip';
+            const location = b.location || 'N/A';
+            const checkIn = b.checkIn || 'N/A';
+            const checkOut = b.checkOut || 'N/A';
+            const guests = b.guests || b.guestName || 'N/A';
+            const amount = b.totalAmount || b.amount || b.price || 'View Details';
+            const itemType = b.itemType || 'N/A';
+            
             card.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:start;">
                     <div>
                         <span class="status-pill">${b.status || 'Pending'}</span>
-                        <h4 style="margin:8px 0 2px 0; font-size:1.1rem;">${b.itemName || 'Trip'}</h4>
+                        <h4 style="margin:8px 0 2px 0; font-size:1.1rem;">${hotelName}</h4>
+                        <p style="margin:0; font-size:0.8rem; color:#777;">📍 ${location}</p>
+                        <p style="margin:0; font-size:0.8rem; color:#777;">📅 Check-in: ${checkIn}</p>
+                        <p style="margin:0; font-size:0.8rem; color:#777;">👥 ${guests}</p>
+                        <p style="margin:5px 0 0 0; font-size:0.8rem; color:#999;">Type: ${itemType}</p>
                         <p style="margin:0; font-size:0.8rem; color:#777;">📅 Booked: ${bookingDate}</p>
-                        <p style="margin:5px 0 0 0; font-size:0.8rem; color:#999;">Type: ${b.itemType || 'N/A'}</p>
                     </div>
                     <div style="text-align:right;">
-                        <p style="margin:0; font-weight:bold; color:#0b74e7;">${b.price ? '₹' + b.price : 'View Details'}</p>
+                        <p style="margin:0; font-weight:bold; color:#0b74e7;">${amount !== 'View Details' ? '₹' + amount : amount}</p>
                     </div>
                 </div>
                 <div style="margin-top:15px; display:flex; gap:10px;">
-                     <button onclick="window.showToast('Ticket for ${b.itemName} - Valid for 30 days')" 
+                     <button onclick="window.showToast('Ticket for ${hotelName} - Valid for 30 days')" 
                             style="flex:1; background:#0b74e7; color:#fff; border:none; padding:8px; border-radius:6px; cursor:pointer; font-weight:600;">
                         View Ticket
                     </button> 
@@ -328,11 +566,56 @@ if (searchTransportBtn) {
     searchTransportBtn.onclick = async (e) => {
         e.preventDefault(); // 🛑 Stop the page refresh
 
-        const from = document.getElementById("fromCity").value.trim() || "Your Location";
-        const to = document.getElementById("toCity").value.trim();
+        const fromCityField = document.getElementById("fromCity");
+        const toCityField = document.getElementById("toCity");
+        const travelDateField = document.getElementById("travelDate");
+        
+        const fromCityError = document.getElementById("fromCityError");
+        const toCityError = document.getElementById("toCityError");
+        const travelDateError = document.getElementById("travelDateError");
+        
+        // Reset errors
+        [fromCityField, toCityField, travelDateField].forEach(field => field.classList.remove('error'));
+        [fromCityError, toCityError, travelDateError].forEach(err => {
+            err.classList.remove('show');
+            err.textContent = '';
+        });
+        
+        const from = fromCityField.value.trim();
+        const to = toCityField.value.trim();
+        const travelDate = travelDateField.value.trim();
         const type = document.getElementById("transportType").value;
-
-        if (!to) return window.showToast("⚠️ Please enter a destination city.");
+        
+        let hasError = false;
+        
+        // Validate from city
+        if (!from) {
+            fromCityField.classList.add('error');
+            fromCityError.textContent = 'Please enter departure city';
+            fromCityError.classList.add('show');
+            hasError = true;
+        }
+        
+        // Validate to city
+        if (!to) {
+            toCityField.classList.add('error');
+            toCityError.textContent = 'Please enter destination city';
+            toCityError.classList.add('show');
+            hasError = true;
+        }
+        
+        // Validate travel date
+        if (!travelDate) {
+            travelDateField.classList.add('error');
+            travelDateError.textContent = 'Please select travel date';
+            travelDateError.classList.add('show');
+            hasError = true;
+        }
+        
+        // If there are errors, don't proceed
+        if (hasError) {
+            return;
+        }
 
         resultsContainer.innerHTML = `<p>🔍 Scanning for available ${type}s to ${to}...</p>`;
 
@@ -380,7 +663,7 @@ if (searchTransportBtn) {
                                 <p style="margin:5px 0 0 0; font-size:0.8rem; color:#777;">🕒 ${item.time} • ₹${item.price}</p>
                             </div>
                             <div style="text-align:right;">
-                                <button class="btn-primary-small" onclick="openTransportModal('${item.name}', ${item.price})">Book</button>
+                                <button class="btn-primary-small" onclick="openTransportModal('${item.name}', ${item.price}, '${from}', '${to}', '${travelDate}', '${type}')">Book</button>
                             </div>
                         </div>
                     </div>
@@ -536,21 +819,28 @@ modalClose.addEventListener("click", hideLoginModal);
 modalLogin.addEventListener("click", () => window.location.href = "login.html");
 
 // ===============================
-// TRANSPORT BOOKING MODAL
+// TRANSPORT BOOKING FLOW (unified)
 // ===============================
-window.openTransportModal = (transportName, price) => {
+window.openTransportModal = (transportName, price, fromCity, toCity, travelDate, transportType) => {
     const user = auth.currentUser;
     if (!user) {
         showLoginModal();
         return;
     }
-    
-    // Simple confirmation for transport booking
-    const confirmed = confirm(`\n Book ${transportName}?\n\nPrice: ₹${price}\n\nClick "OK" to confirm your booking.`);
-    
-    if (confirmed) {
-        window.initiateBooking(transportName, 'Transport');
-    }
+
+    // Redirect to unified booking page to keep UX consistent
+    const params = new URLSearchParams({
+        hotelName: transportName,
+        address: `${fromCity} → ${toCity}`,
+        price: price,
+        city: toCity,
+        checkIn: travelDate,
+        checkOut: travelDate,
+        guests: '1',
+        itemType: 'Transport',
+        transportMode: transportType
+    });
+    window.location.href = `booking.html?${params.toString()}`;
 };
 
 loginBtn.onclick = () => window.location.href = "login.html";
@@ -562,14 +852,6 @@ logoutBtn.onclick = async () => {
   localStorage.clear();
   window.location.reload();
 };
-
-// Search Redirection
-document.querySelector("#itinerary .search-btn")?.addEventListener("click", (e) => {
-  e.preventDefault();
-  const dest = document.querySelector("#itinerary input[placeholder='Destination']").value.trim();
-  const days = document.querySelector("#itinerary input[placeholder='Days']").value.trim();
-  if (dest && days) window.location.href = `itinerary.html?city=${encodeURIComponent(dest)}&days=${days}`;
-});
 
 // ===============================
 // CAROUSEL & OFFERS
@@ -590,11 +872,8 @@ async function loadDestinations() {
     
     // ✅ DYNAMIC BOOKING LOGIC FOR ATTRACTIONS
     slide.addEventListener("click", () => {
-      if (d.bookingUrl) {
-          window.initiateBooking(d.name, 'Attraction');
-      } else {
-          window.location.href = `destination-details.html?city=${encodeURIComponent(d.name)}&hero=${encodeURIComponent(d.image)}`;
-      }
+      // All attraction cards now go through the unified destination flow
+      window.location.href = `destination-details.html?city=${encodeURIComponent(d.name)}&hero=${encodeURIComponent(d.image)}`;
     });
 
     slide.innerHTML = `<img src="${d.image}" alt="${d.name}"><p>${d.name}</p>`;
@@ -670,16 +949,14 @@ async function boot() {
     updateSlider();
   }, 3000);
 }
-// This tells the "My Bookings" button to open the modal
+// This tells the "My Bookings" button to open the new dedicated page
 document.addEventListener('DOMContentLoaded', () => {
     const myBookingsBtn = document.getElementById("myBookingsBtn");
     if (myBookingsBtn) {
         myBookingsBtn.onclick = (e) => {
             e.preventDefault();
-            // This line closes your Account Menu so you can see the Modal
-            accountMenu.classList.remove("show"); 
-            // This line runs the function that gets your trips from Firebase
-            window.viewMyBookings();
+            accountMenu.classList.remove("show");
+            window.location.href = "mybookings.html";
         };
     }
 });
@@ -792,32 +1069,7 @@ function add3DBuildings() {
     });
 }
 // 1. Target the button by the ID you just added
-const exploreBtn = document.getElementById("destExploreBtn");
 
-if (exploreBtn) {
-    exploreBtn.onclick = (e) => {
-        // 🛑 CRITICAL: This stops the <form> from refreshing the page
-        e.preventDefault(); 
-
-        // 2. Get the values from your input and select fields
-        const cityInput = document.querySelector("#destination input[type='text']");
-        const vibeSelect = document.querySelector("#destination select");
-        
-        const city = cityInput.value.trim();
-        const vibe = vibeSelect.value;
-
-        // 3. Shake validation if empty (Premium TechNirmaan style)
-        if (!city) {
-            cityInput.classList.add("input-error");
-            setTimeout(() => cityInput.classList.remove("input-error"), 500);
-            return;
-        }
-
-        // 4. Redirect to your details page with the parameters
-        // This ensures the "same interface" pops up as requested
-        window.location.href = `destination-details.html?city=${encodeURIComponent(city)}&vibe=${vibe}`;
-    };
-}
 // FORCE RESET: Overriding the cancel flow
 window.cancelBooking = (id) => {
     const confirmModal = document.getElementById("customConfirmModal");

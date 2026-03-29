@@ -91,63 +91,89 @@
          <!-- HOTELS -->
         <form class="tab-panel active" id="hotels">
           <div class="field-row">
-            <input type="text" id="hotelCity" placeholder="City" class="field mid">
+            <div class="field-wrapper">
+              <input type="text" id="hotelCity" placeholder="City" class="field mid">
+              <div class="error-message" id="cityError"></div>
+            </div>
             <div class="date-group">
-            <input type="text" id="checkIn" placeholder="Check-in" onfocus="(this.type='date')" class="field short">
-            <input type="text" id="checkOut" placeholder="Check-out" onfocus="(this.type='date')" class="field short">
-        </div>
-        <select id="guestSelect"class="field short">
-            <option>2 Guests, 1 Room</option>
-            <option>1 Guest, 1 Room</option>
-            <option>Family (2 Adults, 2 Kids)</option>
-        </select>
-        <button type="button" id="hotelSearchBtn"class="search-btn">Search Hotels</button>
-      </div>
-    </form>
+              <div class="field-wrapper">
+                <input type="text" id="checkIn" placeholder="Check-in" onfocus="(this.type='date')" class="field short">
+                <div class="error-message" id="checkInError"></div>
+              </div>
+              <div class="field-wrapper">
+                <input type="text" id="checkOut" placeholder="Check-out" onfocus="(this.type='date')" class="field short">
+                <div class="error-message" id="checkOutError"></div>
+              </div>
+            </div>
+            <select id="guestSelect" class="field short">
+              <option>2 Guests, 1 Room</option>
+              <option>1 Guest, 1 Room</option>
+              <option>Family (2 Adults, 2 Kids)</option>
+            </select>
+            <button type="button" id="hotelSearchBtn" class="search-btn">Search Hotels</button>
+          </div>
+        </form>
         <!-- TRANSPORT -->
         <form class="tab-panel" id="transport">
           <div class="field-row">
-        <input type="text" id="fromCity"placeholder="From City" class="field short">
-        <input type="text" id="toCity" placeholder="To City" class="field short">
-        <input type="text" id="travelDate" placeholder="Travel Date" onfocus="(this.type='date')" class="field short">
-        <select id="transportType" class="field short">
-            <option value="flight">✈️ Flight</option>
-            <option value="train">🚆 Train</option>
-            <option value="bus">🚌 Bus</option>
-            <option value="cab">🚖 Cab</option>
-        </select>
-        <button id="searchTransportBtn" class="search-btn">Search Transport</button>
-      </div>
-       <div id="transport-results" class="results-container" style="margin-top: 20px;">
-    </div>
-    </form>
+            <div class="field-wrapper">
+              <input type="text" id="fromCity" placeholder="From City" class="field short">
+              <div class="error-message" id="fromCityError"></div>
+            </div>
+            <div class="field-wrapper">
+              <input type="text" id="toCity" placeholder="To City" class="field short">
+              <div class="error-message" id="toCityError"></div>
+            </div>
+            <div class="field-wrapper">
+              <input type="text" id="travelDate" placeholder="Travel Date" onfocus="(this.type='date')" class="field short">
+              <div class="error-message" id="travelDateError"></div>
+            </div>
+            <select id="transportType" class="field short">
+              <option value="flight">✈️ Flight</option>
+              <option value="train">🚆 Train</option>
+              <option value="bus">🚌 Bus</option>
+              <option value="cab">🚖 Cab</option>
+            </select>
+            <button id="searchTransportBtn" class="search-btn">Search Transport</button>
+          </div>
+          <div id="transport-results" class="results-container" style="margin-top: 20px;"></div>
+        </form>
    
           <!-- DESTINATION -->
         <form class="tab-panel" id="destination">
           <div class="field-row">
-            <input type="text" placeholder="Search places (e.g. 'Coorg')" class="field mid">
-        <select class="field mid">
-            <option value="">What's your vibe?</option>
-            <option value="beach">🏖️ Beaches & Relax</option>
-            <option value="mountain">🏔️ Mountains & Trek</option>
-            <option value="temple">🛕 Heritage & Culture</option>
-        </select>
-        <button id="destExploreBtn" class="search-btn">Explore</button>
-        </div>
-      </form>
+            <div class="field-wrapper">
+              <input type="text" id="destPlace" placeholder="Search places (e.g. 'Coorg')" class="field mid">
+              <div class="error-message" id="destPlaceError"></div>
+            </div>
+            <select id="destVibe" class="field mid">
+              <option value="">What's your vibe?</option>
+              <option value="beach">🏖️ Beaches & Relax</option>
+              <option value="mountain">🏔️ Mountains & Trek</option>
+              <option value="temple">🛕 Heritage & Culture</option>
+            </select>
+            <button id="destExploreBtn" class="search-btn">Explore</button>
+          </div>
+        </form>
         <!-- ITINERARY -->
         <form class="tab-panel" id="itinerary">
           <div class="field-row">
-          <input type="text" placeholder="Destination" class="field short">
-          <input type="number" placeholder="Days" class="field tiny" style="width: 80px;">
-          <select class="field mid">
+            <div class="field-wrapper">
+              <input type="text" id="itinDestination" placeholder="Destination" class="field short">
+              <div class="error-message" id="itinDestError"></div>
+            </div>
+            <div class="field-wrapper">
+              <input type="number" id="itinDays" placeholder="Days" class="field tiny" style="width: 80px;">
+              <div class="error-message" id="itinDaysError"></div>
+            </div>
+            <select id="itinStyle" class="field mid">
               <option>Relaxed (Leisure)</option>
               <option>Packed (Sightseeing)</option>
               <option>Adventure (Active)</option>
-          </select>
-         <button type="button" class="search-btn">Create Plan</button>
+            </select>
+            <button type="button" id="itinCreateBtn" class="search-btn">Create Plan</button>
           </div>
-      </form>
+        </form>
       </div>
     </div>
     <!--<booking section-->

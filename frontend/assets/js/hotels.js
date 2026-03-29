@@ -140,7 +140,8 @@ function renderHotels(hotels) {
                         city: city,
                         checkIn: searchedCheckIn,
                         checkOut: searchedCheckOut,
-                        guests: searchedGuests
+                        guests: searchedGuests,
+                        itemType: 'Hotel'
                     });
                     window.location.href = `booking.html?${params.toString()}`;
                 };

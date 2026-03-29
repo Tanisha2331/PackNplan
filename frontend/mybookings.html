@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pack & Plan — My Bookings</title>
+  <link rel="stylesheet" href="assets/css/hotels.css">
+  <link rel="stylesheet" href="assets/css/home.css">
+  <style>
+    .category-switch { display: flex; gap: 12px; margin-bottom: 20px; justify-content: center; }
+    .category-switch button { padding: 10px 16px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #222; cursor: pointer; transition: all 0.2s ease; }
+    .category-switch button.active { background: #0b74e7; color: #fff; border-color: #0b74e7; }
+    .booking-section { display: none; }
+    .booking-section.active { display: block; }
+    .booking-card { border: 1px solid #e0e0e0; border-radius: 10px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); background: #fff; }
+    .booking-card h4 { margin: 0 0 8px; }
+    .booking-card p { margin: 5px 0; color: #555; }
+    .empty-placeholder { text-align: center; color: #888; margin-top: 30px; font-size: 1rem; }
+  </style>
+</head>
+<body>
+  <header class="hotel-header">
+    <button onclick="window.location.href='index.html'" class="back-btn">← Back</button>
+    <h1>My Bookings</h1>
+  </header>
+  <main class="container" style="margin-top: 20px;">
+    <div class="category-switch">
+      <button id="showHotelsBtn" class="active">Hotels & Homes Bookings</button>
+      <button id="showTransportBtn">Transport Bookings</button>
+    </div>
+    <div id="hotelsSection" class="booking-section active"></div>
+    <div id="transportSection" class="booking-section"></div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDfP1XaMtkGuBeSrl4fRw-Zi3l7_5sPm_w",
+      authDomain: "packnplan-3312d.firebaseapp.com",
+      projectId: "packnplan-3312d",
+      storageBucket: "packnplan-3312d.firebasestorage.app",
+      messagingSenderId: "976654836537",
+      appId: "1:976654836537:web:4d9b292611ccd5328b3ee8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const hotelsSection = document.getElementById('hotelsSection');
+    const transportSection = document.getElementById('transportSection');
+    const showHotelsBtn = document.getElementById('showHotelsBtn');
+    const showTransportBtn = document.getElementById('showTransportBtn');
+
+    showHotelsBtn.addEventListener('click', () => {
+      showHotelsBtn.classList.add('active');
+      showTransportBtn.classList.remove('active');
+      hotelsSection.classList.add('active');
+      transportSection.classList.remove('active');
+    });
+
+    showTransportBtn.addEventListener('click', () => {
+      showHotelsBtn.classList.remove('active');
+      showTransportBtn.classList.add('active');
+      hotelsSection.classList.remove('active');
+      transportSection.classList.add('active');
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+      await loadBookings(user.uid);
+    });
+
+    async function loadBookings(userId) {
+      const q = query(collection(db, 'bookings'), where('userId', '==', userId));
+      const snapshot = await getDocs(q);
+      if (snapshot.empty) {
+        hotelsSection.innerHTML = '<div class="empty-placeholder">No bookings found yet.</div>';
+        transportSection.innerHTML = '<div class="empty-placeholder">No bookings found yet.</div>';
+        return;
+      }
+
+      const allBookings = [];
+      snapshot.forEach(docSnap => {
+        allBookings.push({ id: docSnap.id, ...docSnap.data() });
+      });
+
+      const hotelBookings = allBookings.filter(b => (b.itemType || '').toLowerCase() !== 'transport');
+      const transportBookings = allBookings.filter(b => (b.itemType || '').toLowerCase() === 'transport');
+
+      renderBookings(hotelsSection, hotelBookings, 'No hotels & homes bookings yet.');
+      renderBookings(transportSection, transportBookings, 'No transport bookings yet.');
+    }
+
+    function renderBookings(target, list, emptyText) {
+      if (list.length === 0) {
+        target.innerHTML = `<div class="empty-placeholder">${emptyText}</div>`;
+        return;
+      }
+
+      target.innerHTML = '';
+      list.forEach(b => {
+        const card = document.createElement('div');
+        card.className = 'booking-card';
+        card.innerHTML = `
+          <h4>${b.hotelName || b.location || 'Booking'}</h4>
+          <p><strong>Type:</strong> ${b.itemType || 'Hotel'}</p>
+          <p><strong>Location:</strong> ${b.location || 'N/A'}</p>
+          <p><strong>Check-in:</strong> ${b.checkIn || 'N/A'}</p>
+          <p><strong>Check-out:</strong> ${b.checkOut || 'N/A'}</p>
+          <p><strong>Guests:</strong> ${b.guests || 'N/A'}</p>
+          <p><strong>Amount:</strong> ₹${b.totalAmount || 0}</p>
+          <p><strong>Status:</strong> ${b.status || 'Confirmed'}</p>
+        `;
+        target.appendChild(card);
+      });
+    }
+  </script>
+</body>
+</html>

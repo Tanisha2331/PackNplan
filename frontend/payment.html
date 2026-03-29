@@ -253,8 +253,17 @@
 
         // Populate summary
         document.getElementById('summaryHotel').textContent = bookingDetails.hotelName || 'N/A';
-        document.getElementById('summaryTravelers').textContent = bookingDetails.travelers || 'N/A';
-        document.getElementById('summaryNights').textContent = bookingDetails.nights || 'N/A';
+        
+        // Handle display based on item type
+        const isDestination = bookingDetails.itemType === 'Stay' || bookingDetails.itemType === 'Attraction';
+        if (isDestination) {
+            document.getElementById('summaryTravelers').textContent = 'N/A';
+            document.getElementById('summaryNights').textContent = 'N/A';
+        } else {
+            document.getElementById('summaryTravelers').textContent = bookingDetails.travelers || 'N/A';
+            document.getElementById('summaryNights').textContent = bookingDetails.nights || 'N/A';
+        }
+        
         document.getElementById('summaryTotal').textContent = `₹${bookingDetails.totalAmount || 0}`;
 
         function switchPaymentMethod(method) {

@@ -14,7 +14,7 @@
 
     <main class="container">
         <div class="booking-form-container">
-            <div class="hotel-summary">
+            <div id="hotelSummary" class="hotel-summary">
                 <h2 id="hotelName">Hotel Name</h2>
                 <p id="hotelAddress">Address</p>
                 <div class="price-summary">
@@ -22,11 +22,19 @@
                 </div>
             </div>
 
+            <div id="transportSummary" class="hotel-summary" style="display:none;">
+                <h2 id="transportTitle">Transport Booking</h2>
+                <p id="transportRoute">From - To</p>
+                <div class="price-summary">
+                    <span>Price per ticket: ₹<span id="pricePerTicket">0</span></span>
+                </div>
+            </div>
+
             <form id="bookingForm" class="booking-form">
                 <div class="form-section">
-                    <h3>Personal Details</h3>
+                    <h3>Passenger Details</h3>
                     <div class="input-block">
-                        <label>Full Name</label>
+                        <label>Lead Passenger Name</label>
                         <input type="text" id="guestName" required>
                     </div>
                     <div class="input-block">
@@ -42,29 +50,73 @@
                     </div>
                 </div>
 
-                <div class="form-section">
-                    <h3>Booking Details</h3>
+                <div id="hotelDetails" class="form-section">
+                    <h3>Hotel Booking Details</h3>
                     <div class="input-block">
                         <label>Number of Travelers</label>
                         <input type="number" id="travelers" min="1" value="2" required>
                     </div>
+                    <div class="input-block">
+                        <button id="addHotelTravelerBtn" type="button" class="btn-primary-small">Add Traveler</button>
+                    </div>
+                    <div id="hotelTravelerFormsContainer" class="traveler-forms"></div>
                     <div class="input-block">
                         <label>Number of Nights</label>
                         <input type="number" id="nights" min="1" value="1" required>
                     </div>
                 </div>
 
+                <div id="transportDetails" class="form-section" style="display:none;">
+                    <h3>Transport Booking Details</h3>
+                    <div class="input-block">
+                        <label>Number of Travelers</label>
+                        <input type="number" id="transportTravelers" min="1" value="1" required>
+                    </div>
+                    <div class="input-block">
+                        <button id="addTravelerBtn" type="button" class="btn-primary-small">Add Traveler</button>
+                    </div>
+                    <div id="travelerFormsContainer" class="traveler-forms"></div>
+
+                    <div class="input-block">
+                        <label>Travel Date</label>
+                        <input type="text" id="travelDate" placeholder="Select travel date" onfocus="(this.type='date')" required>
+                    </div>
+
+                    <div id="flightOptions" class="input-block" style="display:none;">
+                        <label>Seat Class</label>
+                        <select id="seatClass" class="field">
+                            <option value="Economy">Economy</option>
+                            <option value="Business">Business</option>
+                        </select>
+                    </div>
+
+                    <div id="busCabOptions" class="form-section" style="display:none;">
+                        <div class="input-block">
+                            <label>Pickup Location</label>
+                            <input type="text" id="pickupLoc" placeholder="Pickup point">
+                        </div>
+                        <div class="input-block">
+                            <label>Drop Location</label>
+                            <input type="text" id="dropLoc" placeholder="Drop point">
+                        </div>
+                        <div class="input-block">
+                            <label>Travel Time</label>
+                            <input type="time" id="travelTime">
+                        </div>
+                    </div>
+                </div>
+
                 <div class="booking-summary">
                     <h3>Booking Summary</h3>
                     <div class="summary-item">
-                        <span>Hotel:</span>
-                        <span id="summaryHotel">Hotel Name</span>
+                        <span>Item:</span>
+                        <span id="summaryItem">N/A</span>
                     </div>
-                    <div class="summary-item">
+                    <div class="summary-item" id="summaryGuestsBlock">
                         <span>Travelers:</span>
-                        <span id="summaryTravelers">2</span>
+                        <span id="summaryTravelers">1</span>
                     </div>
-                    <div class="summary-item">
+                    <div class="summary-item" id="summaryNightsBlock">
                         <span>Nights:</span>
                         <span id="summaryNights">1</span>
                     </div>

@@ -152,40 +152,68 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 });
 
 // ===============================
+// TOAST NOTIFICATION SYSTEM
+// ===============================
+function showToast(message, type = "info", duration = 3500) {
+  const toastContainer = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<div class="toast-content">${message}</div>`;
+
+  toastContainer.appendChild(toast);
+
+  // Trigger animation
+  setTimeout(() => toast.classList.add("show"), 10);
+
+  // Remove after duration
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+// ===============================
 // FORGOT PASSWORD LOGIC
 // ===============================
 const forgotBtn = document.getElementById("forgotPasswordBtn");
 
 if (forgotBtn) {
   forgotBtn.addEventListener("click", async (e) => {
-    e.preventDefault(); // Stops the page from refreshing
+    e.preventDefault();
 
     // 1. Grab the email from your existing input field (id="email")
     const emailField = document.getElementById("email");
     const emailValue = emailField.value.trim();
-    const auth = getAuth();
 
-    // 2. Validation: Make sure they actually typed an email first
+    // 2. Validation: Make sure they typed an email first
     if (!emailValue) {
-      alert("Please type your email address in the input field first.");
-      emailField.focus(); // Highlights the box for them
+      showToast("📧 Please enter your email address first", "warning");
+      emailField.focus();
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+      showToast("❌ Please enter a valid email address", "error");
       return;
     }
 
     try {
       // 3. Trigger the Firebase reset email
       await sendPasswordResetEmail(auth, emailValue);
-      alert("Check your inbox! A password reset link has been sent to: " + emailValue);
+      showToast("✅ Password reset link sent! Check your inbox.", "success", 4000);
+      emailField.value = ""; // Clear the email field after success
     } catch (error) {
       console.error("Reset Error:", error.code);
       
       // 4. Friendly error messages
       if (error.code === 'auth/user-not-found') {
-        alert("We couldn't find an account with that email.");
+        showToast("❌ No account found with that email", "error");
       } else if (error.code === 'auth/invalid-email') {
-        alert("The email address is not formatted correctly.");
+        showToast("❌ Email address is not valid", "error");
+      } else if (error.code === 'auth/too-many-requests') {
+        showToast("⏳ Too many attempts. Please try again later.", "warning");
       } else {
-        alert("Something went wrong. Please try again later.");
+        showToast("❌ Error sending reset email. Try again.", "error");
       }
     }
   });

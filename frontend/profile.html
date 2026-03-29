@@ -7,11 +7,8 @@
 
   <link rel="stylesheet" href="assets/css/profile.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+  <!-- FontAwesome via CORS-enabled CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
 </head>
 
 <body>
@@ -37,12 +34,13 @@
 
     <div class="options">
       <a href="#" class="option" id="openEditBtn"><i class="fas fa-edit"></i> Edit Profile</a>
-      <a href="#" class="option"><i class="fas fa-lock"></i> Change Password</a>
-      <a href="#" class="option"><i class="fas fa-history"></i> Trip History</a>
+      <a href="#" class="option" id="openPasswordBtn"><i class="fas fa-lock"></i> Change Password</a>
+      <a href="#" class="option" id="openTripHistoryBtn"><i class="fas fa-history"></i> Trip History</a>
       <a href="login.html" class="option"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 
   </div>
+  <!-- EDIT PROFILE MODAL -->
   <div id="editModal" class="modal-overlay hidden">
     <div class="modal-box">
       <h3>Edit Profile</h3>
@@ -59,6 +57,85 @@
       </div>
     </div>
   </div>
+
+  <!-- CHANGE PASSWORD MODAL -->
+  <div id="passwordModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>🔐 Change Password</h3>
+      
+      <label>Current Password</label>
+      <input type="password" id="inputCurrentPassword" placeholder="Enter current password">
+      
+      <label>New Password</label>
+      <input type="password" id="inputNewPassword" placeholder="Enter new password (min 6 characters)">
+      
+      <label>Confirm New Password</label>
+      <input type="password" id="inputConfirmPassword" placeholder="Confirm new password">
+
+      <div class="modal-actions">
+        <button id="btnPasswordCancel">Cancel</button>
+        <button id="btnChangePassword">Change Password</button>
+      </div>
+      <p id="passwordMessage" class="modal-message"></p>
+      <p style="text-align: center; margin-top: 15px; font-size: 13px;">
+        <a href="#" id="forgotPasswordBtnProfile" style="color: #00b4d8; text-decoration: none;">Forgot your password?</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- TRIP HISTORY MODAL -->
+  <div id="tripHistoryModal" class="modal-overlay hidden">
+    <div class="modal-box trip-history-modal">
+      <h3>🚀 Trip History</h3>
+      
+      <!-- Tabs for switching between booking history and trip history -->
+      <div class="trip-tabs">
+        <button class="trip-tab active" data-tab="booking">📅 Booking History</button>
+        <button class="trip-tab" data-tab="visited">🗺️ Visited Trips</button>
+      </div>
+
+      <!-- BOOKING HISTORY TAB -->
+      <div id="bookingHistoryTab" class="trip-tab-content active">
+        <div id="bookingHistoryList" class="history-list">
+          <p class="loading">Loading your bookings...</p>
+        </div>
+      </div>
+
+      <!-- VISITED TRIPS TAB -->
+      <div id="visitedTripsTab" class="trip-tab-content">
+        <div id="visitedTripsList" class="history-list">
+          <p class="loading">Loading your visited trips...</p>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 20px;">
+        <button id="btnTripHistoryClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORGOT PASSWORD MODAL -->
+  <div id="forgotPasswordModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>🔑 Reset Password</h3>
+      <p style="color: #666; font-size: 14px; margin-bottom: 15px;">
+        Enter your email address and we'll send you a password reset link.
+      </p>
+      
+      <label>Email Address</label>
+      <input type="email" id="resetEmailInput" placeholder="your@email.com">
+
+      <div class="modal-actions">
+        <button id="btnResetCancel">Back</button>
+        <button id="btnSendReset" style="background: linear-gradient(135deg, #00b4d8, #009688);">Send Reset Link</button>
+      </div>
+      <p id="resetMessage" class="modal-message"></p>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="toast-container"></div>
+
 <script type="module" src="assets/js/profile.js"></script>
 </body>
 </html>
