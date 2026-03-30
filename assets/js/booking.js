@@ -147,7 +147,9 @@ if (isTransport) {
     pricePerNightEl.textContent = basePrice;
 }
 
+
 const isFixedPrice = itemType === 'Stay' || itemType === 'Attraction';
+
 if (isFixedPrice) {
     document.getElementById('hotelDetails').style.display = 'none';
     document.getElementById('summaryNightsBlock').style.display = 'none';
@@ -284,6 +286,12 @@ function renderHotelTravelerForms(count) {
             <button type="button" class="removeHotelTravelerBtn btn-secondary" style="margin-top:8px;">Remove</button>
         `;
 
+        // 🔥 ADD THIS PART HERE:
+        if (isFixedPrice) {
+            card.querySelectorAll('input, select').forEach(input => {
+                input.required = false;
+            });
+        }
         card.querySelector('.removeHotelTravelerBtn').addEventListener('click', () => {
             const currentCount = parseInt(travelersInput.value) || 1;
             const newCount = Math.max(1, currentCount - 1);
