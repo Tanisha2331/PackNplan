@@ -16,6 +16,29 @@
     .booking-card h4 { margin: 0 0 8px; }
     .booking-card p { margin: 5px 0; color: #555; }
     .empty-placeholder { text-align: center; color: #888; margin-top: 30px; font-size: 1rem; }
+    .booking-card { position: relative; } /* To help with button positioning */
+    .card-actions { display: flex; gap: 10px; 
+        margin-top: 15px; 
+        justify-content: flex-end; 
+    }
+    .btn-cancel { 
+        padding: 8px 15px; 
+        border: 1px solid #ff4d4d; 
+        color: #ff4d4d; 
+        background: transparent; 
+        border-radius: 6px; 
+        cursor: pointer; 
+    }
+    .btn-cancel:hover { background: #fff5f5; }
+    .btn-print { 
+        padding: 8px 15px; 
+        background: #0b74e7; 
+        color: white; 
+        border: none; 
+        border-radius: 6px; 
+        cursor: pointer; 
+    }
+    .btn-print:hover { background: #085cb5; }
   </style>
 </head>
 <body>
@@ -32,9 +55,9 @@
     <div id="transportSection" class="booking-section"></div>
   </main>
 
-  <script type="module">
+ <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+    import { getFirestore, collection, query, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -80,6 +103,7 @@
     async function loadBookings(userId) {
       const q = query(collection(db, 'bookings'), where('userId', '==', userId));
       const snapshot = await getDocs(q);
+      
       if (snapshot.empty) {
         hotelsSection.innerHTML = '<div class="empty-placeholder">No bookings found yet.</div>';
         transportSection.innerHTML = '<div class="empty-placeholder">No bookings found yet.</div>';
@@ -117,10 +141,83 @@
           <p><strong>Guests:</strong> ${b.guests || 'N/A'}</p>
           <p><strong>Amount:</strong> ₹${b.totalAmount || 0}</p>
           <p><strong>Status:</strong> ${b.status || 'Confirmed'}</p>
+          <div class="card-actions">
+             <button class="btn-cancel" data-id="${b.id}">Cancel Booking</button>
+             <button class="btn-print" data-booking='${JSON.stringify(b)}'>Print Receipt</button>
+          </div>
         `;
+
+        // --- Event Listener for Printing ---
+        card.querySelector('.btn-print').addEventListener('click', (e) => {
+            const bookingData = JSON.parse(e.target.dataset.booking);
+            // We store the data in localStorage so success.html can read it
+            localStorage.setItem('bookingDetails', JSON.stringify(bookingData));
+            window.location.href = 'success.html';
+        });
+
+       // --- Event Listener for Canceling (Better UI) ---
+card.querySelector('.btn-cancel').addEventListener('click', (e) => {
+    const docId = e.target.dataset.id;
+    const modal = document.getElementById('confirmModal');
+    const confirmBtn = document.getElementById('confirmCancel');
+    const closeBtn = document.getElementById('closeModal');
+
+    // Show the modal
+    modal.style.display = 'flex';
+
+    // Handle "Keep Booking"
+    closeBtn.onclick = () => { modal.style.display = 'none'; };
+
+    // Handle "Yes, Cancel"
+    confirmBtn.onclick = async () => {
+        confirmBtn.innerText = "Canceling...";
+        confirmBtn.disabled = true;
+        try {
+            await deleteDoc(doc(db, "bookings", docId));
+            
+            // --- UPDATED SUCCESS UI ---
+            const modalContent = modal.querySelector('div > div'); // Select the white card
+            modalContent.innerHTML = `
+                <div style="font-size: 50px; color: #4caf50; margin-bottom: 15px;">✔</div>
+                <h3 style="margin-bottom: 10px; font-family: 'Poppins', sans-serif;">Canceled!</h3>
+                <p style="color: #666; margin-bottom: 25px;">Your booking has been removed successfully.</p>
+            `;
+            
+            // Auto-refresh after 1.5 seconds so the user can see the success message
+            setTimeout(() => {
+                modal.style.display = 'none';
+                location.reload(); 
+            }, 1500);
+
+        } catch (error) {
+            console.error("Error:", error);
+            modal.style.display = 'none';
+            alert("Failed to cancel. Please try again."); // Keep this for actual errors
+        }
+    };
+});
+
         target.appendChild(card);
       });
     }
   </script>
+  <div id="confirmModal" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div style="background: white; padding: 30px; border-radius: 15px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: slideUp 0.3s ease-out;">
+        <div style="font-size: 50px; color: #ff4d4d; margin-bottom: 15px;">⚠️</div>
+        <h3 style="margin-bottom: 10px; font-family: 'Poppins', sans-serif;">Cancel Booking?</h3>
+        <p style="color: #666; margin-bottom: 25px; line-height: 1.5;">Are you sure you want to cancel this booking? This action cannot be undone.</p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+            <button id="closeModal" style="padding: 10px 20px; border: 1px solid #ddd; background: white; border-radius: 8px; cursor: pointer; flex: 1;">Keep Booking</button>
+            <button id="confirmCancel" style="padding: 10px 20px; border: none; background: #ff4d4d; color: white; border-radius: 8px; cursor: pointer; flex: 1; font-weight: 600;">Yes, Cancel</button>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+</style>
 </body>
 </html>
