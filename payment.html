@@ -183,7 +183,7 @@
                 <div class="summary-grid">
                     <div class="summary-item">
                         <span>Hotel:</span>
-                        <strong id="summaryHotel">Loading...</strong>
+                        <strong id="hotelName">Loading...</strong>
                     </div>
                     <div class="summary-item">
                         <span>Travelers:</span>
@@ -252,7 +252,7 @@
         const bookingDetails = JSON.parse(localStorage.getItem('bookingDetails') || '{}');
 
         // Populate summary
-        document.getElementById('summaryHotel').textContent = bookingDetails.hotelName || 'N/A';
+        document.getElementById('hotelName').textContent = bookingDetails.hotelName || 'N/A';
         
         // Handle display based on item type
         const isDestination = bookingDetails.itemType === 'Stay' || bookingDetails.itemType === 'Attraction';

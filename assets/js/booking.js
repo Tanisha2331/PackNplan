@@ -120,7 +120,7 @@ if (isTransport) {
     document.getElementById('hotelDetails').style.display = 'none';
     transportSummary.style.display = 'block';
     document.getElementById('transportDetails').style.display = 'block';
-
+    if (travelDateInput) travelDateInput.required = true;
     document.getElementById('summaryNightsBlock').style.display = 'none';
     document.getElementById('summaryItem').textContent = `${transportMode ? transportMode.charAt(0).toUpperCase() + transportMode.slice(1) : 'Transport'} Trip`;
     transportTitle.textContent = `${transportMode ? transportMode.charAt(0).toUpperCase() + transportMode.slice(1) : 'Transport'} Booking`;
@@ -140,9 +140,10 @@ if (isTransport) {
     transportSummary.style.display = 'none';
     document.getElementById('hotelDetails').style.display = 'block';
     document.getElementById('transportDetails').style.display = 'none';
+    if (travelDateInput) travelDateInput.required = false;
     document.getElementById('summaryNightsBlock').style.display = 'block';
     document.getElementById('summaryItem').textContent = hotelName || 'Hotel Booking';
-    document.getElementById('summaryHotel').textContent = hotelName || 'Hotel Name';
+    document.getElementById('hotelName').textContent = hotelName || 'Hotel Name';
     pricePerNightEl.textContent = basePrice;
 }
 
@@ -424,8 +425,10 @@ calculateTotal();
 // Form submission
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    // Define hotelTravelerDetails at the top so it's accessible globally in this function
+    let hotelTravelerDetails = []; 
 
-    // Check if user is logged in
     if (!isUserLoggedIn) {
         alert('Please log in to complete this booking');
         window.location.href = 'login.html';
@@ -442,6 +445,7 @@ form.addEventListener('submit', async (e) => {
     const phone = phoneField.value.trim();
     let firstInvalidField = null;
 
+    // Basic Validation
     if (!guestName) {
         setInvalid(guestNameField);
         showValidationNote(guestNameField, 'Lead passenger name is required');
@@ -452,11 +456,7 @@ form.addEventListener('submit', async (e) => {
         showValidationNote(emailField, 'Email is required');
         firstInvalidField = firstInvalidField || emailField;
     }
-    if (!phone) {
-        setInvalid(phoneField);
-        showValidationNote(phoneField, 'Phone number is required');
-        firstInvalidField = firstInvalidField || phoneField;
-    } else if (phone.length !== 10) {
+    if (!phone || phone.length !== 10) {
         setInvalid(phoneField);
         showValidationNote(phoneField, 'Enter a valid 10-digit phone number');
         firstInvalidField = firstInvalidField || phoneField;
@@ -474,15 +474,11 @@ form.addEventListener('submit', async (e) => {
     let transportDate = checkIn;
     let transportData = {};
 
+    // --- DYNAMIC TRANSPORT LOGIC ---
     if (isTransport) {
         travelers = parseInt(transportTravelersInput.value) || 1;
         nights = 1;
         transportDate = travelDateInput.value;
-
-        if (!transportMode) {
-            alert('Transport mode not specified. Please select a valid option.');
-            return;
-        }
 
         if (!transportDate) {
             setInvalid(travelDateInput);
@@ -494,143 +490,75 @@ form.addEventListener('submit', async (e) => {
         const travelerDetails = getTravelerDetails();
         let travelerInvalid = false;
 
-        travelerFormsContainer.querySelectorAll('.traveler-card').forEach((card, idx) => {
+        // Dynamic validation for each traveler card
+        travelerFormsContainer.querySelectorAll('.traveler-card').forEach((card) => {
             const nameField = card.querySelector('.traveler-name');
             const ageField = card.querySelector('.traveler-age');
             const genderField = card.querySelector('.traveler-gender');
 
-            if (!nameField.value.trim()) {
-                setInvalid(nameField);
-                showValidationNote(nameField, 'Name required');
-                travelerInvalid = true;
-            }
-            if (!ageField.value.trim()) {
-                setInvalid(ageField);
-                showValidationNote(ageField, 'Age required');
-                travelerInvalid = true;
-            }
-            if (!genderField.value) {
-                setInvalid(genderField);
-                showValidationNote(genderField, 'Gender required');
+            if (!nameField.value.trim() || !ageField.value.trim() || !genderField.value) {
+                setInvalid(nameField); setInvalid(ageField); setInvalid(genderField);
                 travelerInvalid = true;
             }
 
-            if (transportMode === 'flight') {
-                const seatClassField = card.querySelector('.traveler-seatClass');
-                if (!seatClassField || !seatClassField.value) {
-                    setInvalid(seatClassField);
-                    showValidationNote(seatClassField, 'Seat class required');
-                    travelerInvalid = true;
-                }
-            }
-            if (transportMode === 'train') {
-                const berthField = card.querySelector('.traveler-berthPreference');
-                if (!berthField || !berthField.value) {
-                    setInvalid(berthField);
-                    showValidationNote(berthField, 'Berth preference required');
-                    travelerInvalid = true;
-                }
-            }
+            // Conditional validation for Flight/Train
+            if (transportMode === 'flight' && !card.querySelector('.traveler-seatClass').value) travelerInvalid = true;
+            if (transportMode === 'train' && !card.querySelector('.traveler-berthPreference').value) travelerInvalid = true;
         });
 
         if (travelerInvalid) {
-            const firstBad = travelerFormsContainer.querySelector('.input-invalid');
-            firstBad?.focus();
-            window.scrollTo({ top: firstBad?.getBoundingClientRect().top + window.scrollY - 80 || 0, behavior: 'smooth' });
+            alert('Please fill in all traveler details, including preferences.');
             return;
         }
 
-        if (transportMode === 'flight') {
-            transportData = { travelerDetails };
-        } else if (transportMode === 'train') {
-            transportData = { travelerDetails };
-        } else if (transportMode === 'bus' || transportMode === 'cab') {
-            const pickupLoc = pickupLocInput ? pickupLocInput.value.trim() : '';
-            const dropLoc = dropLocInput ? dropLocInput.value.trim() : '';
-            const travelTime = travelTimeInput ? travelTimeInput.value : '';
+        // Logic for Bus/Cab specific fields
+        if (transportMode === 'bus' || transportMode === 'cab') {
+            const pickupLoc = pickupLocInput?.value.trim();
+            const dropLoc = dropLocInput?.value.trim();
+            const travelTime = travelTimeInput?.value;
 
             if (!pickupLoc || !dropLoc || !travelTime) {
-                if (!pickupLoc) {
-                    setInvalid(pickupLocInput);
-                    showValidationNote(pickupLocInput, 'Pickup location required');
-                }
-                if (!dropLoc) {
-                    setInvalid(dropLocInput);
-                    showValidationNote(dropLocInput, 'Drop location required');
-                }
-                if (!travelTime) {
-                    setInvalid(travelTimeInput);
-                    showValidationNote(travelTimeInput, 'Travel time required');
-                }
+                alert('Please fill in Pickup, Drop, and Time for your trip.');
                 return;
             }
-
             transportData = { pickupLoc, dropLoc, travelTime, travelerDetails };
         } else {
-            // Fallback generic transport data
             transportData = { travelerDetails };
         }
 
-    let hotelTravelerDetails = [];
-
+    // --- HOTEL / ATTRACTION LOGIC ---
     } else if (!isFixedPrice) {
         travelers = parseInt(travelersInput.value) || 1;
         nights = parseInt(nightsInput.value) || 1;
         hotelTravelerDetails = getHotelTravelerDetails();
 
-        const hotelTravelerInvalid = hotelTravelerDetails.some(h => !h.name || !h.age || !h.gender);
-        if (hotelTravelerInvalid) {
-            alert('Please complete all hotel guest name, age, and gender fields.');
+        if (hotelTravelerDetails.some(h => !h.name || !h.age || !h.gender)) {
+            alert('Please complete all hotel guest details.');
             return;
         }
     }
 
+    // Final Calculation and Redirection
     const totals = calculateTotal();
     const totalAmount = totals.total;
-
-    if (totalAmount <= 0) {
-        alert('Invalid total amount. Please verify traveler count and pricing');
-        submitBtn.textContent = 'Proceed to Payment';
-        submitBtn.disabled = false;
-        return;
-    }
-
-    const paidAmount = 999; // legacy display no longer required, but stays for summary
+    const paidAmount = 999;
     const remainingAmount = Math.max(0, totalAmount - paidAmount);
 
-    // Show loading
     if (submitBtn) {
         submitBtn.textContent = 'Processing...';
         submitBtn.disabled = true;
     }
 
     try {
-        // Generate booking ID
         const bookingId = 'BOOK-' + Date.now();
-        
-        // Store booking details in localStorage for payment page
         localStorage.setItem('bookingDetails', JSON.stringify({
-            bookingId,
-            hotelName,
-            guestName,
-            email,
-            phone,
-            totalAmount,
-            paidAmount,
-            remainingAmount,
-            travelers,
-            nights,
-            checkIn: transportDate,
-            checkOut: transportDate,
-            address,
-            itemType,
-            city,
-            transportMode,
-            transportData,
-            hotelTravelerDetails
+            bookingId, hotelName, guestName, email, phone,
+            totalAmount, paidAmount, remainingAmount,
+            travelers, nights, checkIn: transportDate,
+            address, itemType, city, transportMode,
+            transportData, hotelTravelerDetails
         }));
 
-        // Redirect to custom payment page
         window.location.href = 'payment.html';
         
     } catch (error) {
