@@ -23,11 +23,20 @@ const bookingDetailsStr = localStorage.getItem('bookingDetails');
 if (bookingDetailsStr) {
     const bookingDetails = JSON.parse(bookingDetailsStr);
 
-    // Display booking information
+   // 1. Display booking ID
     document.getElementById('bookingId').textContent = bookingDetails.bookingId || 'N/A';
-    document.getElementById('hotelName').textContent = bookingDetails.hotelName || 'N/A';
+
+    // 2. FIX: Handle missing Hotel Name by falling back to City or Address
+    // This ensures Destination Cards (Jaipur/Manali) show the name instead of N/A
+    const displayName = bookingDetails.hotelName || bookingDetails.city || bookingDetails.address || 'Trip Destination';
+    document.getElementById('hotelName').textContent = displayName;
+
+    // 3. Display Guest Name
     document.getElementById('guestName').textContent = bookingDetails.guestName || 'N/A';
-    document.getElementById('totalAmount').textContent = `₹${bookingDetails.totalAmount || 0}`;
+
+    // 4. FIX: Ensure totalAmount is pulled correctly
+    const amount = bookingDetails.totalAmount || 0;
+    document.getElementById('totalAmount').textContent = `₹${amount}`;
 
     // Wait for auth state to be ready, then save booking if payment was completed
     const paymentCompleted = localStorage.getItem('paymentCompleted');

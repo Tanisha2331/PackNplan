@@ -63,6 +63,8 @@ const guests = urlParams.get('guests');
 const itemType = (urlParams.get('itemType') || 'Hotel').trim();
 const transportMode = (urlParams.get('transportMode') || '').trim().toLowerCase();
 
+const isFixedPrice = itemType === 'Stay' || itemType === 'Attraction';
+
 // Update page title and back button based on item type
 document.title = `Pack & Plan — ${itemType} Booking Details`;
 const backBtn = document.querySelector('.back-btn');
@@ -136,6 +138,16 @@ if (isTransport) {
     // Initialize defaults for transport fields
     if (transportTravelersInput) transportTravelersInput.value = 1;
     if (travelDateInput && checkIn) travelDateInput.value = checkIn;
+}else if (isFixedPrice) {
+    // NEW: Handle Destination Cards (Jaipur/Manali)
+    transportSummary.style.display = 'none';
+    document.getElementById('hotelDetails').style.display = 'block';
+    document.getElementById('transportDetails').style.display = 'none';
+    if (travelDateInput) travelDateInput.required = false;
+    document.getElementById('summaryNightsBlock').style.display = 'none'; 
+    if (nightsInput) nightsInput.closest('.input-block').style.display = 'none'; 
+    document.getElementById('summaryItem').textContent = hotelName || 'Booking';
+    pricePerNightEl.textContent = basePrice;
 } else {
     transportSummary.style.display = 'none';
     document.getElementById('hotelDetails').style.display = 'block';
@@ -148,10 +160,10 @@ if (isTransport) {
 }
 
 
-const isFixedPrice = itemType === 'Stay' || itemType === 'Attraction';
+
 
 if (isFixedPrice) {
-    document.getElementById('hotelDetails').style.display = 'none';
+    document.getElementById('hotelDetails').style.display = 'block';
     document.getElementById('summaryNightsBlock').style.display = 'none';
     pricePerNightEl.textContent = basePrice;
 }
@@ -335,10 +347,10 @@ if (addTravelerBtn) {
 }
 
 if (travelersInput) {
-    travelersInput.addEventListener('change', (e) => {
+    travelersInput.addEventListener('input', (e) => {
         const count = parseInt(e.target.value) || 1;
-        renderHotelTravelerForms(count);
-        calculateTotal();
+        renderHotelTravelerForms(count); // This creates the Name/Age boxes
+        calculateTotal(); // This updates the price
     });
 }
 
@@ -354,7 +366,10 @@ if (addHotelTravelerBtn) {
 if (isTransport) {
     renderTravelerForms(parseInt(transportTravelersInput.value) || 1);
 } else {
-    renderHotelTravelerForms(parseInt(travelersInput.value) || 1);
+    // FORCE the guest forms to appear for Stays/Hotels/Attractions
+    // This uses the 'guests' or 'travelers' count from the URL/Input
+    const initialGuestCount = parseInt(travelersInput.value) || 1;
+    renderHotelTravelerForms(initialGuestCount);
 }
 
 // Calculate total
@@ -364,30 +379,19 @@ function calculateTotal() {
         const travelers = parseInt(transportTravelersInput.value) || 1;
         total = basePrice * travelers;
         summaryTravelers.textContent = travelers;
-        summaryNights.textContent = 'N/A';
-        document.getElementById('summaryNightsBlock').style.display = 'none';
-        document.getElementById('summaryGuestsBlock').style.display = 'block';
-        summaryItem.textContent = `${transportMode ? transportMode.charAt(0).toUpperCase() + transportMode.slice(1) : 'Transport'} Trip`;
     } else if (isFixedPrice) {
-        // For destinations and attractions, price is fixed total
-        total = basePrice;
-        summaryTravelers.textContent = 'N/A';
+        // NEW: Multiplies Destination price by number of members
+        const travelers = parseInt(travelersInput.value) || 1;
+        total = basePrice * travelers; 
+        summaryTravelers.textContent = travelers;
         summaryNights.textContent = 'N/A';
-        document.getElementById('summaryGuestsBlock').style.display = 'none';
-        document.getElementById('summaryNightsBlock').style.display = 'none';
-        summaryItem.textContent = hotelName || 'Booking';
     } else {
-        // For hotels, calculate based on travelers and nights
         const travelers = parseInt(travelersInput.value) || 1;
         const nights = parseInt(nightsInput.value) || 1;
         total = basePrice * nights * travelers;
         summaryTravelers.textContent = travelers;
         summaryNights.textContent = nights;
-        document.getElementById('summaryGuestsBlock').style.display = 'block';
-        document.getElementById('summaryNightsBlock').style.display = 'block';
-        summaryItem.textContent = hotelName || 'Hotel Booking';
     }
-
     totalAmountEl.textContent = `₹${total}`;
     return { total };
 }
@@ -420,13 +424,6 @@ if (!isFixedPrice && !isTransport) {
     if (travelersInput) travelersInput.addEventListener('input', calculateTotal);
     if (nightsInput) nightsInput.addEventListener('input', calculateTotal);
 }
-
-// Hide travelers and nights inputs for fixed-price items
-if (isFixedPrice) {
-    const hotelSection = document.querySelector('.form-section:nth-child(2)');
-    if (hotelSection) hotelSection.style.display = 'none';
-}
-
 // Initial calculation
 calculateTotal();
 
@@ -448,7 +445,7 @@ form.addEventListener('submit', async (e) => {
     const guestNameField = document.getElementById('guestName');
     const emailField = document.getElementById('guestEmail');
     const phoneField = document.getElementById('guestPhone');
-    const guestName = guestNameField.value.trim();
+    const guestName = guestNameField ? guestNameField.value.trim() : "";
     const email = emailField.value.trim();
     const phone = phoneField.value.trim();
     let firstInvalidField = null;
@@ -534,17 +531,28 @@ form.addEventListener('submit', async (e) => {
             transportData = { travelerDetails };
         }
 
-    // --- HOTEL / ATTRACTION LOGIC ---
-    } else if (!isFixedPrice) {
-        travelers = parseInt(travelersInput.value) || 1;
-        nights = parseInt(nightsInput.value) || 1;
-        hotelTravelerDetails = getHotelTravelerDetails();
+    } else {
+    // This handles both Normal Hotels AND your Destination/Stay cards
+    travelers = parseInt(travelersInput.value) || 1;
+    
+    // Logic: If it's a 'Stay' card, nights is 1. If it's a Hotel, use the input.
+    nights = isFixedPrice ? 1 : (parseInt(nightsInput.value) || 1);
+    
+    // CRITICAL: Re-sync the details from the forms on screen
+    hotelTravelerDetails = getHotelTravelerDetails();
 
-        if (hotelTravelerDetails.some(h => !h.name || !h.age || !h.gender)) {
-            alert('Please complete all hotel guest details.');
-            return;
+    // Check if the forms were actually filled
+    const isMissingData = hotelTravelerDetails.some(h => !h.name || !h.age || !h.gender);
+    if (isMissingData) {
+        alert('Please enter Name, Age, and Gender for ALL travelers.');
+        // If you have a submitBtn variable, reset it here
+        if (typeof submitBtn !== 'undefined') {
+            submitBtn.textContent = 'Proceed to Payment';
+            submitBtn.disabled = false;
         }
+        return; 
     }
+}
 
     // Final Calculation and Redirection
     const totals = calculateTotal();
@@ -560,8 +568,12 @@ form.addEventListener('submit', async (e) => {
     try {
         const bookingId = 'BOOK-' + Date.now();
         localStorage.setItem('bookingDetails', JSON.stringify({
-            bookingId, hotelName, guestName, email, phone,
-            totalAmount, paidAmount, remainingAmount,
+            bookingId, hotelName: hotelName || city || "Trip to Destination", 
+            guestName: guestName,
+            email: email,
+            phone: phone,
+            totalAmount: totals.total,
+            paidAmount, remainingAmount,
             travelers, nights, checkIn: transportDate,
             address, itemType, city, transportMode,
             transportData, hotelTravelerDetails
