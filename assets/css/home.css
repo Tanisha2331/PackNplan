@@ -1438,3 +1438,10 @@ html.dark-mode .footer-bottom {
     from { transform: scale(0.8); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
 }
+/* Hide the Google Translate top bar and attribution */
+.goog-te-banner-frame.skiptranslate, .goog-logo-link, .goog-te-gadget span {
+    display: none !important;
+}
+.skiptranslate {
+    display: none !important;
+}
