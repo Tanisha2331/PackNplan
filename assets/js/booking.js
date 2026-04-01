@@ -214,7 +214,7 @@ function renderTravelerForms(count) {
             </div>
             <div class="input-block">
                 <label>Age</label>
-                <input type="number" min="0" class="traveler-age" placeholder="Age" required>
+                <input type="text"  class="traveler-age" placeholder="Age" required>
             </div>
             <div class="input-block">
                 <label>Gender</label>
@@ -284,7 +284,7 @@ function renderHotelTravelerForms(count) {
             </div>
             <div class="input-block">
                 <label>Age</label>
-                <input type="number" min="0" class="hotel-traveler-age" placeholder="Age" required>
+                <input type="text"  class="hotel-traveler-age" placeholder="Age" required>
             </div>
             <div class="input-block">
                 <label>Gender</label>
