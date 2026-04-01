@@ -1,57 +1,28 @@
-/* --- 1. THEME VARIABLES --- */
-:root {
-    --bg-main: linear-gradient(135deg, #5ec9f3, #7de2b9);
-    --bg-container: rgba(255, 255, 255, 0.85);
-    --bg-card: #ffffff;
-    --text-title: #0b3c5d;
-    --text-main: #444444;
-    --accent: #0b74e7;
-    --card-hover: #f1faf6;
-    --border-clr: rgba(0, 0, 0, 0.1);
-}
-
-html.dark-mode {
-    --bg-main: #121212;
-    --bg-container: rgba(30, 30, 30, 0.95);
-    --bg-card: #252525;
-    /* make both title and body text white for maximum contrast */
-    --text-title: #ffffff;
-    --text-main: #ffffff;
-    --accent: #FF9933;
-    --card-hover: #333333;
-    --border-clr: #444444;
-}
-
-/* --- 2. GLOBAL STYLES --- */
 body {
     font-family: "Poppins", sans-serif;
     margin: 0;
     padding: 0;
-    background: var(--bg-main);
+    background: linear-gradient(135deg, #5ec9f3, #7de2b9);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: background 0.3s ease, color 0.3s ease;
-    color: var(--text-main);
 }
 
-/* --- 3. CONTAINER & CARDS --- */
 .settings-container {
-    background: var(--bg-container);
+    background: rgba(255, 255, 255, 0.85);
     padding: 30px;
     border-radius: 16px;
     width: 90%;
     max-width: 700px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     backdrop-filter: blur(4px);
-    transition: all 0.3s ease;
 }
 
 .title {
     font-size: 34px;
     font-weight: bold;
-    color: var(--text-title);
+    color: #0b3c5d;
     margin-bottom: 25px;
     display: flex;
     align-items: center;
@@ -59,124 +30,685 @@ body {
 }
 
 .title-icon {
-    width: 40px; height: 40px;
-    transition: filter 0.3s ease;
+    width: 40px;
+    height: 40px;
 }
 
-html.dark-mode .title-icon {
-    filter: brightness(0) invert(1);
+.settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
 }
 
 .setting-option {
     padding: 20px;
-    background: var(--bg-card);
+    background: white;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     transition: 0.3s;
     cursor: pointer;
-    border: 1px solid transparent;
 }
 
 .setting-option:hover {
     transform: translateY(-4px);
-    background: var(--card-hover);
-    border-color: var(--accent);
+    background: #f1faf6;
 }
 
 .setting-option h3 {
     margin: 0;
-    color: var(--text-title);
+    font-size: 20px;
+    color: #0b3c5d;
 }
 
 .setting-option p {
     margin: 5px 0 0;
-    color: var(--text-main);
+    color: #444;
     font-size: 14px;
 }
 
-/* --- 4. TOGGLE & UI ELEMENTS --- */
-.toggle-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+@media (max-width: 600px) {
+    .title {
+        font-size: 28px;
+    }
+
+    .setting-option h3 {
+        font-size: 18px;
+    }
 }
+/* --- Add this to the bottom of settings.css --- */
+
+/* 1. The Global Dark Class */
+.dark-mode, .dark-mode body{
+    background-color: #121212 !important; /* Deep dark background */
+    color: #f1f1f1 !important;            /* Off-white text for readability */
+}
+
+/* 2. Style the Container for Dark Mode */
+.dark-mode .settings-container {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+/* 3. Style the Text inside the Options */
+.dark-mode .setting-option h3 {
+    color: #FF9933; /* Keeps your brand color for headings */
+}
+
+.dark-mode .setting-option p {
+    color: #bbbbbb; /* Dimmer text for the descriptions */
+}
+
+/* 4. Hover effect in Dark Mode */
+.dark-mode .setting-option:hover {
+    background-color: #2a2a2a;
+    cursor: pointer;
+}
+
+/* 5. Ensure the Icon is visible */
+.dark-mode .title-icon {
+    filter: brightness(0) invert(1); /* Turns black icons white */
+}
+/* This targets the entire screen when .dark-mode is active */
+html.dark-mode, 
+html.dark-mode body {
+    background-color: #121212 !important;
+    color: #ffffff !important;
+}
+
+/* Specific fix for your settings cards/sidebar */
+html.dark-mode .settings-container, 
+html.dark-mode .setting-option,
+html.dark-mode .sidebar {
+    background-color: #1e1e1e !important;
+    border-color: #333 !important;
+    color: #f1f1f1 !important;
+}
+/* --- Appearance Toggle UI --- */
+
+/* The grey box holding both buttons */
+.theme-switch-wrapper {
+    display: flex;
+    background: #f1f5f9; 
+    padding: 5px;
+    border-radius: 12px;
+    gap: 5px;
+    width: fit-content;
+    margin-top: 10px;
+}
+
+/* Style for both buttons */
+.theme-btn {
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
+    background: transparent;
+    color: #64748b;
+}
+
+/* The "Selected" button look */
+.theme-btn.active {
+    background: #ffffff;
+    color: #0b74e7; /* Your blue accent */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Dark Mode adjustment for the switch itself */
+.dark-mode .theme-switch-wrapper {
+    background: #2d2d2d;
+}
+
+.dark-mode .theme-btn {
+    color: #888;
+}
+
+.dark-mode .theme-btn.active {
+    background: #1a1a1a;
+    color: #FF9933; /* Your Saffron accent */
+}
+/* --- THE SLIDING TOGGLE CSS --- */
+
+/* The container */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+/* Hide the default checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The actual slider track */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+/* The white circle (the knob) */
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+/* When checked: change background to Blue */
+input:checked + .slider {
+  background-color: #0b74e7;
+}
+
+/* When checked: move the circle to the right */
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* Dark Mode adjustment for the track when active */
+.dark-mode input:checked + .slider {
+  background-color: #FF9933; /* Your Saffron accent */
+}
+/* --- SIDE-BY-SIDE LAYOUT --- */
+
+.toggle-row {
+    display: flex;             /* Align items in a row */
+    justify-content: space-between; /* Push text left, toggle right */
+    align-items: center;       /* Center them vertically */
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.05); /* Slight box look */
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+/* --- THE SLIDING TOGGLE (SIDE VERSION) --- */
 
 .switch {
-    position: relative;
-    display: inline-block;
-    width: 46px;
-    height: 24px;
+  position: relative;
+  display: inline-block;
+  width: 46px;   /* Slightly slimmer for the side */
+  height: 24px;
+  flex-shrink: 0; /* Prevents the toggle from squishing */
 }
 
-.switch input { opacity: 0; width: 0; height: 0; }
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
 
 .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-    border-radius: 34px;
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
 }
 
 .slider:before {
-    position: absolute;
-    content: "";
-    height: 18px; width: 18px;
-    left: 3px; bottom: 3px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
 }
 
-input:checked + .slider { background-color: var(--accent); }
-input:checked + .slider:before { transform: translateX(22px); }
+input:checked + .slider {
+  background-color: #0b74e7;
+}
 
-/* --- 5. MODALS --- */
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+/* Dark Mode Track Color */
+.dark-mode input:checked + .slider {
+  background-color: #FF9933; 
+}
+.settings-select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+/* Match the saffron accent in dark mode */
+.dark-mode .settings-select {
+    border-color: #FF9933;
+    background: #1a1a1a;
+}
+
+/* FORCE DARK MODE STYLES */
+.dark-mode, .dark-mode body {
+    background: #121212 !important;
+    color: #ffffff !important;
+}
+
+.dark-mode .settings-container {
+    background: #1e1e1e !important;
+    color: white !important;
+    border: 1px solid #333;
+}
+
+.dark-mode .setting-option {
+    background: #2a2a2a !important;
+    border-bottom: 1px solid #444;
+}
+
+.dark-mode .setting-option h3 {
+    color: #FF9933 !important;
+}
+
+.dark-mode .setting-option p {
+    color: #ccc !important;
+}
+/* --- FORCE DARK MODE (HIGH SPECIFICITY) --- */
+
+/* 1. The Background */
+html.dark-mode, 
+html.dark-mode body {
+    background: #121212 !important; /* Deep black */
+    background-image: none !important; /* Removes the blue/green gradient */
+    color: #ffffff !important;
+}
+
+/* 2. The Main Container */
+html.dark-mode .settings-container {
+    background: rgba(30, 30, 30, 0.95) !important;
+    color: #ffffff !important;
+    border: 1px solid #444 !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* 3. The Individual Option Cards */
+html.dark-mode .setting-option {
+    background: #252525 !important;
+    border: 1px solid #333 !important;
+}
+
+html.dark-mode .setting-option:hover {
+    background: #333333 !important;
+}
+
+/* 4. The Text Colors */
+html.dark-mode .setting-option h3,
+html.dark-mode .title {
+    color: #FF9933 !important; /* Saffron headers */
+}
+
+html.dark-mode .setting-option p {
+    color: #bbbbbb !important; /* Gray subtext */
+}
+
+/* 5. The Language Buttons */
+html.dark-mode .lang-btn {
+    color: #ffffff !important;
+    border-color: #FF9933 !important;
+}
+#account-opt:hover {
+    background-color: rgba(0, 0, 0, 0.05); /* Very light gray */
+    transition: background 0.3s ease;
+}
+
+/* If Dark Mode is active, make the hover color lighter */
+html.dark-mode #account-opt:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+/* Modal Background */
 .modal {
-    display: none;
+    display: none; 
     position: fixed;
     z-index: 1000;
     left: 0; top: 0;
     width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.6);
-    backdrop-filter: blur(5px);
+    background-color: rgba(0,0,0,0.5);
 }
 
+/* Modal Box */
 .modal-content {
-    background-color: var(--bg-card);
+    background-color: white;
     margin: 15% auto;
     padding: 25px;
     border-radius: 12px;
     width: 350px;
     text-align: center;
-    color: var(--text-main);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
-/* --- 6. LANGUAGE BUTTONS --- */
-.lang-btn {
-    padding: 6px 12px;
-    border: 1px solid var(--accent);
-    background: transparent;
-    color: var(--text-main);
-    border-radius: 5px;
+.close-btn {
+    float: right;
+    font-size: 28px;
     cursor: pointer;
-    transition: 0.3s;
 }
 
-/* ensure any leftover hard‑coded text becomes readable in dark mode */
-html.dark-mode body,
-html.dark-mode .settings-container,
-html.dark-mode h1, html.dark-mode h2, html.dark-mode h3,
-html.dark-mode h4, html.dark-mode h5, html.dark-mode h6,
-html.dark-mode p,
-html.dark-mode button,
-html.dark-mode label {
-    color: var(--text-main) !important;
+#toggle-2fa-btn {
+    background-color: #FF9933;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-top: 15px;
+    cursor: pointer;
+}
+/* Two factor authentication 03/03/26 */
+/* Input box remains full width for easy typing */
+input[type="email"], input[type="text"] {
+    width: 100%; 
+    padding: 12px;
+    margin: 15px 0;
+    box-sizing: border-box; /* Crucial to keep width accurate */
+    border-radius: 8px;
+    border: 1px solid #ddd;
 }
 
-.lang-btn:hover, .lang-btn.active {
-    background: var(--accent);
-    color: white !important;
+/* Buttons are now smaller and centered */
+#send-email-btn, #verify-btn {
+    width: 60%; /* This makes it smaller than the input box */
+    padding: 10px; /* Slightly less padding for a smaller feel */
+    margin: 10px auto; /* "auto" centers the button horizontally */
+    display: block; /* Required for the "auto" margin to work */
+    border: none;
+    border-radius: 25px; /* Pill-shaped buttons look more aesthetic */
+    font-weight: 600;
+    cursor: pointer;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    transition: all 0.2s ease;
+}
+
+#send-email-btn:hover, #verify-btn:hover {
+    width: 65%; /* Slight growth effect on hover looks very pro */
+    filter: brightness(1.1);
+}
+/* Help & Support 03/03/26 */
+/* FAQ Container styling */
+.faq-container {
+    flex-direction: column !important; /* Stack drawer under the text */
+    align-items: flex-start !important;
+    cursor: pointer;
+}
+
+.faq-drawer {
+    max-height: 0; /* Hidden by default */
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, padding 0.3s ease;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05); /* Subtle contrast */
+    border-radius: 8px;
+}
+
+/* When the "active" class is added via JS */
+.faq-drawer.active {
+    max-height: 600px; /* Adjust based on content size */
+    padding: 15px 0;
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.faq-item {
+    padding: 10px 0;
+}
+
+.faq-item h4 {
+    margin: 0;
+    font-size: 14px;
+    color: #4facfe;
+}
+
+.faq-item p {
+    margin: 5px 0 0 0;
+    font-size: 13px;
+    color: #666;
+}
+.faq-prompt {
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.faq-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two buttons per row */
+    gap: 10px;
+}
+
+.faq-opt-btn {
+    padding: 10px;
+    border: 1px solid #4facfe;
+    background: transparent;
+    color: #4facfe;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.faq-opt-btn:hover {
+    background: #4facfe;
+    color: white;
+}
+
+.solution-box {
+    display: none; /* Shown via JS */
+    margin-top: 15px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border-left: 4px solid #4facfe;
+}
+
+#solution-text {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.5;
+}
+
+#back-to-faq {
+    margin-top: 10px;
+    background: none;
+    border: none;
+    color: #888;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 12px;
+}
+#solution-text ul {
+    list-style-type: none; /* Remove default dots */
+    padding: 0;
+}
+
+#solution-text li {
+    position: relative;
+    padding-left: 20px;
+    font-size: 13.5px;
+    color: #444;
+}
+
+/* Add a custom blue bullet point */
+#solution-text li::before {
+    content: "•";
+    color: #4facfe;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+.feedback-container {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    text-align: center;
+}
+
+.feedback-container p {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 8px;
+}
+
+.feedback-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.feedback-btn {
+    background: #f0f0f0;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 50%; /* Circle shape */
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s ease;
+}
+
+.feedback-btn:hover {
+    background: #e0e0e0;
+    transform: scale(1.1);
+}
+
+/* Specific colors for up/down */
+#thumbs-up:hover { background: #d4edda; }
+#thumbs-down:hover { background: #f8d7da; }
+.contact-support-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: #4facfe;
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.contact-support-btn:hover {
+    background: #00f2fe;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(79, 172, 254, 0.3);
+}
+/* Languages 03/03/26 */
+.lang-simple-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 0;
+}
+
+.lang-btn {
+    width: 100%;
+    padding: 12px 15px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    transition: 0.2s all ease;
+}
+
+.lang-btn:hover {
+    background: #f8f9fa;
+    border-color: #4facfe;
+}
+
+.lang-btn.selected {
+    background: #eef7ff;
+    border-color: #4facfe;
+    color: #007bff;
+    font-weight: 600;
+}
+
+/* Add a checkmark for the selected language */
+.lang-btn.selected::after {
+    content: "✓";
+    margin-left: auto;
+    font-weight: bold;
+}
+/* Hide the Google Translate header bar */
+.goog-te-banner-frame.skiptranslate {
+    display: none !important;
+}
+body {
+    top: 0px !important;
+}
+/* Hide the Google "Powered by" text if you want it cleaner */
+.goog-logo-link {
+    display: none !important;
+}
+.goog-te-gadget {
+    color: transparent !important;
+}
+/* 1. Hide the main Google Translate banner bar */
+.goog-te-banner-frame.skiptranslate, 
+.goog-te-banner-frame {
+    display: none !important;
+}
+
+/* 2. Prevent the body from shifting down when the bar is "hidden" */
+body {
+    top: 0px !important;
+}
+
+/* 3. Hide the small "Powered by Google" branding inside the widget */
+.goog-logo-link {
+    display: none !important;
+}
+
+.goog-te-gadget {
+    color: transparent !important;
+}
+
+/* 4. Hide the "Show Original" tooltip that appears on hover */
+#goog-gt-tt, .goog-te-balloon-frame {
+    display: none !important;
+}
+
+.goog-text-highlight {
+    background: none !important;
+    box-shadow: none !important;
+}
+/* This hides the wrapper and the frame itself */
+iframe.goog-te-banner-frame {
+    display: none !important;
+}
+
+.goog-te-gadget {
+    display: none !important;
+}
+
+/* Removes the extra space Google adds to the top of the page */
+.skiptranslate {
+    display: none !important;
+}
+
+body {
+    top: 0px !important;
+    position: static !important;
 }

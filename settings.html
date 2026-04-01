@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <!-- //Two-Factor Authenticaton 03/03/26 -->
     <script>
     // This runs BEFORE the page even draws, preventing a "white flash"
     (function() {
@@ -30,15 +31,16 @@
         Settings
     </h2>
     <div class="settings-list">
-        <div class="setting-option" id="account-opt" style="cursor: pointer;">
-            <h3 class="lang-account-title">Account</h3>
-            <p class="lang-account-desc">Update your traveler profile name.</p>
-        </div>
+    <div class="setting-option" id="account-opt" style="cursor: pointer;">
+    <h3 class="lang-account-title">Account</h3>
+    <p class="lang-account-desc">Update your traveler profile name.</p>
+</div>
+<!-- Privacy & Security 03/03/26 -->
     <div class="setting-option" id="privacy-opt" style="cursor: pointer;">
-        <div class="option-info">
-            <h3 class="lang-privacy-title">Privacy & Security</h3>
-            <p class="lang-privacy-desc">Add an extra layer of security to your account.</p>
-        </div>
+    <div class="option-info">
+        <h3 class="lang-privacy-title">Privacy & Security</h3>
+        <p class="lang-privacy-desc">Add an extra layer of security to your account.</p>
+    </div>
 </div>
     <div class="setting-option toggle-row">
     <div class="option-info">
@@ -50,25 +52,59 @@
         <span class="slider round"></span>
     </label>
 </div>
-   <div class="setting-option toggle-row" id="language-option">
-        <div class="option-info">
-            <h3 class="lang-language-title">Language</h3>
-            <p class="lang-language-desc">Choose your language.</p>
-        </div>
-        <div class="language-buttons">
-            <button onclick="changeLanguageManual('en')" class="lang-btn">English</button>
-            <button onclick="changeLanguageManual('hi')" class="lang-btn">हिन्दी</button>
+<!-- Languages 03/03/26 -->
+   <div class="setting-option" id="language-opt" style="cursor: pointer;">
+    <div class="option-info">
+        <h3>Language</h3>
+        <p>Current: <span id="current-lang" style="font-weight: bold; color: #4facfe;">English (US)</span></p>
+    </div>
+    
+    <div id="lang-drawer" class="faq-drawer">
+        <div class="lang-simple-list">
+            <button class="lang-btn selected" data-lang="English (US)">🇺🇸 English (US)</button>
+            <button class="lang-btn" data-lang="हिन्दी">🇮🇳 हिन्दी (Hindi)</button>
         </div>
     </div>
 </div>
-<div class="setting-option">
-            <h3>Help & Support</h3>
-            <p>Get help or contact customer support.</p>
-        </div>
 </div>
-<div id="twoFactorModal" class="modal">
+<!-- Help & Support 03/03/26-->
+<div class="setting-option faq-container" id="help-support-opt" style="cursor: pointer;">
+    <div class="option-info">
+        <h3>Help & Support</h3>
+        <p>Get help or contact customer support.</p>
+    </div>
+    
+    <div id="faq-drawer" class="faq-drawer">
+        <p class="faq-prompt">What's the problem you're facing?</p>
+        
+        <div class="faq-options">
+            <button class="faq-opt-btn" data-target="otp-issue">OTP not received</button>
+            <button class="faq-opt-btn" data-target="account-issue">Account Access</button>
+            <button class="faq-opt-btn" data-target="theme-issue">Display/Theme</button>
+            <button class="faq-opt-btn" data-target="other-issue">Other</button>
+        </div>
+
+        <div id="solution-box" class="solution-box" style="display:none;">
+            <div id="solution-text"></div>
+            
+            <div id="feedback-container" class="feedback-container">
+                <p>Did this help?</p>
+                <div class="feedback-buttons">
+                    <button class="feedback-btn" id="thumbs-up">👍</button>
+                    <button class="feedback-btn" id="thumbs-down">👎</button>
+                </div>
+            </div>
+
+            <p id="feedback-thanks" style="display:none; color: #4facfe; font-size: 13px; margin-top: 10px;">Thanks for your feedback!</p>
+
+            <button id="back-to-faq" style="margin-top: 15px;">← Back to options</button>
+        </div>
+    </div>
+</div>
+<!-- //Two-Factor Authenticaton 03/03/26 -->
+<div id="twoFactorModal" class="modal"> 
     <div class="modal-content">
-        <span class="close-btn">&times;</span>
+        <span class="close-btn" style="position: absolute; right: 20px; top: 15px; cursor: pointer; font-size: 24px; color: #999;">&times;</span>
         <h2>Two-Factor Security</h2>
         <p id="2fa-msg">Enter your email to receive a code.</p>
         
@@ -81,6 +117,15 @@
         </div>
     </div>
 </div>
+</div>
+<!-- Language change 03/03/26 -->
+ <div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'hi,en'}, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <script src="assets/js/settings.js"></script>
 </body>
 </html>
