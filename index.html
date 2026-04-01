@@ -412,7 +412,30 @@
         </div>
     </div>
 </div>
+
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script type="module" src="/assets/js/home.js"></script>
+<!-- Language change 01/04/26 -->
+<div id="google_translate_element" style="position: absolute; opacity: 0; pointer-events: none; z-index: -1;"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en',
+    includedLanguages: 'en,hi',
+    layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+  }, 'google_translate_element');
+
+  // AUTO-APPLY SAVED LANGUAGE
+  setTimeout(function() {
+    const savedLang = localStorage.getItem('appLanguage');
+    const googleSelect = document.querySelector('.goog-te-combo');
+    if (savedLang && googleSelect) {
+        googleSelect.value = savedLang;
+        googleSelect.dispatchEvent(new Event('change'));
+    }
+  }, 1000); // Wait 1 second for Google to load
+}
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
