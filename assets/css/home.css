@@ -457,6 +457,10 @@ body,html{
     opacity: 1;
     transform: translateY(4px);   /* tiny motion */
 }
+#carouselTrack {
+    display: flex;
+    transition: transform 0.5s ease-in-out; /* Makes the slide smooth */
+}
 .carousel-track:hover .carousel-slide:not(:hover) {
     opacity: 0.55;
     transform: scale(0.98);

@@ -959,6 +959,20 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 });
+
+// 1. Next Button Logic - Increments the index and updates
+nextBtn.addEventListener("click", () => {
+    const maxIndex = Math.max(0, slides.length - visibleCount);
+    index = (index + 1) > maxIndex ? 0 : index + 1; // Loops back to start
+    updateSlider();
+});
+
+// 2. Previous Button Logic - Decrements the index and updates
+prevBtn.addEventListener("click", () => {
+    const maxIndex = Math.max(0, slides.length - visibleCount);
+    index = (index - 1) < 0 ? maxIndex : index - 1; // Loops to end
+    updateSlider();
+});
 // ===============================
 // MAP LOGIC (MapLibre & 3D)
 // ===============================
