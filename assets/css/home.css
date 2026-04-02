@@ -1258,30 +1258,6 @@ html.dark-mode .footer-column a:hover {
   color: var(--accent);
 }
 
-.social-icons {
-  display: flex;
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.social-icon {
-  width: 40px;
-  height: 40px;
-  background: var(--accent);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  text-decoration: none;
-  cursor: pointer;
-  font-size: 1.3rem;
-}
-
-html.dark-mode .social-icon {
-  background: rgba(11, 116, 231, 0.8);
-}
-
 .partners {
   display: flex;
   flex-direction: column;
