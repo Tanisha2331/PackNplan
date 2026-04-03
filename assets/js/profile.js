@@ -19,6 +19,7 @@ window.addEventListener('pageshow', applyTheme);
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut, EmailAuthProvider, reauthenticateWithCredential, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 // 2. CONFIGURATION
 const firebaseConfig = {
@@ -34,6 +35,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+const storage = getStorage(app);
 
 // 3. DOM ELEMENTS
 const nameEl = document.getElementById("profileName");
@@ -41,7 +43,8 @@ const emailEl = document.getElementById("profileEmail");
 const phoneEl = document.getElementById("profilePhone");
 const picEl = document.getElementById("profilePic");
 const logoutBtn = document.getElementById("logoutBtn");
-
+const changePicButton = document.getElementById("changePicButton");
+const profilePicInput = document.getElementById("profilePicInput");
 // Modal Elements
 const editModal = document.getElementById("editModal");
 const openEditBtn = document.getElementById("openEditBtn");
@@ -395,4 +398,65 @@ if (logoutBtn) {
     await signOut(auth);
     window.location.href = "login.html";
   });
+}
+
+// 9. PROFILE PHOTO UPLOAD LOGIC 03/04/26
+
+if (changePicButton) {
+    changePicButton.addEventListener("click", () => {
+        profilePicInput.click();
+    });
+}
+
+if (profilePicInput) {
+    profilePicInput.addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const user = auth.currentUser;
+        if (!user) return;
+
+        // Visual Feedback
+        changePicButton.textContent = "Uploading...";
+        changePicButton.disabled = true;
+
+        // 1. Prepare the file for ImgBB
+        const formData = new FormData();
+        formData.append("image", file);
+
+        try {
+            // 2. Upload to ImgBB (REPLACE THE KEY BELOW)
+            const apiKey = "4472c1a29a8eb827507cca6b0fdacbad"; 
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                const uploadedUrl = result.data.url;
+
+                // 3. Save this URL to your Firestore
+                const userRef = doc(db, "users", user.uid);
+                await updateDoc(userRef, {
+                    profilePic: uploadedUrl
+                });
+
+                // 4. Update UI
+                picEl.src = uploadedUrl;
+                showToast("Profile picture updated! 📸", "success");
+            } else {
+                throw new Error("ImgBB Upload Failed");
+            }
+
+        } catch (error) {
+            console.error("Upload Error:", error);
+            showToast("Failed to upload. Check your API key.", "error");
+        } finally {
+            changePicButton.textContent = "Add Profile Picture";
+            changePicButton.disabled = false;
+            profilePicInput.value = ""; 
+        }
+    });
 }
