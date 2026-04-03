@@ -376,9 +376,45 @@ h2 {
 }
 
 .history-list {
-    max-height: 400px;
-    overflow-y: auto;
-    padding: 10px 0;
+    height: 600px !important;
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    padding: 15px 10px 15px 15px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    scrollbar-width: auto !important;
+    scrollbar-color: #0b74e7 #e8e8e8 !important;
+}
+
+/* Firefox scrollbar */
+.history-list {
+    scrollbar-width: auto;
+    scrollbar-color: #0b74e7 #e8e8e8;
+}
+
+/* Chromium browsers scrollbar */
+.history-list::-webkit-scrollbar {
+    width: 12px !important;
+}
+
+.history-list::-webkit-scrollbar-track {
+    background: #e8e8e8 !important;
+    border-radius: 10px !important;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+    background: #0b74e7 !important;
+    border-radius: 10px !important;
+    min-height: 50px !important;
+}
+
+.history-list::-webkit-scrollbar-thumb:hover {
+    background: #085cb5 !important;
+}
+
+.history-list::-webkit-scrollbar-thumb:active {
+    background: #064494 !important;
 }
 
 .history-item {

@@ -44,10 +44,19 @@ window.bookTransport = async (transportName, price) => {
             userId: user.uid,
             userEmail: user.email,
             itemName: transportName,
+            hotelName: transportName,
             itemType: "Transport",
             price: price,
+            totalAmount: price,
             status: "Confirmed",
-            bookingDate: serverTimestamp()
+            bookingDate: serverTimestamp(),
+            location: 'N/A',
+            checkIn: 'N/A',
+            checkOut: 'N/A',
+            guests: 'N/A',
+            from: 'N/A',
+            to: 'N/A',
+            travelDate: 'N/A'
         });
         
         alert(`✅ Transport booked successfully!\n\nService: ${transportName}\nPrice: ₹${price}\n\nView your bookings in My Bookings.`);
