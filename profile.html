@@ -82,18 +82,22 @@
   <!-- TRIP HISTORY MODAL -->
   <div id="tripHistoryModal" class="modal-overlay hidden">
     <div class="modal-box trip-history-modal">
-      <h3>🚀 Trip History</h3>
+      <h3> Trip History</h3>
       
       <!-- Tabs for switching between booking history and trip history -->
       <div class="trip-tabs">
-        <button class="trip-tab active" data-tab="booking">📅 Booking History</button>
-        <button class="trip-tab" data-tab="visited">🗺️ Visited Trips</button>
+        <button class="trip-tab active" data-tab="booking"><i class="fas fa-calendar-check"></i> Booking History</button>
+        <button class="trip-tab" data-tab="visited"><i class="fas fa-map-marked-alt"></i> Visited Trips</button>
       </div>
 
       <!-- BOOKING HISTORY TAB -->
       <div id="bookingHistoryTab" class="trip-tab-content active">
         <div id="bookingHistoryList" class="history-list">
-          <p class="loading">Loading your bookings...</p>
+          <div class="empty-message">
+                    <p>📫</p> 
+                    <p class="empty-title">No bookings yet</p>
+                    <p class="empty-sub">Start planning your next adventure!</p>
+                </div>
         </div>
       </div>
 
@@ -105,7 +109,7 @@
       </div>
 
       <div class="modal-actions" style="margin-top: 20px;">
-        <button id="btnTripHistoryClose">Close</button>
+        <button id="btnTripHistoryClose" class="btn-modern-close">Close</button>
       </div>
     </div>
   </div>
