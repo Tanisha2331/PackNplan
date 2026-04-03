@@ -32,7 +32,7 @@ window.addEventListener('pageshow', syncTheme);
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
 import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
-import { addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+import { addDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 import { deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
 const famousPlaces = [
@@ -91,6 +91,76 @@ window.showToast = (message) => {
 window.confirmAction = (msg, callback) => {
     if (confirm(msg)) callback(); // You can build a custom modal for this later!
 };
+
+async function getSavedTripIDsForUser(user) {
+  if (!user) return new Set();
+  try {
+    const q = query(collection(db, 'savedTrips'), where('userId', '==', user.uid));
+    const snap = await getDocs(q);
+    const savedCities = new Set();
+    snap.forEach(item => savedCities.add(item.data().city));
+    return savedCities;
+  } catch (e) {
+    console.error('Saved trip lookup failed', e);
+    return new Set();
+  }
+}
+
+async function refreshSavedHeartState() {
+  const hearts = document.querySelectorAll('.save-heart');
+  hearts.forEach(h => h.classList.remove('saved'));
+
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const savedCities = await getSavedTripIDsForUser(user);
+  hearts.forEach(h => {
+    if (savedCities.has(h.dataset.city)) {
+      h.classList.add('saved');
+      h.innerHTML = '<i class="fa-solid fa-heart"></i>';
+    }
+  });
+}
+
+async function toggleSavedTrip(destination, heartButton) {
+  const user = auth.currentUser;
+  if (!user) {
+    showLoginModal();
+    return;
+  }
+
+  try {
+    const tripQuery = query(collection(db, 'savedTrips'), where('userId', '==', user.uid), where('city', '==', destination.name));
+    const tripSnap = await getDocs(tripQuery);
+
+    // If already saved, remove it (toggle behavior)
+    if (!tripSnap.empty) {
+      await Promise.all(tripSnap.docs.map(docSnap => deleteDoc(doc(db, 'savedTrips', docSnap.id))));
+      heartButton.classList.remove('saved');
+      heartButton.innerHTML = '<i class="fa-regular fa-heart"></i>';
+      window.showToast(`${destination.name} removed from saved trips`);
+      return;
+    }
+
+    await addDoc(collection(db, 'savedTrips'), {
+      userId: user.uid,
+      userEmail: user.email,
+      city: destination.name,
+      description: destination.desc || '',
+      image: destination.image || '',
+      days: destination.days || 1,
+      savedAt: serverTimestamp()
+    });
+
+    heartButton.classList.add('saved');
+    heartButton.innerHTML = '<i class="fa-solid fa-heart"></i>';
+    window.showToast(`${destination.name} added to saved trips`);
+  } catch (e) {
+    console.error('Error toggling saved trip:', e);
+    window.showToast('Could not update saved trips. Try again.');
+  }
+}
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -420,6 +490,10 @@ window.viewMyBookings = async () => {
                             style="flex:1; background:#0b74e7; color:#fff; border:none; padding:8px; border-radius:6px; cursor:pointer; font-weight:600;">
                         View Ticket
                     </button> 
+                    <button onclick="markAsVisited('${docSnap.id}')" 
+                      style="flex:1; background:#28a745; color:#fff; border:none; padding:8px; border-radius:6px; cursor:pointer; font-weight:600;"> 
+                      Mark as Visited
+                    </button>
                     <button onclick="window.cancelBooking('${docSnap.id}')" 
                       style="flex:1; background:#fff; color:#ff4d4d; border:1.5px solid #ff4d4d; padding:8px; border-radius:6px; cursor:pointer;"> 
                       Cancel
@@ -432,6 +506,47 @@ window.viewMyBookings = async () => {
         window.showToast("Error loading bookings");
     }
 };
+
+// MARK AS VISITED FUNCTION
+window.markAsVisited = async (bookingId) => {
+    const user = auth.currentUser;
+    if (!user) return window.showToast("Please login first!");
+
+    try {
+        // Get the booking data
+        const bookingRef = doc(db, "bookings", bookingId);
+        const bookingSnap = await getDocs(query(collection(db, "bookings"), where("__name__", "==", bookingId)));
+        if (bookingSnap.empty) return window.showToast("Booking not found");
+
+        const bookingData = bookingSnap.docs[0].data();
+
+        // Add to visitedTrips
+        await addDoc(collection(db, "visitedTrips"), {
+            userId: user.uid,
+            userEmail: user.email,
+            hotelName: bookingData.hotelName || bookingData.itemName || 'Trip',
+            location: bookingData.location || 'N/A',
+            checkIn: bookingData.checkIn || 'N/A',
+            checkOut: bookingData.checkOut || 'N/A',
+            guests: bookingData.guests || 'N/A',
+            itemType: bookingData.itemType || 'N/A',
+            rating: 0,
+            suggestions: '',
+            visitedDate: serverTimestamp()
+        });
+
+        // Delete the booking
+        await deleteDoc(bookingRef);
+
+        window.showToast("Trip marked as visited! Check your Visited Trips.");
+        // Refresh the bookings list
+        viewMyBookings();
+    } catch (e) {
+        console.error("Error marking as visited:", e);
+        window.showToast("Error updating trip status");
+    }
+};
+
 // ===============================
 // DOM ELEMENTS
 // ===============================
@@ -488,7 +603,10 @@ function updateUI(user) {
     userEls.forEach(el => el.classList.add("hidden"));
   }
 }
-onAuthStateChanged(auth, updateUI);
+onAuthStateChanged(auth, async (user) => {
+  updateUI(user);
+  await refreshSavedHeartState();
+});
 // ===============================
 // CHATBOT LOGIC
 // ===============================
@@ -763,13 +881,116 @@ const visitedList = document.getElementById("visitedTripsList");
 const closeVisitedBtn = document.getElementById("closeVisitedModal");
 
 if (visitedTrips) {
-  visitedTrips.addEventListener("click", () => {
-    if (!auth.currentUser) { showLoginModal(); return; }
+  visitedTrips.addEventListener("click", async () => {
+    const user = auth.currentUser;
+    if (!user) { showLoginModal(); return; }
+    
     closeDrawer();
     visitedModal.classList.remove("hidden");
-    visitedList.innerHTML = `<div style="text-align:center; padding:20px;"><h3>No visited trips yet</h3></div>`;
+    visitedList.innerHTML = `<p style="text-align:center; padding:20px;">Loading visited trips... 🗺️</p>`;
+
+    try {
+        const q = query(collection(db, "visitedTrips"), where("userId", "==", user.uid));
+        const snap = await getDocs(q);
+        
+        if (snap.empty) {
+            visitedList.innerHTML = `<div style="text-align:center; padding:20px;"><h3>No visited trips yet</h3><p>Mark your bookings as visited to start building your travel journal!</p></div>`;
+            return;
+        }
+        
+        visitedList.innerHTML = "";
+        snap.forEach(docSnap => {
+            const trip = docSnap.data();
+            const tripId = docSnap.id;
+            const card = document.createElement("div");
+            card.className = "visited-trip-card";
+            
+            card.innerHTML = `
+              <div style="padding:15px; background:#f8f9fa; border-radius:10px; margin-bottom:12px; border-left:5px solid #28a745; position:relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <h4 style="margin:0 0 5px 0;">📍 ${trip.location || trip.hotelName}</h4>
+                <p style="margin:0 0 10px 0; color:#666; font-size:0.9rem;">Check-in: ${trip.checkIn} | Guests: ${trip.guests}</p>
+                
+                <div style="margin-bottom:10px;">
+                    <label style="font-weight:600; font-size:0.9rem;">Rate your experience:</label>
+                    <div class="rating-stars" data-trip-id="${tripId}" data-rating="${trip.rating || 0}">
+                        ${[1,2,3,4,5].map(star => `<i class="fa-star ${star <= (trip.rating || 0) ? 'fa-solid' : 'fa-regular'}" data-star="${star}"></i>`).join('')}
+                    </div>
+                </div>
+                
+                <div style="margin-bottom:10px;">
+                    <label style="font-weight:600; font-size:0.9rem;">Suggestions/Notes:</label>
+                    <textarea class="suggestions-textarea" data-trip-id="${tripId}" placeholder="Share your thoughts..." rows="2">${trip.suggestions || ''}</textarea>
+                </div>
+                
+                <div style="display:flex; gap:10px;">
+                    <button onclick="saveVisitedTrip('${tripId}')" 
+                            style="background:#0b74e7; color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer; font-size:0.85rem;">
+                        Save Changes
+                    </button>
+                    
+                    <button onclick="deleteVisitedTrip('${tripId}')" 
+                            style="background:#ff4d4d; color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer; font-size:0.85rem;">
+                        Delete
+                    </button>
+                </div>
+              </div>`;
+            visitedList.appendChild(card);
+        });
+
+        // Add event listeners for rating stars
+        document.querySelectorAll('.rating-stars').forEach(starsContainer => {
+            starsContainer.querySelectorAll('.fa-star').forEach(star => {
+                star.addEventListener('click', () => {
+                    const rating = parseInt(star.dataset.star);
+                    const tripId = starsContainer.dataset.tripId;
+                    starsContainer.dataset.rating = rating;
+                    starsContainer.querySelectorAll('.fa-star').forEach((s, index) => {
+                        s.classList.toggle('fa-solid', index < rating);
+                        s.classList.toggle('fa-regular', index >= rating);
+                    });
+                });
+            });
+        });
+    } catch (e) { 
+        console.error(e); 
+        visitedList.innerHTML = `<div style="text-align:center; padding:20px;"><h3>Error loading trips</h3></div>`;
+    }
   });
 }
+
+// SAVE VISITED TRIP CHANGES
+window.saveVisitedTrip = async (tripId) => {
+    try {
+        const card = document.querySelector(`.rating-stars[data-trip-id="${tripId}"]`).closest('.visited-trip-card');
+        const rating = parseInt(card.querySelector('.rating-stars').dataset.rating);
+        const suggestions = card.querySelector('.suggestions-textarea').value;
+        
+        await updateDoc(doc(db, "visitedTrips", tripId), {
+            rating: rating,
+            suggestions: suggestions
+        });
+        
+        window.showToast("Trip updated successfully!");
+    } catch (e) {
+        console.error("Error saving trip:", e);
+        window.showToast("Error saving changes");
+    }
+};
+
+// DELETE VISITED TRIP
+window.deleteVisitedTrip = async (tripId) => {
+    if (!confirm("Are you sure you want to remove this visited trip?")) return;
+    
+    try {
+        await deleteDoc(doc(db, "visitedTrips", tripId));
+        window.showToast("Visited trip deleted");
+        // Refresh the list
+        visitedTrips.click();
+    } catch (e) {
+        console.error("Delete failed:", e);
+        window.showToast("Error deleting trip");
+    }
+};
 // Close Modals
 closeSavedBtn?.addEventListener("click", () => savedModal.classList.add("hidden"));
 closeVisitedBtn?.addEventListener("click", () => visitedModal.classList.add("hidden"));
@@ -868,19 +1089,30 @@ async function loadDestinations() {
     const d = docSnap.data();
     const slide = document.createElement("div");
     slide.className = "carousel-slide";
-    
+
     // ✅ DYNAMIC BOOKING LOGIC FOR ATTRACTIONS
     slide.addEventListener("click", () => {
-      // All attraction cards now go through the unified destination flow
       window.location.href = `destination-details.html?city=${encodeURIComponent(d.name)}&hero=${encodeURIComponent(d.image)}`;
     });
 
+    const heartButton = document.createElement('button');
+    heartButton.type = 'button';
+    heartButton.className = 'save-heart';
+    heartButton.dataset.city = d.name;
+    heartButton.innerHTML = '<i class="fa-regular fa-heart"></i>';
+    heartButton.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await toggleSavedTrip(d, heartButton);
+    });
+
     slide.innerHTML = `<img src="${d.image}" alt="${d.name}"><p>${d.name}</p>`;
+    slide.appendChild(heartButton);
     track.appendChild(slide);
   });
   slides = Array.from(track.querySelectorAll(".carousel-slide"));
   applySlideSizing();
   buildDots();
+  refreshSavedHeartState();
 }
 
 async function loadOffers() {

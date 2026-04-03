@@ -63,35 +63,37 @@ async function saveBookingToFirebase(bookingDetails, user) {
             return;
         }
 
-        // Prepare booking data with consistent structure
+        console.log("Booking details from localStorage:", bookingDetails);
+
+        // Prepare booking data - keep it SIMPLE like before
         const bookingData = {
             userId: user.uid,
             userEmail: user.email,
-            hotelName: bookingDetails.hotelName,
-            location: bookingDetails.address || bookingDetails.city || 'N/A',
-            checkIn: bookingDetails.checkIn || 'As per booking',
-            checkOut: bookingDetails.checkOut || 'As per booking',
-            guests: bookingDetails.itemType === 'Stay' || bookingDetails.itemType === 'Attraction'
-                ? '1 Guest'
-                : `${bookingDetails.travelers || 1} Travelers`,
+            hotelName: bookingDetails.hotelName || 'Booking',
+            itemName: bookingDetails.itemName || bookingDetails.hotelName || '',
+            location: bookingDetails.address || bookingDetails.city || '',
+            checkIn: bookingDetails.checkIn || '',
+            checkOut: bookingDetails.checkOut || '',
+            travelDate: bookingDetails.travelDate || '',
+            guests: bookingDetails.guests || `${bookingDetails.travelers || 1} Travelers`,
             totalAmount: bookingDetails.totalAmount || 0,
-            itemType: bookingDetails.itemType || 'Hotel Stay',
-            transportMode: bookingDetails.transportMode || null,
-            transportData: bookingDetails.transportData || null,
-            travelerDetails: bookingDetails.transportData?.travelerDetails || bookingDetails.hotelTravelerDetails || [],
+            itemType: bookingDetails.itemType || 'Hotel',
+            transportMode: bookingDetails.transportMode || '',
+            transportData: bookingDetails.transportData || {},
+            hotelTravelerDetails: bookingDetails.hotelTravelerDetails || [],
             status: 'Confirmed',
             bookingDate: serverTimestamp(),
-            // Additional details from booking flow
-            guestName: bookingDetails.guestName,
-            guestEmail: bookingDetails.email,
-            guestPhone: bookingDetails.phone,
-            nights: bookingDetails.nights || 1,
-            bookingId: bookingDetails.bookingId
+            guestName: bookingDetails.guestName || '',
+            email: bookingDetails.email || user.email,
+            phone: bookingDetails.phone || '',
+            nights: bookingDetails.nights || 0,
+            bookingId: bookingDetails.bookingId || ''
         };
 
         // Save to Firestore
         const docRef = await addDoc(collection(db, "bookings"), bookingData);
         console.log("Booking saved successfully with ID: ", docRef.id);
+        console.log("Booking data saved:", bookingData);
 
         // Clear the payment completion flag to prevent duplicate saves
         localStorage.removeItem('paymentCompleted');
