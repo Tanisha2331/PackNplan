@@ -101,17 +101,15 @@ function showToast(message, type = "info", duration = 3000) {
 }
 
 // 4. MAIN LOGIC (Check User)
+// 4. MAIN LOGIC (Check User)
 onAuthStateChanged(auth, async (user) => {
   if (user) {
-    // --- USER LOGGED IN ---
     currentUserId = user.uid;
 
-    // A. Set Basic Info
     nameEl.textContent = user.displayName || "Traveler";
     emailEl.textContent = user.email;
     if (user.photoURL) picEl.src = user.photoURL;
 
-    // B. Fetch Firestore Data
     try {
       const docRef = doc(db, "users", user.uid);
       const docSnap = await getDoc(docRef);
@@ -120,17 +118,19 @@ onAuthStateChanged(auth, async (user) => {
         const data = docSnap.data();
         if (data.name) nameEl.textContent = data.name;
         if (data.phone) phoneEl.textContent = data.phone;
-        if (data.profilePic) picEl.src = data.profilePic;
+        if (data.profilePic) {
+          picEl.src = data.profilePic;
+          changePicButton.textContent = "Change Profile Picture";
+        }
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
     }
-
   } else {
-    // --- NO USER ---
+    // No user is signed in
     window.location.href = "login.html";
   }
-});
+}); // <--- Make sure this has BOTH the brace and the parenthesis
 
 // 5. EDIT MODAL LOGIC
 if (openEditBtn) {
@@ -424,16 +424,14 @@ if (profilePicInput) {
         const user = auth.currentUser;
         if (!user) return;
 
-        // Visual Feedback
+        // 1. Visual Feedback - Disable and show loading
         changePicButton.textContent = "Uploading...";
         changePicButton.disabled = true;
 
-        // 1. Prepare the file for ImgBB
         const formData = new FormData();
         formData.append("image", file);
 
         try {
-            // 2. Upload to ImgBB (REPLACE THE KEY BELOW)
             const apiKey = "4472c1a29a8eb827507cca6b0fdacbad"; 
             const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
                 method: "POST",
@@ -445,26 +443,31 @@ if (profilePicInput) {
             if (result.success) {
                 const uploadedUrl = result.data.url;
 
-                // 3. Save this URL to your Firestore
+                // 2. Update Firestore
                 const userRef = doc(db, "users", user.uid);
                 await updateDoc(userRef, {
                     profilePic: uploadedUrl
                 });
 
-                // 4. Update UI
+                // 3. Update UI immediately
                 picEl.src = uploadedUrl;
-                showToast("Profile picture updated! 📸", "success");
+                
+                // CRITICAL: Set this explicitly here so it stays after the 1st, 2nd, or 10th upload
+                changePicButton.textContent = "Change Profile Picture"; 
+                
+                showToast("Profile updated! 📸", "success");
             } else {
-                throw new Error("ImgBB Upload Failed");
+                throw new Error("Upload failed");
             }
 
         } catch (error) {
             console.error("Upload Error:", error);
-            showToast("Failed to upload. Check your API key.", "error");
+            showToast("Failed to upload image.", "error");
+            // Revert text only if it fails
+            changePicButton.textContent = picEl.src.includes("flaticon.com") ? "Add Profile Picture" : "Change Profile Picture";
         } finally {
-            changePicButton.textContent = "Add Profile Picture";
             changePicButton.disabled = false;
-            profilePicInput.value = ""; 
+            profilePicInput.value = ""; // Reset the input so the SAME file can be picked again if needed
         }
     });
 }
