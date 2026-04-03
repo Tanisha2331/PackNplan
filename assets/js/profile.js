@@ -410,12 +410,14 @@ if (logoutBtn) {
 
 // 9. PROFILE PHOTO UPLOAD LOGIC 03/04/26
 
+// TRIGGER FILE PICKER
 if (changePicButton) {
     changePicButton.addEventListener("click", () => {
         profilePicInput.click();
     });
 }
 
+// HANDLE FILE SELECTION
 if (profilePicInput) {
     profilePicInput.addEventListener("change", async (e) => {
         const file = e.target.files[0];
@@ -424,10 +426,13 @@ if (profilePicInput) {
         const user = auth.currentUser;
         if (!user) return;
 
-        // 1. Visual Feedback - Disable and show loading
+        // --- STEP 1: INSTANT LOCAL UPDATE (FAST) ---
+        const localUrl = URL.createObjectURL(file);
+        picEl.src = localUrl; 
         changePicButton.textContent = "Uploading...";
         changePicButton.disabled = true;
 
+        // --- STEP 2: BACKGROUND UPLOAD ---
         const formData = new FormData();
         formData.append("image", file);
 
@@ -443,18 +448,12 @@ if (profilePicInput) {
             if (result.success) {
                 const uploadedUrl = result.data.url;
 
-                // 2. Update Firestore
                 const userRef = doc(db, "users", user.uid);
                 await updateDoc(userRef, {
                     profilePic: uploadedUrl
                 });
 
-                // 3. Update UI immediately
-                picEl.src = uploadedUrl;
-                
-                // CRITICAL: Set this explicitly here so it stays after the 1st, 2nd, or 10th upload
                 changePicButton.textContent = "Change Profile Picture"; 
-                
                 showToast("Profile updated! 📸", "success");
             } else {
                 throw new Error("Upload failed");
@@ -462,12 +461,12 @@ if (profilePicInput) {
 
         } catch (error) {
             console.error("Upload Error:", error);
-            showToast("Failed to upload image.", "error");
-            // Revert text only if it fails
-            changePicButton.textContent = picEl.src.includes("flaticon.com") ? "Add Profile Picture" : "Change Profile Picture";
+            showToast("Failed to sync to cloud.", "error");
         } finally {
             changePicButton.disabled = false;
-            profilePicInput.value = ""; // Reset the input so the SAME file can be picked again if needed
+            profilePicInput.value = ""; 
+            // Note: Don't revoke the URL immediately if you want it to stay visible 
+            // while the background upload finishes.
         }
     });
 }
