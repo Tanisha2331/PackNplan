@@ -327,6 +327,7 @@ async function loadBookingHistory() {
           <p>💰 ${data.totalAmount ? '₹' + data.totalAmount : data.amount ? '₹'+data.amount : 'N/A'}</p>
           <p>🗓️ Booked on ${created}</p>
         </div>`;
+        triggerTranslate();
     });
   } catch (error) {
     console.error("Booking history load error", error);
@@ -357,6 +358,7 @@ async function loadVisitedHistory() {
           <p>👥 ${data.guests || "N/A"}</p>
           <p>🗓️ Visited on ${data.visitedDate ? new Date(data.visitedDate.seconds * 1000).toLocaleDateString() : "N/A"}</p>
         </div>`;
+       triggerTranslate();
     });
   } catch (error) {
     console.error("Visited trips load error", error);
@@ -470,3 +472,54 @@ if (profilePicInput) {
         }
     });
 }
+
+// 10. Language change
+
+// Function to change language to Hindi
+function changeToHindi() {
+    const googleCombo = document.querySelector('.goog-te-combo');
+    if (googleCombo) {
+        googleCombo.value = 'hi'; // 'hi' is the code for Hindi
+        googleCombo.dispatchEvent(new Event('change'));
+        localStorage.setItem('selectedLanguage', 'hindi');
+        showToast("भाषा हिंदी में बदली गई", "success");
+    } else {
+        console.error("Google Translate not loaded yet.");
+    }
+}
+
+function triggerTranslate() {
+    const savedLanguage = localStorage.getItem('selectedLanguage');
+    if (savedLanguage === 'hindi') {
+        const googleCombo = document.querySelector('.goog-te-combo');
+        if (googleCombo) {
+            googleCombo.dispatchEvent(new Event('change'));
+        }
+    }
+}
+
+// Attach to your Hindi button
+const hindiBtn = document.getElementById("hindiBtn");
+if (hindiBtn) {
+    hindiBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        changeToHindi();
+    });
+}
+
+function applyLanguage() {
+    const savedLanguage = localStorage.getItem('selectedLanguage');
+    if (savedLanguage === 'hindi') {
+        // Wait a small moment for Google Translate to load
+        setTimeout(() => {
+            const googleCombo = document.querySelector('.goog-te-combo');
+            if (googleCombo) {
+                googleCombo.value = 'hi';
+                googleCombo.dispatchEvent(new Event('change'));
+            }
+        }, 1000); // 1 second delay to ensure the script is ready
+    }
+}
+
+// Run on page load
+applyLanguage();
