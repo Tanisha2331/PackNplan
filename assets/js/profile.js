@@ -301,10 +301,18 @@ async function loadBookingHistory() {
     const q = query(collection(db, "bookings"), where("userId", "==", currentUserId));
     const snap = await getDocs(q);
 
-    if (snap.empty) {
-      bookingHistoryList.innerHTML = "<div style='text-align:center; padding:20px;'><h3>No bookings found.</h3></div>";
-      return;
-    }
+  if (snap.empty) {
+  bookingHistoryList.innerHTML = `
+    <div class="empty-message">
+        <div class="empty-icon-container">
+            <i class="fas fa-inbox"></i> 
+        </div>
+        <p class="empty-title">No bookings yet</p>
+        <p class="empty-sub">Start planning your next adventure!</p>
+    </div>
+  `;
+  return;
+}
 
     bookingHistoryList.innerHTML = "";
     snap.forEach((docSnap) => {

@@ -337,14 +337,21 @@ h2 {
    TRIP HISTORY MODAL STYLES
    =============================== */
 .trip-history-modal {
-    max-width: 600px !important;
-    max-height: 80vh;
-    overflow-y: auto;
+    max-width: 500px !important;
+    background: #ffffff;
+    border-radius: 16px !important;
+    padding: 30px !important;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    border: none !important;
 }
-
+.trip-history-modal h3 {
+    margin-top: 0;
+    font-size: 1.4rem;
+    color: #333;
+}
 .trip-tabs {
     display: flex;
-    gap: 10px;
+    gap: 20px;
     margin: 20px 0;
     border-bottom: 2px solid #e0e0e0;
 }
@@ -352,13 +359,13 @@ h2 {
 .trip-tab {
     background: none;
     border: none;
-    padding: 12px 16px;
+    padding: 10px 5px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    color: #999;
+    color: #8d979f;
     border-bottom: 3px solid transparent;
-    transition: 0.2s;
+    transition: 0.3s;
 }
 
 .trip-tab.active {
@@ -378,22 +385,29 @@ h2 {
 .trip-tab-content.active {
     display: block;
 }
+.trip-tab i {
+    margin-right: 8px;   /* Space between icon and text */
+    font-size: 16px;     /* Keep them slightly larger than the text */
+    width: 20px;          /* Fixed width so text starts at the same spot */
+    text-align: center;
+}
 
+.trip-tab.active i {
+    color: #00b4d8;      /* Matches your active blue theme */
+}
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
 }
 
 .history-list {
-    height: 600px !important;
-    overflow-y: scroll !important;
-    overflow-x: hidden !important;
-    padding: 15px 10px 15px 15px !important;
-    border: 1px solid #ddd !important;
-    border-radius: 8px !important;
-    background: #ffffff !important;
-    scrollbar-width: auto !important;
-    scrollbar-color: #0b74e7 #e8e8e8 !important;
+    height: auto !important; /* Removes the 600px forced height */
+    min-height: 200px;
+    max-height: 400px; /* Allows scrolling only if many items exist */
+    overflow-y: auto !important;
+    padding: 10px 0 !important;
+    border: none !important; /* Removes that inner border box */
+    background: transparent !important;
 }
 
 /* Firefox scrollbar */
@@ -404,9 +418,13 @@ h2 {
 
 /* Chromium browsers scrollbar */
 .history-list::-webkit-scrollbar {
-    width: 12px !important;
+    width: 5px;
 }
-
+.history-list::-webkit-scrollbar-thumb {
+    background: #eee;
+    border-radius: 10px;
+}
+/* Chromium browsers scrollbar 
 .history-list::-webkit-scrollbar-track {
     background: #e8e8e8 !important;
     border-radius: 10px !important;
@@ -424,7 +442,7 @@ h2 {
 
 .history-list::-webkit-scrollbar-thumb:active {
     background: #064494 !important;
-}
+}*/
 
 .history-item {
     background: #f9f9f9;
@@ -497,15 +515,73 @@ h2 {
 
 .empty-message {
     text-align: center;
-    padding: 40px 20px;
-    color: #999;
+    padding: 40px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .empty-message p:first-child {
-    font-size: 2rem;
+    font-size: 3rem !important; /* The Mailbox icon size */
+    margin-bottom: 10px;
+}
+/* --- Empty State Icon Styling --- */
+.empty-icon-container {
+    margin-bottom: 20px;
+}
+
+.empty-icon-container i {
+    font-size: 64px;         /* Makes the icon large and prominent */
+    color: #dfe6e9;          /* Light gray so it doesn't distract */
+    display: block;
+}
+
+.empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #636e72;          /* Slightly darker gray for readability */
     margin: 0;
 }
 
+.empty-sub {
+    font-size: 0.95rem;
+    color: #b2bec3;
+    margin-top: 8px;
+}
+.empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #888;
+    margin: 0;
+}
+
+.empty-sub {
+    font-size: 0.9rem;
+    color: #bbb;
+    margin-top: 5px;
+}
+/* --- The Modern Close Button --- */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+}
+
+.btn-modern-close {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    color: #444;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-modern-close:hover {
+    background-color: #e2e6ea;
+    border-color: #ccc;
+}
 .loading {
     text-align: center;
     color: #00b4d8;
