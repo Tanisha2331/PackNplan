@@ -215,8 +215,8 @@ h2 {
 
 /* Cancel Button */
 #btnCancel {
-    background: #f1f5f9;
-    color: #64748b;
+    background: #c3c0c0;
+    color: #171818;
     border: none;
     padding: 12px 20px;
     border-radius: 8px;
@@ -225,7 +225,7 @@ h2 {
     transition: 0.2s;
 }
 #btnCancel:hover {
-    background: #e2e8f0;
+    background: linear-gradient(135deg, #fd8d1d, #ff5213);;
     color: #333;
 }
 
@@ -316,7 +316,7 @@ h2 {
 }
 
 #btnChangePassword {
-    background: linear-gradient(135deg, #e91e63, #c2185b);
+    background: linear-gradient(135deg, #00b4d8, #009688);
     color: white;
     border: none;
     padding: 12px 24px;
@@ -332,7 +332,20 @@ h2 {
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(233, 30, 99, 0.4);
 }
-
+#btnPasswordCancel {
+background: #c3c0c0;
+    color: #171818;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+}
+#btnPasswordCancel:hover {
+    background: linear-gradient(135deg, #fd8d1d, #ff5213);
+    color: #333;
+}
 /* ===============================
    TRIP HISTORY MODAL STYLES
    =============================== */
@@ -568,7 +581,7 @@ h2 {
 }
 
 .btn-modern-close {
-    background-color: #f8f9fa;
+     background: linear-gradient(135deg, #0ecaf0, #06c6b3);
     border: 1px solid #ddd;
     color: #444;
     padding: 8px 20px;
@@ -579,8 +592,8 @@ h2 {
 }
 
 .btn-modern-close:hover {
-    background-color: #e2e6ea;
-    border-color: #ccc;
+   background: linear-gradient(135deg, #fc9631, #fa6833);
+    border-color: #4f92f6;
 }
 .loading {
     text-align: center;

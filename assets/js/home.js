@@ -773,10 +773,10 @@ if (searchTransportBtn) {
 
             options.forEach(item => {
                 resultsContainer.innerHTML += `
-                    <div class="booking-card" style="margin-bottom:15px; border-left: 5px solid #0b74e7;">
+                    <div class="booking-card" style="margin-bottom:15px; border-left: 5px solid #0b74e7; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div>
-                                <h4 style="margin:0;">${item.name}</h4>
+                                <h4 style="margin:0; color: #333;">${item.name}</h4>
                                 <p style="margin:5px 0 0 0; font-size:0.8rem; color:#777;">🕒 ${item.time} • ₹${item.price}</p>
                             </div>
                             <div style="text-align:right;">

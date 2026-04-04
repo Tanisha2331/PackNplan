@@ -183,59 +183,88 @@ function renderTravelerForms(count) {
         card.style.marginBottom = '10px';
 
         let extraFieldsHtml = '';
-        if (transportMode === 'flight') {
-            extraFieldsHtml = `
-                <div class="input-block">
-                    <label>Seat Class</label>
-                    <select class="traveler-seatClass" required>
-                        <option value="Economy">Economy</option>
-                        <option value="Business">Business</option>
-                    </select>
-                </div>
-            `;
-        } else if (transportMode === 'train') {
-            extraFieldsHtml = `
-                <div class="input-block">
-                    <label>Berth Preference</label>
-                    <select class="traveler-berthPreference" required>
-                        <option value="Lower">Lower</option>
-                        <option value="Middle">Middle</option>
-                        <option value="Upper">Upper</option>
-                    </select>
-                </div>
-            `;
-        }
+       if (transportMode === 'flight') {
+    extraFieldsHtml = `
+        <div class="input-block">
+            <label>Seat Class</label>
+            <div class="gender-selection">
+                <label class="gender-tile">
+                    <input type="radio" name="seat-${i}" value="Economy" class="traveler-seatClass" checked required>
+                    <span>Economy</span>
+                </label>
+                <label class="gender-tile">
+                    <input type="radio" name="seat-${i}" value="Business" class="traveler-seatClass">
+                    <span>Business</span>
+                </label>
+            </div>
+        </div>
+    `;
+} else if (transportMode === 'train') {
+    extraFieldsHtml = `
+        <div class="input-block">
+            <label>Berth Preference</label>
+            <div class="gender-selection">
+                <label class="gender-tile">
+                    <input type="radio" name="berth-${i}" value="Lower" class="traveler-berthPreference" checked required>
+                    <span>Lower</span>
+                </label>
+                <label class="gender-tile">
+                    <input type="radio" name="berth-${i}" value="Middle" class="traveler-berthPreference">
+                    <span>Middle</span>
+                </label>
+                <label class="gender-tile">
+                    <input type="radio" name="berth-${i}" value="Upper" class="traveler-berthPreference">
+                    <span>Upper</span>
+                </label>
+            </div>
+        </div>
+    `;
+}
 
         card.innerHTML = `
-            <h4>Traveler ${i + 1}</h4>
-            <div class="input-block">
-                <label>Name</label>
-                <input type="text" class="traveler-name" placeholder="Full name" required>
-            </div>
-            <div class="input-block">
-                <label>Age</label>
-                <input type="text"  class="traveler-age" placeholder="Age" required>
-            </div>
-            <div class="input-block">
-                <label>Gender</label>
-                <select class="traveler-gender" required>
-                    <option value="">Select gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-            ${extraFieldsHtml}
-            <button type="button" class="removeTravelerBtn btn-secondary" style="margin-top:8px;">Remove</button>
-        `;
+    <h4>Traveler ${i + 1}</h4>
+    <div class="input-block">
+        <label>Name</label>
+        <input type="text" class="traveler-name" placeholder="Full name" required>
+    </div>
+    <div class="input-block">
+        <label>Age</label>
+        <input type="text" class="traveler-age" placeholder="Age" required>
+    </div>
+    <div class="input-block">
+        <label>Gender</label>
+        <div class="gender-selection">
+            <label class="gender-tile">
+                <input type="radio" name="gender-${i}" value="Male" required>
+                <span>Male</span>
+            </label>
+            <label class="gender-tile">
+                <input type="radio" name="gender-${i}" value="Female">
+                <span>Female</span>
+            </label>
+            <label class="gender-tile">
+                <input type="radio" name="gender-${i}" value="Other">
+                <span>Other</span>
+            </label>
+        </div>
+    </div>            
+    ${extraFieldsHtml || ''} 
+    <button type="button" class="removeHotelTravelerBtn btn-secondary">Remove</button>
+`;
+    travelerFormsContainer.appendChild(card);
+        // Ensure the class name matches what is in your card.innerHTML exactly
+        const transportRemoveBtn = card.querySelector('.removeHotelTravelerBtn');
+        
+        if (transportRemoveBtn) {
+            transportRemoveBtn.addEventListener('click', () => {
+                const currentVal = parseInt(transportTravelersInput.value) || 1;
+                const newCount = Math.max(1, currentVal - 1);
+                renderTravelerForms(newCount);
+                if (typeof calculateTotal === 'function') calculateTotal();
+            });
+        }
 
-        card.querySelector('.removeTravelerBtn').addEventListener('click', () => {
-            const newCount = Math.max(1, parseInt(transportTravelersInput.value) - 1);
-            renderTravelerForms(newCount);
-            calculateTotal();
-        });
-
-        travelerFormsContainer.appendChild(card);
+        
     }
 }
 
@@ -246,15 +275,18 @@ function getTravelerDetails() {
     cards.forEach((card, index) => {
         const name = card.querySelector('.traveler-name').value.trim();
         const age = card.querySelector('.traveler-age').value.trim();
-        const gender = card.querySelector('.traveler-gender').value;
+        const selectedGender = card.querySelector(`input[name="gender-${index}"]:checked`);
+        const gender = selectedGender ? selectedGender.value : "";
 
         const traveler = { name, age, gender, index: index + 1 };
 
         if (transportMode === 'flight') {
-            traveler.seatClass = card.querySelector('.traveler-seatClass').value;
-        } else if (transportMode === 'train') {
-            traveler.berthPreference = card.querySelector('.traveler-berthPreference').value;
-        }
+    const selectedSeat = card.querySelector(`input[name="seat-${index}"]:checked`);
+    traveler.seatClass = selectedSeat ? selectedSeat.value : "Economy";
+} else if (transportMode === 'train') {
+    const selectedBerth = card.querySelector(`input[name="berth-${index}"]:checked`);
+    traveler.berthPreference = selectedBerth ? selectedBerth.value : "Lower";
+}
 
         travelers.push(traveler);
     });
@@ -288,15 +320,24 @@ function renderHotelTravelerForms(count) {
             </div>
             <div class="input-block">
                 <label>Gender</label>
-                <select class="hotel-traveler-gender" required>
-                    <option value="">Select gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-            <button type="button" class="removeHotelTravelerBtn btn-secondary" style="margin-top:8px;">Remove</button>
+                <div class="gender-selection">
+                    <label class="gender-tile">
+                        <input type="radio" name="gender-${i}" value="Male" required>
+                        <span>Male</span>
+                    </label>
+                    <label class="gender-tile">
+                        <input type="radio" name="gender-${i}" value="Female">
+                        <span>Female</span>
+                    </label>
+                    <label class="gender-tile">
+                        <input type="radio" name="gender-${i}" value="Other">
+                        <span>Other</span>
+                    </label>
+                </div>
+            </div>           
+            <button type="button" class="removeHotelTravelerBtn btn-secondary">Remove</button>
         `;
+        
 
         // 🔥 ADD THIS PART HERE:
         if (isFixedPrice) {
@@ -312,6 +353,8 @@ function renderHotelTravelerForms(count) {
         });
 
         hotelTravelerFormsContainer.appendChild(card);
+
+        
     }
 }
 

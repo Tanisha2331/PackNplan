@@ -1522,3 +1522,26 @@ html.dark-mode .footer-bottom {
 .skiptranslate {
     display: none !important;
 }
+.btn-primary-small {
+    background-color: var(--accent);/* Your requested colors */
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(9, 132, 227, 0.2);
+}
+
+/* HIGH-LEVEL HOVER EFFECT */
+.btn-primary-small:hover {
+    transform: translateY(-2px); /* Slight lift */
+    box-shadow: 0 6px 15px rgba(9, 132, 227, 0.3);
+    filter: brightness(1.1); /* Subtle glow */
+}
+
+.btn-primary-small:active {
+    transform: translateY(0);
+}

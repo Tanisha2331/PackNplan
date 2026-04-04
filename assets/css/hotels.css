@@ -6,6 +6,9 @@
     --accent: #0b74e7;
     --border-clr: #eeeeee;
     --bg-summary: #f8f9fa;
+    /* ... your other vars ... */
+    --bg-input: #ffffff;
+    --tile-border: #eeeeee;
 }
 
 html.dark-mode {
@@ -15,6 +18,9 @@ html.dark-mode {
     --accent: #FF9933; /* Saffron for Dark Mode */
     --border-clr: #333333;
     --bg-summary: #2a2a2a;
+    /* ... your other vars ... */
+    --bg-input: #2a2a2a;
+    --tile-border: #444444;
 }
 
 /* --- 2. YOUR ORIGINAL HOTEL GRID & CARDS (UNCHANGED) --- */
@@ -103,7 +109,7 @@ body { font-family: 'Poppins', sans-serif; margin: 0; background: #f8f9fa; }
     width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 14px;
     font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s;
 }
-...btn-primary-large:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.btn-primary-large:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
 .input-invalid {
     border-color: #e74c3c !important;
@@ -421,7 +427,7 @@ html.dark-mode .btn-link-cancel {
     gap: 15px;
     justify-content: center;
 }
-
+/* 
 .btn-secondary {
     background: var(--bg-summary);
     color: var(--text-main);
@@ -434,4 +440,62 @@ html.dark-mode .btn-link-cancel {
 
 .btn-secondary:hover {
     background: var(--border-clr);
+}
+/* --- GENDER SELECTION TILES --- */
+.gender-selection {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.gender-tile {
+    flex: 1;
+    cursor: pointer;
+    position: relative;
+}
+
+/* Hide the radio button but keep it functional */
+.gender-tile input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.gender-tile span {
+    display: block;
+    padding: 12px 5px;
+    text-align: center;
+    border: 2px solid var(--tile-border); /* Slightly thicker for better look */
+    border-radius: 12px;
+    background: var(--bg-input);
+    color: var(--text-main);
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* HOVER STATE */
+.gender-tile:hover span {
+    border-color: var(--accent);
+}
+
+/* CHECKED STATE - This is the magic part */
+.gender-tile input:checked + span {
+    background-color: var(--accent) !important;
+    color: #ffffff !important; /* Force white text on blue background */
+    border-color: var(--accent) !important;
+    box-shadow: 0 4px 12px rgba(11, 116, 231, 0.3);
+    transform: translateY(-1px);
+}
+
+/* Ensure the button uses a smooth transition - add to the base class */
+.removeHotelTravelerBtn {
+    transition: background-color 0.3s ease, color 0.3s ease; /* Transitions background and text color only */
+}
+
+/* THE HOVER EFFECT - Applies to both */
+.removeHotelTravelerBtn:hover {
+    background: linear-gradient(135deg, #fd8d1d, #ff5213); /* Solid Red background on hover */
+    color: #ffffff !important; /* Forces text to turn white on hover */
 }
