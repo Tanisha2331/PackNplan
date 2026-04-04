@@ -749,3 +749,10 @@ background: #c3c0c0;
         max-width: calc(100% - 30px);
     }
 }
+/* Hide the Google Translate top bar and attribution */
+.goog-te-banner-frame.skiptranslate, .goog-logo-link, .goog-te-gadget span {
+    display: none !important;
+}
+.skiptranslate {
+    display: none !important;
+}
