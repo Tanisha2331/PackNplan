@@ -811,19 +811,55 @@ const savedList = document.getElementById("savedTripsList");
 const closeSavedBtn = document.getElementById("closeSavedModal");
 
 // Global function to handle deletion
-window.deleteTrip = async (docId) => {
-    if (!confirm("Are you sure you want to remove this trip?")) return;
-    
-    try {
-        const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js");
-        await deleteDoc(doc(db, "savedTrips", docId));
-        
-        // Refresh the list immediately after deleting
-        savedTrips.click(); 
-    } catch (e) {
-        console.error("Delete failed:", e);
-        alert("Error deleting trip.");
-    }
+// 1. Force the function to be global
+window.deleteTrip = async (tripId) => {
+    console.log("Delete button clicked for ID:", tripId); // Check your console for this!
+
+    // 2. Create the Custom Confirmation Overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay'; // Ensure the CSS I gave you earlier is in your file
+    overlay.innerHTML = `
+        <div class="confirm-card">
+            <h3>Remove Trip?</h3>
+            <p>Are you sure you want to delete this trip from your saved list?</p>
+            <div class="confirm-btns">
+                <button class="btn-confirm-no">Cancel</button>
+                <button class="btn-confirm-yes">Remove</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // 3. Handle Cancel
+    overlay.querySelector('.btn-confirm-no').onclick = () => overlay.remove();
+
+    // 4. Handle Delete
+    overlay.querySelector('.btn-confirm-yes').onclick = async () => {
+        const btn = overlay.querySelector('.btn-confirm-yes');
+        btn.innerText = "Deleting...";
+        btn.disabled = true;
+
+        try {
+            // Import Firestore logic if not already available
+            const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js");
+            
+            // 'db' must be your Firestore instance defined elsewhere in your script
+            await deleteDoc(doc(db, "savedTrips", tripId));
+            
+            overlay.remove();
+            
+            // High-level refresh: Re-trigger the saved trips list to update the UI
+            if (window.savedTripsBtn) {
+                window.savedTripsBtn.click(); 
+            } else {
+                location.reload(); // Fallback if you don't have a refresh trigger
+            }
+        } catch (e) {
+            console.error("Delete failed:", e);
+            alert("Error deleting trip.");
+            overlay.remove();
+        }
+    };
 };
 
 if (savedTrips) {
@@ -856,13 +892,11 @@ if (savedTrips) {
                     <p style="margin:0 0 10px 0; color:#666; font-size:0.9rem;">${trip.days} Days</p>
                     
                     <div style="display:flex; gap:10px;">
-                        <button onclick="window.location.href='itinerary.html?city=${encodeURIComponent(trip.city)}&days=${trip.days}'" 
-                                style="background:#0b74e7; color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer; font-size:0.85rem;">
+                        <button class="view-plan"  onclick="window.location.href='itinerary.html?city=${encodeURIComponent(trip.city)}&days=${trip.days}'" >
                             View Plan
                         </button>
                         
-                        <button onclick="deleteTrip('${tripId}')" 
-                                style="background:#ff4d4d; color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer; font-size:0.85rem;">
+                        <button  class="del-saved-trips" onclick="deleteTrip('${tripId}')">
                             Delete
                         </button>
                     </div>
@@ -917,19 +951,24 @@ if (visitedTrips) {
                     </div>
                 </div>
                 
-                <div style="margin-bottom:10px;">
-                    <label style="font-weight:600; font-size:0.9rem;">Suggestions/Notes:</label>
-                    <textarea class="suggestions-textarea" data-trip-id="${tripId}" placeholder="Share your thoughts..." rows="2">${trip.suggestions || ''}</textarea>
+                <div style="margin-bottom:10px; class="notes-container">
+                    <div class="notes-header">
+                        <i class="fas fa-comment-dots"></i> 
+                        <span>Feedback on your trip</span>
+                    </div>
+                    <textarea 
+                        class="trip-notes-input" 
+                        placeholder="How was the stay? Any tips for other travelers?..." 
+                        rows="3"
+                    >${trip.notes || ''}</textarea>
                 </div>
                 
                 <div style="display:flex; gap:10px;">
-                    <button onclick="saveVisitedTrip('${tripId}')" 
-                            style="background:#0b74e7; color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer; font-size:0.85rem;">
+                    <button class="view-plan"  onclick="saveVisitedTrip('${tripId}', this)">
                         Save Changes
                     </button>
                     
-                    <button onclick="deleteVisitedTrip('${tripId}')" 
-                            style="background:#ff4d4d; color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer; font-size:0.85rem;">
+                    <button class="del-saved-trips" onclick="deleteVisitedTrip('${tripId}')">
                         Delete
                     </button>
                 </div>
@@ -959,37 +998,91 @@ if (visitedTrips) {
 }
 
 // SAVE VISITED TRIP CHANGES
-window.saveVisitedTrip = async (tripId) => {
+window.saveVisitedTrip = async (tripId, cardElement) => {
     try {
-        const card = document.querySelector(`.rating-stars[data-trip-id="${tripId}"]`).closest('.visited-trip-card');
-        const rating = parseInt(card.querySelector('.rating-stars').dataset.rating);
-        const suggestions = card.querySelector('.suggestions-textarea').value;
+        // 1. Get the Auth instance (using the global one you defined at the top)
+        if (!auth.currentUser) {
+            window.showToast("Please log in to save changes");
+            return;
+        }
+
+        const card = cardElement.closest('.visited-trip-card');
+        const notesInput = card.querySelector('.trip-notes-input');
+        const newNotes = notesInput ? notesInput.value.trim() : "";
+
+        // Get rating from stars
+        const starsContainer = card.querySelector('.rating-stars');
+        const newRating = parseInt(starsContainer.dataset.rating) || 0;
+
+        // 2. Import and Update
+        const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js");
+        const tripRef = doc(db, "visitedTrips", tripId);
         
-        await updateDoc(doc(db, "visitedTrips", tripId), {
-            rating: rating,
-            suggestions: suggestions
+        await updateDoc(tripRef, {
+            notes: newNotes,
+            rating: newRating,
+            // Adding this line ensures the document follows the rules from now on
+            userId: auth.currentUser.uid, 
+            updatedAt: new Date().toISOString()
         });
-        
-        window.showToast("Trip updated successfully!");
+
+        window.showToast("Trip feedback saved!");
     } catch (e) {
         console.error("Error saving trip:", e);
-        window.showToast("Error saving changes");
+        // This will tell us if it's still a permission error or something else
+        window.showToast("Failed to save: " + e.code); 
     }
 };
 
 // DELETE VISITED TRIP
 window.deleteVisitedTrip = async (tripId) => {
-    if (!confirm("Are you sure you want to remove this visited trip?")) return;
+    // 1. Create the Custom Confirmation Overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay'; // Reuses the CSS we added earlier
+    overlay.style.zIndex = "999999"; // Extreme Z-Index to stay on top
     
-    try {
-        await deleteDoc(doc(db, "visitedTrips", tripId));
-        window.showToast("Visited trip deleted");
-        // Refresh the list
-        visitedTrips.click();
-    } catch (e) {
-        console.error("Delete failed:", e);
-        window.showToast("Error deleting trip");
-    }
+    overlay.innerHTML = `
+        <div class="confirm-card">
+            <h3>Remove Visited Trip?</h3>
+            <p>This will permanently remove this trip from your history. Are you sure?</p>
+            <div class="confirm-btns">
+                <button class="btn-confirm-no">Keep it</button>
+                <button class="btn-confirm-yes">Delete</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // 2. Handle the "Cancel" action
+    overlay.querySelector('.btn-confirm-no').onclick = () => overlay.remove();
+
+    // 3. Handle the "Delete" action
+    overlay.querySelector('.btn-confirm-yes').onclick = async () => {
+        const deleteBtn = overlay.querySelector('.btn-confirm-yes');
+        deleteBtn.innerText = "Deleting...";
+        deleteBtn.disabled = true;
+
+        try {
+            // Import Firestore logic if not globally available
+            const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js");
+            
+            await deleteDoc(doc(db, "visitedTrips", tripId));
+            
+            window.showToast("Visited trip deleted");
+            overlay.remove();
+            
+            // Refresh the list automatically
+            if (typeof visitedTrips !== 'undefined' && visitedTrips.click) {
+                visitedTrips.click();
+            } else {
+                location.reload();
+            }
+        } catch (e) {
+            console.error("Delete failed:", e);
+            window.showToast("Error deleting trip");
+            overlay.remove();
+        }
+    };
 };
 // Close Modals
 closeSavedBtn?.addEventListener("click", () => savedModal.classList.add("hidden"));

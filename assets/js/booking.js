@@ -363,11 +363,24 @@ function getHotelTravelerDetails() {
     const cards = hotelTravelerFormsContainer.querySelectorAll('.traveler-card');
 
     cards.forEach((card, index) => {
-        const name = card.querySelector('.hotel-traveler-name').value.trim();
-        const age = card.querySelector('.hotel-traveler-age').value.trim();
-        const gender = card.querySelector('.hotel-traveler-gender').value;
+        // Find the elements
+        const nameEl = card.querySelector('.hotel-traveler-name');
+        const ageEl = card.querySelector('.hotel-traveler-age');
+        
+        // Correctly find the checked gender radio button
+        const genderEl = card.querySelector(`input[name="gender-${index}"]:checked`);
 
-        travelers.push({ name, age, gender, index: index + 1 });
+        // Safely get values or default to empty string
+        const name = nameEl ? nameEl.value.trim() : "";
+        const age = ageEl ? ageEl.value.trim() : "";
+        const gender = genderEl ? genderEl.value : "";
+
+        travelers.push({ 
+            name, 
+            age, 
+            gender, 
+            index: index + 1 
+        });
     });
 
     return travelers;

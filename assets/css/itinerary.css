@@ -127,3 +127,40 @@ body {
         margin-bottom: 10px;
     }
 }
+#toast-container {
+    position: fixed;
+    top: 20px;          /* Distance from top */
+    right: 20px;        /* Distance from right */
+    z-index: 100000;    /* Stay above everything */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;          /* Space between multiple toasts */
+    pointer-events: none; /* Let clicks pass through the container gaps */
+}
+
+.toast {
+    background: #333;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font-size: 0.9rem;
+    min-width: 200px;
+    text-align: center;
+    pointer-events: auto; /* Make the toast itself clickable if needed */
+    
+    /* Smooth Entrance Animation from the right */
+    animation: slideInRight 0.3s ease-out;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+@keyframes slideInRight {
+    from { 
+        transform: translateX(100%); 
+        opacity: 0; 
+    }
+    to { 
+        transform: translateX(0); 
+        opacity: 1; 
+    }
+}

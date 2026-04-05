@@ -1545,3 +1545,168 @@ html.dark-mode .footer-bottom {
 .btn-primary-small:active {
     transform: translateY(0);
 }
+
+/* --- CUSTOM CONFIRMATION POPUP --- */
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+   z-index: 99999 !important;
+    backdrop-filter: blur(4px);
+}
+
+.confirm-card {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 320px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Ensures the card itself is above the overlay */
+    position: relative;
+    z-index: 100000 !important;
+}
+
+.confirm-card h3 { margin: 0 0 10px; color: #333; }
+.confirm-card p { color: #666; font-size: 0.9rem; margin-bottom: 20px; }
+
+.confirm-btns { display: flex; gap: 12px; }
+
+.btn-confirm-yes {
+    flex: 1;
+   background:linear-gradient(135deg, #f6a451, #f8855b);
+    color: rgb(42, 40, 40);
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+}
+.btn-confirm-yes:hover
+{
+ background: linear-gradient(135deg, #fd8d1d, #ff5213);
+color: rgb(239, 232, 232);
+border: black;
+}
+.btn-confirm-no {
+    flex: 1;
+    background: #f0f2f5;
+    color: #333;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+.btn-confirm-no:hover
+{
+background:linear-gradient(135deg, #00b894, #0984e3);
+color: rgb(239, 232, 232);
+border: black;
+}
+.del-saved-trips{    
+  background:linear-gradient(135deg, #f6a451, #f8855b);
+  color:rgb(21, 21, 21);
+  border:none;
+  padding:6px 12px;
+  border-radius:5px;
+  cursor: pointer;
+  font-size:0.85rem;
+}
+.del-saved-trips:hover
+{
+ background: linear-gradient(135deg, #fd8d1d, #ff5213);
+color: rgb(239, 232, 232);
+border: black;
+}
+.view-plan{
+ background:linear-gradient(135deg, #00b894, #0984e3);
+ color:rgb(21, 21, 21);
+ border:none;
+ padding:6px 12px;
+ border-radius:5px;
+ cursor:pointer;
+ font-size:0.85rem;
+}
+.view-plan:hover{
+  background: linear-gradient(135deg, #018e71, #0369b8);
+  color: rgb(239, 232, 232);
+}
+.modal-Login{
+background:linear-gradient(135deg, #00b894, #0984e3);
+ color:rgb(21, 21, 21);
+ border:none;
+ padding:6px 12px;
+ border-radius:5px;
+ cursor:pointer;
+ font-size:0.85rem;
+}
+.modal-Login:hover{
+  background: linear-gradient(135deg, #018e71, #0369b8);
+  color: rgb(239, 232, 232);
+}
+.modal-Close{
+background:linear-gradient(135deg, #f6a451, #f8855b);
+  color:rgb(21, 21, 21);
+  border:none;
+  padding:6px 12px;
+  border-radius:5px;
+  cursor: pointer;
+  font-size:0.85rem;
+}
+.modal-Close:hover{
+background: linear-gradient(135deg, #fd8d1d, #ff5213);
+color: rgb(239, 232, 232);
+border: black;
+}
+@keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+/* visited trips -> suggestion box  */
+.notes-container {
+    margin-top: 18px;
+    background: #fdfdfd; /* Clean off-white */
+    padding: 15px;
+    border-radius: 16px;
+    border: 1px solid #edf2f7;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); /* Inner shadow for depth */
+}
+
+.notes-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #2d3748; /* Darker slate color */
+    margin-bottom: 10px;
+}
+
+.notes-header i {
+    color: #0b74e7; /* Your brand blue */
+    font-size: 1rem;
+}
+
+.trip-notes-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    font-size: 0.95rem;
+    color: #4a5568;
+    resize: none;
+    line-height: 1.6;
+}
+
+/* When the user clicks to type */
+.notes-container:focus-within {
+    border-color: #0b74e7;
+    background: #ffffff;
+    box-shadow: 0 4px 20px rgba(11, 116, 231, 0.08);
+    transition: all 0.3s ease;
+}

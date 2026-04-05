@@ -164,6 +164,37 @@
         .secure-badge::before {
             content: "🔒";
         }
+        .hidden-error-block {
+    display: none; 
+    background: #fff5f5; 
+    color: #c53030; 
+    border: 1px solid #feb2b2; /* Subtle red border */
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 15px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.hidden-error-block i {
+    color: #e53e3e; /* Brighter red for the icon */
+    font-size: 1.1rem;
+}
+
+.show-error-block {
+    display: flex !important;
+    animation: shake 0.4s ease-in-out; /* Adds a "High-Level" shake effect on error */
+}
+
+/* Shake animation to grab user's attention */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
     </style>
 </head>
 <body>
@@ -224,6 +255,10 @@
                             <label>Card Name</label>
                             <input type="text" id="cardName" placeholder="John Doe" required>
                         </div>
+                        <div id="paymentErrorBlock" class="hidden-error-block">
+                            <i class="fas fa-triangle-exclamation"></i>
+                            <span id="paymentErrorText"></span>
+                        </div>
                     </div>
                 </form>
 
@@ -277,9 +312,13 @@
         }
 
         function processPayment() {
+            // 1. Find the new elements
+            // 1. Get the actual HTML Elements
+            const errorBlock = document.getElementById('paymentErrorBlock');
+            const errorText = document.getElementById('paymentErrorText');
+            const expiryInputEl = document.getElementById('expiryDate'); // The "Box"
             const payBtn = document.querySelector('.pay-btn');
             const loading = document.getElementById('loadingMessage');
-
             // Basic validation
             const activeForm = document.querySelector('.payment-form.active');
             const inputs = activeForm.querySelectorAll('input[required]');
@@ -294,10 +333,57 @@
                 }
             });
 
-            if (!isValid) {
-                alert('Please fill all required fields');
+           if (!isValid) {
+                // Show your custom red error block instead of an alert
+                const errorBlockEl = document.getElementById('paymentErrorBlock');
+                const errorText = document.getElementById('paymentErrorText');
+                
+                errorText.textContent = "Please fill in all required fields.";
+                errorBlockEl.classList.add('show-error-block');
+                
+                return; // STOP the payment process
+            }
+            // --- Helper function (placed inside so it can access local variables) ---
+            function showPaymentError(message, inputElement) {
+                errorText.textContent = message;
+                errorBlock.classList.add('show-error-block');
+                inputElement.classList.add('input-invalid');
+                inputElement.focus();
+                
+                // Reset button state
+                payBtn.disabled = false;
+                payBtn.textContent = 'Pay Now';
+                loading.style.display = 'none';
+            }
+            // RESET: Hide the error block before re-validating 🛑
+            errorBlock.classList.remove('show-error-block');
+            expiryInputEl.classList.remove('input-invalid'); 
+
+            // 2. Extract the Year (the part after the '/')
+            const expiryValue = expiryInputEl.value.trim();
+            const yearParts = expiryValue.split('/');
+            const year = yearParts.length > 1 ? parseInt(yearParts[1]) : 0;
+
+            // 3. THE HARD BLOCK: If year < 26, STOP EVERYTHING
+            if (expiryValue === "") {
+            // Just empty
+            showPaymentError("Expiry Date is required.", expiryInputEl);
+            return;
+            }
+
+            if (expiryValue.length < 5) {
+                // Incomplete date
+                showPaymentError("Invalid Expiry Format (MM/YY).", expiryInputEl);
                 return;
             }
+
+            if (year > 0 && year < 26) {
+                // expired
+                showPaymentError("This card has expired. Use a valid card.", expiryInputEl);
+                return; // Stops the function here. Payment NEVER happens.
+            }
+           
+            
 
             // Show loading
             payBtn.disabled = true;
@@ -320,16 +406,48 @@
             let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
             e.target.value = formattedValue;
         });
+        document.getElementById('cvv').addEventListener('input', function(e) {
+            // Condition: Remove anything that is NOT a number
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+        document.getElementById('cardName').addEventListener('input', function(e) {
+            // Condition: Allow only letters and spaces
+            this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+        });
 
         // Format expiry date input
         document.getElementById('expiryDate').addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
+
+           // 1. Month Validation (Max 12)
             if (value.length >= 2) {
+                let month = parseInt(value.substring(0, 2));
+                if (month > 12) value = '12' + value.substring(2);
+                if (month === 0) value = '01' + value.substring(2);
                 value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+
+            // 2. Strict Year Validation (Min 26)
+           if (value.length === 5) {
+                let year = parseInt(value.substring(3, 5));
+                if (year < 26) {
+                    // Option C: Trigger your new red error block immediately
+                    const errorBlock = document.getElementById('paymentErrorBlock');
+                    const errorText = document.getElementById('paymentErrorText');
+                    
+                    errorText.textContent = "Year must be 2026 or later.";
+                    errorBlock.classList.add('show-error-block');
+                    e.target.classList.add('input-invalid');
+                    
+                    // Snap it back to 26 so they don't have to delete it
+                    value = value.substring(0, 3) + '26';
+                } else {
+                    // Clear the error if they finally type a valid year
+                    document.getElementById('paymentErrorBlock').classList.remove('show-error-block');
+                    e.target.classList.remove('input-invalid');
+                }
             }
             e.target.value = value;
         });
     </script>
 </body>
-</html></content>
-<parameter name="filePath">d:\PackNPlan\frontend\payment.html

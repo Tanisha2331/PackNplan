@@ -96,20 +96,33 @@ function renderItinerary(places, numDays) {
 // ===============================
 document.getElementById("saveTripBtn")?.addEventListener("click", async () => {
   const user = auth.currentUser;
+
   if (!user) {
-    alert("Please login to save your trip!");
-    window.location.href = "login.html";
+    // Uses the global function from home.js
+    window.showToast("Please login to save your trip! 🔐");
+    
+    // Brief delay so the toast is visible before the page redirects
+    setTimeout(() => {
+      window.location.href = "login.html";
+    }, 1500);
     return;
   }
+
   try {
+    const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js");
+    
     await addDoc(collection(db, "savedTrips"), {
       userId: user.uid,
       city,
       days,
       createdAt: new Date()
     });
-    alert("Trip saved to your profile! 🎒");
-  } catch (e) { alert("Error saving trip."); }
+
+    window.showToast("Trip saved to your profile! 🎒");
+  } catch (e) { 
+    console.error("Save Error:", e);
+    window.showToast("Error saving trip. Please try again."); 
+  }
 });
 
 document.getElementById("downloadPdfBtn")?.addEventListener("click", () => {

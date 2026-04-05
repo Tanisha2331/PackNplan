@@ -16,10 +16,10 @@ applyTheme();
 window.addEventListener('pageshow', applyTheme);
 
 // 1. IMPORTS
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged, signOut, EmailAuthProvider, reauthenticateWithCredential, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut, EmailAuthProvider, reauthenticateWithCredential, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-storage.js";
 
 // 2. CONFIGURATION
 const firebaseConfig = {
@@ -81,7 +81,7 @@ const tripTabButtons = document.querySelectorAll(".trip-tab");
 // Variable to store current user ID
 let currentUserId = null;
 
-function showToast(message, type = "info", duration = 3000) {
+function showToast(message, type = "success", duration = 3000) {
   const container = document.getElementById("toastContainer");
   if (!container) {
     console.log(message);
@@ -89,11 +89,26 @@ function showToast(message, type = "info", duration = 3000) {
   }
 
   const toast = document.createElement("div");
+  // This allows us to style .toast.success and .toast.error differently
   toast.className = `toast ${type}`;
-  toast.textContent = message;
+
+  // Select icon based on type
+  let icon = "fa-info-circle"; // Default
+  if (type === "success") icon = "fa-check-circle";
+  if (type === "error") icon = "fa-triangle-exclamation";
+
+  // Use innerHTML so the icon actually renders
+  toast.innerHTML = `
+    <i class="fas ${icon}"></i>
+    <span>${message}</span>
+  `;
 
   container.appendChild(toast);
+
+  // Trigger the CSS "show" animation
   setTimeout(() => toast.classList.add("show"), 10);
+
+  // Remove logic
   setTimeout(() => {
     toast.classList.remove("show");
     setTimeout(() => toast.remove(), 300);
@@ -153,14 +168,24 @@ if (btnCancel) {
 
 if (btnSave) {
   btnSave.addEventListener("click", async () => {
-    if (!currentUserId) return;
+    if (!currentUserId) {
+      showToast("Please login to update profile!");
+      return;
+    }
 
     const newName = inputName.value;
     const newPhone = inputPhone.value;
+    // Basic Validation before trying to save
+    if (!newName || !newPhone) {
+      showToast("Name and Phone cannot be empty!");
+      return;
+    }
 
     btnSave.textContent = "Saving...";
+    btnSave.disabled = true; // Prevent double clicks
 
     try {
+      const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js");
       const userRef = doc(db, "users", currentUserId);
       
       // Update Firestore
@@ -170,18 +195,25 @@ if (btnSave) {
       });
 
       // Update UI immediately
-      nameEl.textContent = newName;
-      phoneEl.textContent = newPhone;
+      if (nameEl) nameEl.textContent = newName;
+      if (phoneEl) phoneEl.textContent = newPhone;
       
       // Close Modal
       editModal.classList.add("hidden");
-      alert("Profile Updated!");
+      showToast("Profile Updated!");
       
     } catch (error) {
-      console.error("Error updating profile:", error);
-      alert("Failed to save. See console.");
-    } finally {
+  console.error("Error updating profile:", error);
+  
+  // Check if toast exists, otherwise use alert so it doesn't CRASH
+  if (typeof showToast === "function") {
+    showToast("Failed to save changes. 🚫");
+  } else {
+    alert("Failed to save changes.");
+  }
+} finally {
       btnSave.textContent = "Save Changes";
+      btnSave.disabled = false;
     }
   });
 }

@@ -153,8 +153,13 @@ h2 {
     justify-content: center;
     z-index: 2000;
     backdrop-filter: blur(5px); /* Blurs the background content */
+    transition: opacity 0.3s ease, visibility 0.3s ease;
 }
-
+.modal-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
 /* The white box */
 .modal-box {
     background: white;
@@ -652,28 +657,29 @@ background: #c3c0c0;
     flex-direction: column;
     gap: 10px;
     max-width: 350px;
+    pointer-events: none;
 }
-
 .toast {
-    background: white;
-    padding: 16px 20px;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    border-left: 4px solid #00b4d8;
-    animation: slideIn 0.3s ease-out;
-    opacity: 0;
-    transform: translateX(400px);
-    transition: all 0.3s ease-out;
-    font-family: "Poppins", sans-serif;
-    font-size: 14px;
+    background: white; /* Changed from #333 to work with your gradients */
     color: #333;
+    padding: 14px 20px;
+    border-radius: 10px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-left: 5px solid transparent; /* 👈 CRITICAL: Added base border */
+    transform: translateX(120%);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: auto; /* Re-enable clicking for the toast itself */
 }
-
 .toast.show {
-    opacity: 1;
     transform: translateX(0);
 }
-
+/* Icon styling inside the toast */
+.toast i {
+    font-size: 1.2rem;
+}
 .toast-content {
     display: flex;
     align-items: center;
@@ -682,26 +688,30 @@ background: #c3c0c0;
 
 /* Toast Types */
 .toast.success {
-    border-left-color: #4caf50;
+    border-left-color: #2ecc71;
     background: linear-gradient(135deg, #f1f8f4, #ffffff);
+    color: #1b5e20;
 }
-
+.toast.success i { color: #2ecc71; }
 .toast.error {
-    border-left-color: #f44336;
+    border-left-color: #e74c3c;
     background: linear-gradient(135deg, #fef5f5, #ffffff);
-    color: #d32f2f;
+    color: #b71c1c;
 }
+.toast.error i { color: #e74c3c; }
 
 .toast.warning {
     border-left-color: #ff9800;
     background: linear-gradient(135deg, #fff8f1, #ffffff);
     color: #e65100;
+    border-left: 5px solid;
 }
 
 .toast.info {
     border-left-color: #00b4d8;
     background: linear-gradient(135deg, #f0f9ff, #ffffff);
     color: #0277bd;
+    border-left: 5px solid;
 }
 
 @keyframes slideIn {
@@ -713,6 +723,9 @@ background: #c3c0c0;
         opacity: 1;
         transform: translateX(0);
     }
+}
+@keyframes fadeOut {
+    to { transform: translateX(100%); opacity: 0; }
 }
 
 /* Dark mode toast adjustments */
