@@ -420,6 +420,29 @@ if (addHotelTravelerBtn) {
 
 // render default on load paths
 if (isTransport) {
+    if (transportMode === 'bus' || transportMode === 'cab') {
+        const fullRoute = urlParams.get('address') || ''; // Grabs "pune → hydrabad"
+        
+        if (fullRoute.includes('→')) {
+            const cities = fullRoute.split('→');
+            const fromCity = cities[0].trim(); // "pune"
+            const toCity = cities[1].trim();   // "hydrabad"
+
+            if (pickupLocInput) {
+                pickupLocInput.value = fromCity.charAt(0).toUpperCase() + fromCity.slice(1);
+                pickupLocInput.readOnly = true;
+            }
+            if (dropLocInput) {
+                dropLocInput.value = toCity.charAt(0).toUpperCase() + toCity.slice(1);
+                dropLocInput.readOnly = true;
+            }
+        }
+
+        // Set a default time if none exists
+        if (travelTimeInput && !travelTimeInput.value) {
+            travelTimeInput.value = "09:00"; 
+        }
+    }
     renderTravelerForms(parseInt(transportTravelersInput.value) || 1);
 } else {
     // FORCE the guest forms to appear for Stays/Hotels/Attractions
