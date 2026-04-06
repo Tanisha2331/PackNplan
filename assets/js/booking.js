@@ -552,19 +552,29 @@ form.addEventListener('submit', async (e) => {
         let travelerInvalid = false;
 
         // Dynamic validation for each traveler card
-        travelerFormsContainer.querySelectorAll('.traveler-card').forEach((card) => {
+        travelerFormsContainer.querySelectorAll('.traveler-card').forEach((card, index) => {
             const nameField = card.querySelector('.traveler-name');
             const ageField = card.querySelector('.traveler-age');
-            const genderField = card.querySelector('.traveler-gender');
+            
+            // 🛡️ FIX: Use the specific radio button selector for gender
+            const selectedGender = card.querySelector(`input[name="gender-${index}"]:checked`);
 
-            if (!nameField.value.trim() || !ageField.value.trim() || !genderField.value) {
-                setInvalid(nameField); setInvalid(ageField); setInvalid(genderField);
+            // Check if fields exist and have values
+            if (!nameField?.value.trim() || !ageField?.value.trim() || !selectedGender) {
+                if (nameField) setInvalid(nameField);
+                if (ageField) setInvalid(ageField);
                 travelerInvalid = true;
             }
 
             // Conditional validation for Flight/Train
-            if (transportMode === 'flight' && !card.querySelector('.traveler-seatClass').value) travelerInvalid = true;
-            if (transportMode === 'train' && !card.querySelector('.traveler-berthPreference').value) travelerInvalid = true;
+            if (transportMode === 'flight') {
+                const seatField = card.querySelector(`input[name="seat-${index}"]:checked`);
+                if (!seatField) travelerInvalid = true;
+            }
+            if (transportMode === 'train') {
+                const berthField = card.querySelector(`input[name="berth-${index}"]:checked`);
+                if (!berthField) travelerInvalid = true;
+            }
         });
 
         if (travelerInvalid) {

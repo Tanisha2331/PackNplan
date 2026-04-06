@@ -309,93 +309,88 @@
             // Show selected form
             document.querySelectorAll('.payment-form').forEach(form => form.classList.remove('active'));
             document.getElementById(method + 'Form').classList.add('active');
+            document.getElementById('paymentErrorBlock').classList.remove('show-error-block');
+        }
+        function showPaymentError(message, inputElement) {
+            const errorBlockEl = document.getElementById('paymentErrorBlock');
+            const errorTextEl = document.getElementById('paymentErrorText');
+            const payBtn = document.querySelector('.pay-btn');
+            const loading = document.getElementById('loadingMessage');
+
+            errorTextEl.textContent = message;
+            errorBlockEl.classList.add('show-error-block');
+            inputElement.classList.add('input-invalid');
+            inputElement.focus();
+
+            // Reset button state
+            payBtn.disabled = false;
+            payBtn.textContent = 'Pay Now';
+            loading.style.display = 'none';
         }
 
         function processPayment() {
-            // 1. Find the new elements
-            // 1. Get the actual HTML Elements
-            const errorBlock = document.getElementById('paymentErrorBlock');
-            const errorText = document.getElementById('paymentErrorText');
-            const expiryInputEl = document.getElementById('expiryDate'); // The "Box"
             const payBtn = document.querySelector('.pay-btn');
             const loading = document.getElementById('loadingMessage');
-            // Basic validation
+            const errorBlockEl = document.getElementById('paymentErrorBlock');
+            const errorText = document.getElementById('paymentErrorText');
+            
+            // 1. Identify which method is active
+            const isCardActive = document.getElementById('cardForm').classList.contains('active');
+            
+            // 🛑 RESET: Hide error block before re-validating
+            if (errorBlockEl) errorBlockEl.classList.remove('show-error-block');
+            // 2. CARD-ONLY VALIDATION
+            
+            // 2.1. GENERAL VALIDATION
             const activeForm = document.querySelector('.payment-form.active');
             const inputs = activeForm.querySelectorAll('input[required]');
             let isValid = true;
+            let firstEmptyInput = null; // To focus on the first mistake found
 
             inputs.forEach(input => {
                 if (!input.value.trim()) {
-                    input.style.borderColor = 'red';
+                    input.style.borderColor = '#e53e3e';
                     isValid = false;
+                    if (!firstEmptyInput) firstEmptyInput = input; // Remember the first empty one
                 } else {
                     input.style.borderColor = 'var(--border-clr)';
                 }
             });
 
-           if (!isValid) {
-                // Show your custom red error block instead of an alert
-                const errorBlockEl = document.getElementById('paymentErrorBlock');
-                const errorText = document.getElementById('paymentErrorText');
-                
-                errorText.textContent = "Please fill in all required fields.";
-                errorBlockEl.classList.add('show-error-block');
-                
-                return; // STOP the payment process
+            if (!isValid) {
+                // 🚀 ADD THE RED BOX HERE:
+                showPaymentError("Please fill in all required fields.", firstEmptyInput);
+                return; 
             }
-            // --- Helper function (placed inside so it can access local variables) ---
-            function showPaymentError(message, inputElement) {
-                errorText.textContent = message;
-                errorBlock.classList.add('show-error-block');
-                inputElement.classList.add('input-invalid');
-                inputElement.focus();
-                
-                // Reset button state
-                payBtn.disabled = false;
-                payBtn.textContent = 'Pay Now';
-                loading.style.display = 'none';
-            }
-            // RESET: Hide the error block before re-validating 🛑
-            errorBlock.classList.remove('show-error-block');
-            expiryInputEl.classList.remove('input-invalid'); 
+            // card validations
+            if (isCardActive) {
+                const expiryInputEl = document.getElementById('expiryDate');
+                const expiryValue = expiryInputEl.value.trim();
+                const yearParts = expiryValue.split('/');
+                const year = yearParts.length > 1 ? parseInt(yearParts[1]) : 0;
 
-            // 2. Extract the Year (the part after the '/')
-            const expiryValue = expiryInputEl.value.trim();
-            const yearParts = expiryValue.split('/');
-            const year = yearParts.length > 1 ? parseInt(yearParts[1]) : 0;
-
-            // 3. THE HARD BLOCK: If year < 26, STOP EVERYTHING
-            if (expiryValue === "") {
-            // Just empty
-            showPaymentError("Expiry Date is required.", expiryInputEl);
-            return;
-            }
-
-            if (expiryValue.length < 5) {
-                // Incomplete date
-                showPaymentError("Invalid Expiry Format (MM/YY).", expiryInputEl);
-                return;
-            }
-
-            if (year > 0 && year < 26) {
-                // expired
-                showPaymentError("This card has expired. Use a valid card.", expiryInputEl);
-                return; // Stops the function here. Payment NEVER happens.
-            }
-           
+                if (expiryValue === "" || expiryValue.length < 5 || (year > 0 && year < 26)) {
+                    // Use your helper to show the red error box
+                    showPaymentError("Please enter a valid Expiry Date (2026 or later).", expiryInputEl);
+                    return; // STOP HERE for Card
+                }
+            } 
             
-
-            // Show loading
+            // 3. UPI-ONLY VALIDATION
+            else {
+            const upiInputEl = document.getElementById('upiId');
+                if (!upiInputEl.value.includes('@')) {
+                    showPaymentError("Please enter a valid Expiry Date (2026 or later).", expiryInputEl);
+                    return; 
+                }
+            }
+            // 5. PROCEED TO PAYMENT
             payBtn.disabled = true;
             payBtn.textContent = 'Processing...';
             loading.style.display = 'block';
 
-            // Simulate payment processing
             setTimeout(() => {
-                // Store payment completion in localStorage
                 localStorage.setItem('paymentCompleted', 'true');
-
-                // Redirect to success page
                 window.location.href = 'success.html';
             }, 2000);
         }

@@ -83,7 +83,7 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        const API_KEY = "1158d45a31c54d4fa492f618703b1f7f"; 
+        const API_KEY = "1158d45a31c54d4fa492f618703b1f7f"; //geoapify api
         const params = new URLSearchParams(window.location.search);
         const city = params.get("city");
         const heroImage = params.get("hero");
@@ -108,7 +108,7 @@
         }
 
         async function getPlaces(lat, lon, category, containerId, typeLabel) {
-            const url = `https://api.geoapify.com/v2/places?categories=${category}&filter=circle:${lon},${lat},50000&limit=15&apiKey=${API_KEY}`;
+            const url = `https://api.geoapify.com/v2/places?categories=${category}&filter=circle:${lon},${lat},50000&limit=24&apiKey=${API_KEY}`;
             const res = await fetch(url);
             const data = await res.json();
             const container = document.getElementById(containerId);

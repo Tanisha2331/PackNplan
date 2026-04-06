@@ -19,14 +19,14 @@ const API_KEY = "1158d45a31c54d4fa492f618703b1f7f";
 
 // Mock hotels data (fallback if API fails)
 const MOCK_HOTELS = [
-    { properties: { name: "The Oberoi Mumbai", address_line2: "Nariman Point, Mumbai" } },
-    { properties: { name: "ITC Grand Central", address_line2: "Central Mumbai" } },
-    { properties: { name: "Taj Lands End", address_line2: "Bandra, Mumbai" } },
-    { properties: { name: "The St. Regis Mumbai", address_line2: "Lower Parel, Mumbai" } },
-    { properties: { name: "Four Seasons Mumbai", address_line2: "Marine Drive, Mumbai" } },
-    { properties: { name: "Hilton Mumbai", address_line2: "Vile Parle, Mumbai" } },
-    { properties: { name: "Park Hyatt Mumbai", address_line2: "Worli, Mumbai" } },
-    { properties: { name: "Leela Kempinski", address_line2: "Sahar, Mumbai" } }
+    { properties: { name: "The Oberoi ", address_line2: "Nariman Point" } },
+    { properties: { name: "ITC Grand Central", address_line2: "Central" } },
+    { properties: { name: "Taj Lands End", address_line2: "Bandra" } },
+    { properties: { name: "The St. Regis ", address_line2: "Lower Parel" } },
+    { properties: { name: "Four Seasons ", address_line2: "Marine Drive" } },
+    { properties: { name: "Hilton ", address_line2: "Vile Parle" } },
+    { properties: { name: "Park Hyatt ", address_line2: "Worli" } },
+    { properties: { name: "Leela Kempinski", address_line2: "Sahar" } }
 ]; 
 
 const urlParams = new URLSearchParams(window.location.search);
